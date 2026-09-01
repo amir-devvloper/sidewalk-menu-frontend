@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>مدیریت سفارش‌ها | SIDE WALK</title>
+
+    <link 
+        rel="stylesheet" 
+        href="order.css"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body>
+
+    <div class="admin-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-logo">
+                    SW
+                </div>
+
+                <div>
+                    <strong>SIDE WALK</strong>
+                    <span>مدیریت کافه</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <a href="#" class="nav-item active">
+                    <span>🧾</span>
+                    <span>سفارش‌ها</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>🍔</span>
+                    <span>محصولات</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span>📊</span>
+                    <span>گزارش‌ها</span>
+                </a>
+
+            </nav>
+
+            <div class="sidebar-footer">
+                <span class="status-dot"></span>
+                سیستم آنلاین
+            </div>
+
+        </aside>
+
+
+        <!-- Main -->
+        <main class="main-content">
+
+            <!-- Header -->
+            <header class="topbar">
+
+                <div>
+                    <h1>سفارش‌ها</h1>
+                    <p>
+                        مدیریت سفارش‌های ثبت‌شده در کافه
+                    </p>
+                </div>
+
+                <button
+                    class="refresh-btn"
+                    id="refreshBtn"
+                >
+                    <span>↻</span>
+                    بروزرسانی
+                </button>
+
+            </header>
+
+
+            <!-- Stats -->
+            <section class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-icon new">
+                        🧾
+                    </div>
+
+                    <div>
+                        <span>کل سفارش‌ها</span>
+                        <strong id="totalOrders">
+                            0
+                        </strong>
+                    </div>
+                </div>
+
+
+                <div class="stat-card">
+                    <div class="stat-icon pending">
+                        🔴
+                    </div>
+
+                    <div>
+                        <span>جدید</span>
+                        <strong id="newOrders">
+                            0
+                        </strong>
+                    </div>
+                </div>
+
+
+                <div class="stat-card">
+                    <div class="stat-icon preparing">
+                        🔥
+                    </div>
+
+                    <div>
+                        <span>در حال آماده‌سازی</span>
+                        <strong id="preparingOrders">
+                            0
+                        </strong>
+                    </div>
+                </div>
+
+
+                <div class="stat-card">
+                    <div class="stat-icon ready">
+                        ✅
+                    </div>
+
+                    <div>
+                        <span>آماده شده</span>
+                        <strong id="readyOrders">
+                            0
+                        </strong>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- Toolbar -->
+            <section class="toolbar">
+
+                <div class="search-box">
+
+                    <span>⌕</span>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="جستجو با شماره سفارش، نام یا میز..."
+                    >
+
+                </div>
+
+
+                <select id="statusFilter">
+
+                    <option value="all">
+                        همه سفارش‌ها
+                    </option>
+
+                    <option value="جدید">
+                        جدید
+                    </option>
+
+                    <option value="در حال آماده‌سازی">
+                        در حال آماده‌سازی
+                    </option>
+
+                    <option value="آماده شد">
+                        آماده شد
+                    </option>
+
+                    <option value="تحویل شد">
+                        تحویل شد
+                    </option>
+
+                    <option value="لغو شد">
+                        لغو شد
+                    </option>
+
+                </select>
+
+            </section>
+
+
+            <!-- Orders -->
+            <section class="orders-section">
+
+                <div
+                    id="ordersContainer"
+                    class="orders-container"
+                ></div>
+
+                <div
+                    id="emptyState"
+                    class="empty-state hidden"
+                >
+                    <div class="empty-icon">
+                        🧾
+                    </div>
+
+                    <h2>
+                        سفارشی پیدا نشد
+                    </h2>
+
+                    <p>
+                        هنوز سفارشی با این مشخصات ثبت نشده است.
+                    </p>
+                </div>
+
+                <div
+                    id="loadingState"
+                    class="loading-state"
+                >
+                    <div class="spinner"></div>
+                    <span>
+                        در حال دریافت سفارش‌ها...
+                    </span>
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- Order Details Modal -->
+    <div
+        id="orderModal"
+        class="modal hidden"
+    >
+
+        <div class="modal-overlay"></div>
+
+        <div class="modal-content">
+
+            <button
+                class="modal-close"
+                id="modalClose"
+            >
+                ×
+            </button>
+
+            <div id="modalBody"></div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="toast"
+        class="toast"
+    ></div>
+
+
+    <script src="order.js"></script>
+
+</body>
+
+</html>
+

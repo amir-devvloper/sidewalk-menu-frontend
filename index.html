@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="منوی دیجیتال کافه رستوران SIDE WALK | پیاده‌رو"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0b0b0b"
+    >
+
+    <title>SIDE WALK | پیاده‌رو | منوی دیجیتال</title>
+
+    <!-- ================= FONTS ================= -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- ================= FONT AWESOME ================= -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- ================= CSS ================= -->
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+    <link rel="stylesheet" href="responsive.css">
+</head>
+
+
+<body>
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="header">
+
+        <div class="header-content">
+
+            <a
+                href="#"
+                class="logo"
+                aria-label="SIDE WALK"
+            >
+
+                <span class="logo-icon">
+                    <i class="fa-solid fa-mug-hot"></i>
+                </span>
+
+                <div>
+
+                    <strong>
+                        SIDE
+                        <span>WALK</span>
+                    </strong>
+
+                    <small>
+                        CAFE • RESTAURANT
+                    </small>
+
+                </div>
+
+            </a>
+
+
+            <div class="header-actions">
+<button class="theme-btn" id="themeBtn" aria-label="تغییر تم">
+    <i class="fas fa-moon"></i>
+</button>
+
+                
+                <button
+                    class="cart-btn"
+                    id="cartBtn"
+                    aria-label="سبد سفارش"
+                >
+
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                    <span>
+                        سبد سفارش
+                    </span>
+
+                    <b id="cartCount">
+                        ۰
+                    </b>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <span class="hero-label">
+                <i class="fa-solid fa-fire"></i>
+                به پیاده‌رو خوش آمدید
+            </span>
+
+
+            <h1>
+                طعم خوب،
+                <span>
+                    از اینجا شروع میشه.
+                </span>
+            </h1>
+
+
+            <p>
+                قهوه، غذا و لحظه‌هایی که
+                دلت نمی‌خواد تموم بشن.
+            </p>
+
+
+            <a
+                href="#menu"
+                class="hero-btn"
+            >
+                مشاهده منو
+                <i class="fa-solid fa-arrow-down"></i>
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main id="menu">
+
+        <section class="menu-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-tag">
+                        SIDE WALK MENU
+                    </span>
+
+                    <h2>
+                        منوی ما
+                    </h2>
+
+                </div>
+
+                <p>
+                    بهترین طعم‌ها را برای شما آماده کرده‌ایم.
+                </p>
+
+            </div>
+
+
+            <!-- SEARCH -->
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="جستجوی غذا، نوشیدنی یا دسر..."
+                    autocomplete="off"
+                >
+
+                <button
+                    id="clearSearch"
+                    aria-label="پاک کردن جستجو"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+
+            <!-- CATEGORIES -->
+
+            <div
+                class="categories"
+                id="categories"
+            >
+
+                <button
+                    class="category active"
+                    data-category="all"
+                >
+                    <i class="fa-solid fa-border-all"></i>
+                    همه
+                </button>
+
+
+                <button
+                    class="category"
+                    data-category="coffee"
+                >
+                    <i class="fa-solid fa-mug-hot"></i>
+                    قهوه
+                </button>
+
+
+                <button
+                    class="category"
+                    data-category="drink"
+                >
+                    <i class="fa-solid fa-glass-water"></i>
+                    نوشیدنی
+                </button>
+
+
+                <button
+                    class="category"
+                    data-category="food"
+                >
+                    <i class="fa-solid fa-utensils"></i>
+                    غذا
+                </button>
+
+
+                <button
+                    class="category"
+                    data-category="burger"
+                >
+                    <i class="fa-solid fa-burger"></i>
+                    برگر
+                </button>
+
+
+                <button
+                    class="category"
+                    data-category="pizza"
+                >
+                    <i class="fa-solid fa-pizza-slice"></i>
+                    پیتزا
+                </button>
+
+
+                <button
+                    class="category"
+                    data-category="dessert"
+                >
+                    <i class="fa-solid fa-cake-candles"></i>
+                    دسر
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 MENU PRODUCTS
+            ================================================== -->
+
+            <div
+                class="menu-grid"
+                id="menuGrid"
+            >
+
+
+                <!-- ================= COFFEE ================= -->
+
+                <section
+                    class="menu-category-section"
+                    data-category="coffee"
+                    id="category-coffee"
+                >
+
+                    <div class="menu-category-heading">
+
+                        <div class="category-heading-icon">
+                            <i class="fa-solid fa-mug-hot"></i>
+                        </div>
+
+                        <div class="category-heading-text">
+
+                            <span>
+                                COFFEE
+                            </span>
+
+                            <h2>
+                                قهوه
+                            </h2>
+
+                        </div>
+
+                        <div class="category-heading-line"></div>
+
+                    </div>
+
+
+                    <div class="category-products">
+
+
+                        <!-- Latte -->
+
+                        <article
+                            class="menu-card"
+                            data-id="1"
+                            data-category="coffee"
+                            data-name="لاته کلاسیک"
+                            data-price="140000"
+                            data-rating="4.9"
+                            data-description="اسپرسوی تازه، شیر بخار داده شده و فوم لطیف."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/latte.webp"
+                                    alt="لاته کلاسیک"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="1"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        لاته کلاسیک
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۱۴۰,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    اسپرسوی تازه، شیر بخار داده شده و فوم لطیف.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.9
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="1"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- Americano -->
+
+                        <article
+                            class="menu-card"
+                            data-id="2"
+                            data-category="coffee"
+                            data-name="آمریکانو"
+                            data-price="110000"
+                            data-rating="4.8"
+                            data-description="اسپرسوی غلیظ با آب داغ، ساده و قدرتمند."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/americano.webp"
+                                    alt="آمریکانو"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="2"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        آمریکانو
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۱۱۰,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    اسپرسوی غلیظ با آب داغ، ساده و قدرتمند.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.8
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="2"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- Mocha -->
+
+                        <article
+                            class="menu-card"
+                            data-id="3"
+                            data-category="coffee"
+                            data-name="موکا شکلاتی"
+                            data-price="165000"
+                            data-rating="4.9"
+                            data-description="ترکیب اسپرسو، شکلات و شیر با طعمی فوق‌العاده."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/moka.webp"
+                                    alt="موکا شکلاتی"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="3"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        موکا شکلاتی
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۱۶۵,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    ترکیب اسپرسو، شکلات و شیر با طعمی فوق‌العاده.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.9
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="3"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================= DRINK ================= -->
+
+                <section
+                    class="menu-category-section"
+                    data-category="drink"
+                    id="category-drink"
+                >
+
+                    <div class="menu-category-heading">
+
+                        <div class="category-heading-icon">
+                            <i class="fa-solid fa-glass-water"></i>
+                        </div>
+
+                        <div class="category-heading-text">
+
+                            <span>
+                                DRINKS
+                            </span>
+
+                            <h2>
+                                نوشیدنی
+                            </h2>
+
+                        </div>
+
+                        <div class="category-heading-line"></div>
+
+                    </div>
+
+
+                    <div class="category-products">
+
+
+                        <!-- Lemonade -->
+
+                        <article
+                            class="menu-card"
+                            data-id="4"
+                            data-category="drink"
+                            data-name="لیموناد تازه"
+                            data-price="125000"
+                            data-rating="4.7"
+                            data-description="لیموی تازه، نعناع و یخ؛ خنک و انرژی‌بخش."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/lemon.webp"
+                                    alt="لیموناد تازه"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="4"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        لیموناد تازه
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۱۲۵,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    لیموی تازه، نعناع و یخ؛ خنک و انرژی‌بخش.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.7
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="4"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- Strawberry Smoothie -->
+
+                        <article
+                            class="menu-card"
+                            data-id="5"
+                            data-category="drink"
+                            data-name="اسموتی توت‌فرنگی"
+                            data-price="180000"
+                            data-rating="4.8"
+                            data-description="توت‌فرنگی تازه با شیر و ترکیبی خامه‌ای."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/pinky.webp"
+                                    alt="اسموتی توت‌فرنگی"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="5"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        اسموتی توت‌فرنگی
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۱۸۰,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    توت‌فرنگی تازه با شیر و ترکیبی خامه‌ای.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.8
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="5"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </section>
+                <section
+                class="menu-category-section"
+                data-category="food"
+                id="category-food"
+            >
+
+                <div class="menu-category-heading">
+
+                    <div class="category-heading-icon">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+
+                    <div class="category-heading-text">
+
+                        <span>
+                            FOOD
+                        </span>
+
+                        <h2>
+                            غذا
+                        </h2>
+
+                    </div>
+
+                    <div class="category-heading-line"></div>
+
+                </div>
+
+
+                <div class="category-products">
+
+
+                    <!-- Steak -->
+
+                    <article
+                        class="menu-card"
+                        data-id="10"
+                        data-category="food"
+                        data-name="استیک مخصوص"
+                        data-price="780000"
+                        data-rating="4.9"
+                        data-description="استیک گوساله گریل شده با سس مخصوص سرآشپز."
+                    >
+
+                        <div class="card-image">
+
+                            <img
+                                src="assest/images/steake.webp"
+                                alt="استیک مخصوص"
+                                loading="lazy"
+                            >
+
+                            <button
+                                class="favorite"
+                                data-id="10"
+                                aria-label="افزودن به علاقه‌مندی"
+                            >
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+
+                        </div>
+
+
+                        <div class="card-body">
+
+                            <div class="card-title-row">
+
+                                <h3 class="card-title">
+                                    استیک مخصوص
+                                </h3>
+
+                                <span class="card-price">
+                                    ۷۸۰,۰۰۰
+                                </span>
+
+                            </div>
+
+
+                            <p class="card-description">
+                                استیک گوساله گریل شده با سس مخصوص سرآشپز.
+                            </p>
+
+
+                            <div class="card-bottom">
+
+                                <span class="rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    4.9
+                                </span>
+
+
+                                <button
+                                    class="add-btn"
+                                    data-id="10"
+                                    aria-label="افزودن به سبد"
+                                >
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+                <!-- ================= BURGERS ================= -->
+
+                <section
+                    class="menu-category-section"
+                    data-category="burger"
+                    id="category-burger"
+                >
+
+                    <div class="menu-category-heading">
+
+                        <div class="category-heading-icon">
+                            <i class="fa-solid fa-burger"></i>
+                        </div>
+
+                        <div class="category-heading-text">
+
+                            <span>
+                                BURGERS
+                            </span>
+
+                            <h2>
+                                برگر
+                            </h2>
+
+                        </div>
+
+                        <div class="category-heading-line"></div>
+
+                    </div>
+
+
+                    <div class="category-products">
+
+
+                        <!-- Special Burger -->
+
+                        <article
+                            class="menu-card"
+                            data-id="6"
+                            data-category="burger"
+                            data-name="برگر مخصوص SIDE WALK"
+                            data-price="380000"
+                            data-rating="5"
+                            data-description="گوشت دست‌ساز، پنیر چدار، سس مخصوص و سبزیجات تازه."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/side-burger.webp"
+                                    alt="برگر مخصوص SIDE WALK"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="6"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        برگر مخصوص SIDE WALK
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۳۸۰,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    گوشت دست‌ساز، پنیر چدار، سس مخصوص و سبزیجات تازه.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        5
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="6"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- Cheeseburger -->
+
+                        <article
+                            class="menu-card"
+                            data-id="7"
+                            data-category="burger"
+                            data-name="چیزبرگر کلاسیک"
+                            data-price="340000"
+                            data-rating="4.8"
+                            data-description="گوشت گریل شده، پنیر چدار، کاهو و گوجه."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/cheeseburger.webp"
+                                    alt="چیزبرگر کلاسیک"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="7"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        چیزبرگر کلاسیک
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۳۴۰,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    گوشت گریل شده، پنیر چدار، کاهو و گوجه.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.8
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="7"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================= PIZZA ================= -->
+
+                <section
+                    class="menu-category-section"
+                    data-category="pizza"
+                    id="category-pizza"
+                >
+
+                    <div class="menu-category-heading">
+
+                        <div class="category-heading-icon">
+                            <i class="fa-solid fa-pizza-slice"></i>
+                        </div>
+
+                        <div class="category-heading-text">
+
+                            <span>
+                                PIZZA
+                            </span>
+
+                            <h2>
+                                پیتزا
+                            </h2>
+
+                        </div>
+
+                        <div class="category-heading-line"></div>
+
+                    </div>
+
+
+                    <div class="category-products">
+
+
+                        <!-- Pepperoni -->
+
+                        <article
+                            class="menu-card"
+                            data-id="8"
+                            data-category="pizza"
+                            data-name="پیتزا پپرونی"
+                            data-price="420000"
+                            data-rating="4.9"
+                            data-description="پپرونی، پنیر موزارلا و سس مخصوص روی خمیر تازه."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/pizza-pep.webp"
+                                    alt="پیتزا پپرونی"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="8"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        پیتزا پپرونی
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۴۲۰,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    پپرونی، پنیر موزارلا و سس مخصوص روی خمیر تازه.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.9
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="8"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- Chicken Pizza -->
+
+                        <article
+                            class="menu-card"
+                            data-id="9"
+                            data-category="pizza"
+                            data-name="پیتزا مرغ"
+                            data-price="390000"
+                            data-rating="4.7"
+                            data-description="مرغ گریل، قارچ، پنیر موزارلا و فلفل دلمه."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/IMG_9590_27522-8-scaled.jpg.webp"
+                                    alt="پیتزا مرغ"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="9"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        پیتزا مرغ
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۳۹۰,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    مرغ گریل، قارچ، پنیر موزارلا و فلفل دلمه.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.7
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="9"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================= FOOD ================= -->
+
+
+                <!-- ================= DESSERT ================= -->
+
+                <section
+                    class="menu-category-section"
+                    data-category="dessert"
+                    id="category-dessert"
+                >
+
+                    <div class="menu-category-heading">
+
+                        <div class="category-heading-icon">
+                            <i class="fa-solid fa-cake-candles"></i>
+                        </div>
+
+                        <div class="category-heading-text">
+
+                            <span>
+                                DESSERT
+                            </span>
+
+                            <h2>
+                                دسر
+                            </h2>
+
+                        </div>
+
+                        <div class="category-heading-line"></div>
+
+                    </div>
+
+
+                    <div class="category-products">
+
+
+                        <!-- Cheesecake -->
+
+                        <article
+                            class="menu-card"
+                            data-id="11"
+                            data-category="dessert"
+                            data-name="چیزکیک"
+                            data-price="180000"
+                            data-rating="4.9"
+                            data-description="چیزکیک خامه‌ای با سس توت‌فرنگی تازه."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/ccheese-cake.webp"
+                                    alt="چیزکیک"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="11"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        چیزکیک
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۱۸۰,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    چیزکیک خامه‌ای با سس توت‌فرنگی تازه.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.9
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="11"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+
+                        <!-- Brownie -->
+
+                        <article
+                            class="menu-card"
+                            data-id="12"
+                            data-category="dessert"
+                            data-name="براونی شکلاتی"
+                            data-price="160000"
+                            data-rating="4.8"
+                            data-description="براونی شکلاتی گرم با مغز شکلات و بستنی."
+                        >
+
+                            <div class="card-image">
+
+                                <img
+                                    src="assest/images/choclet.webp"
+                                    alt="براونی شکلاتی"
+                                    loading="lazy"
+                                >
+
+                                <button
+                                    class="favorite"
+                                    data-id="12"
+                                    aria-label="افزودن به علاقه‌مندی"
+                                >
+                                    <i class="fa-regular fa-heart"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <div class="card-title-row">
+
+                                    <h3 class="card-title">
+                                        براونی شکلاتی
+                                    </h3>
+
+                                    <span class="card-price">
+                                        ۱۶۰,۰۰۰
+                                    </span>
+
+                                </div>
+
+
+                                <p class="card-description">
+                                    براونی شکلاتی گرم با مغز شکلات و بستنی.
+                                </p>
+
+
+                                <div class="card-bottom">
+
+                                    <span class="rating">
+                                        <i class="fa-solid fa-star"></i>
+                                        4.8
+                                    </span>
+
+
+                                    <button
+                                        class="add-btn"
+                                        data-id="12"
+                                        aria-label="افزودن به سبد"
+                                    >
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- NO RESULT -->
+
+            <div
+                class="no-result"
+                id="noResult"
+            >
+
+                <i class="fa-solid fa-face-sad-tear"></i>
+
+                <h3>
+                    چیزی پیدا نشد!
+                </h3>
+
+                <p>
+                    عبارت دیگری را امتحان کنید.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         CART OVERLAY
+    ====================================================== -->
+
+    <div
+        class="drawer-overlay"
+        id="drawerOverlay"
+    ></div>
+
+
+    <!-- =====================================================
+         CART DRAWER
+    ====================================================== -->
+
+    <aside
+        class="cart-drawer"
+        id="cartDrawer"
+        aria-label="سبد سفارش"
+    >
+
+        <div class="drawer-header">
+
+            <div>
+
+                <span>
+                    سفارش شما
+                </span>
+
+                <h3>
+                    سبد خرید
+                </h3>
+
+            </div>
+
+
+            <button
+                id="closeCart"
+                aria-label="بستن سبد خرید"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <div
+            class="cart-items"
+            id="cartItems"
+        >
+
+            <div class="empty-cart">
+
+                <div class="empty-icon">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+
+                <h3>
+                    سبد شما خالیه
+                </h3>
+
+                <p>
+                    هنوز چیزی به سفارش اضافه نکردید.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="cart-footer">
+
+            <div class="total-row">
+
+                <span>
+                    مبلغ نهایی
+                </span>
+
+                <strong>
+
+                    <span id="cartTotal">
+                        ۰
+                    </span>
+
+                    تومان
+
+                </strong>
+
+            </div>
+
+
+            <button
+                class="checkout-btn"
+                id="checkoutBtn"
+            >
+
+                ثبت سفارش
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         PRODUCT MODAL
+    ====================================================== -->
+
+    <div
+        class="modal-overlay"
+        id="productModal"
+    >
+
+        <div class="product-modal">
+
+            <button
+                class="modal-close"
+                id="modalClose"
+                aria-label="بستن"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div id="modalContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="footer">
+
+        <div class="footer-content">
+
+            <div class="footer-brand">
+
+                <div class="footer-logo">
+
+                    <i class="fa-solid fa-mug-hot"></i>
+
+                    SIDE WALK
+
+                </div>
+
+
+                <p>
+                    پیاده‌رو؛ جایی برای قهوه‌های خوب،
+                    غذاهای خوشمزه و دورهمی‌های به‌یادماندنی.
+                </p>
+
+            </div>
+
+
+            <div class="footer-info">
+
+                <div>
+                    <i class="fa-solid fa-location-dot"></i>
+                    کرمان , بلوار حمزه , کوچه والفجر 12 , بلوار حمزه طبقه همکف , فست فود پیاده رو
+                </div>
+
+
+                <div>
+                    <i class="fa-solid fa-clock"></i>
+                    هر روز 12 صبح تا 12 شب
+                </div>
+
+
+                <div>
+                    <i class="fa-solid fa-phone"></i>
+                    034-33656788
+                </div>
+
+            </div>
+
+
+            <div class="socials">
+
+                <a
+                    href="#"
+                    aria-label="Instagram"
+                >
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+
+                <a
+                    href="#"
+                    aria-label="Telegram"
+                >
+                    <i class="fa-brands fa-telegram"></i>
+                </a>
+
+
+                <a
+                    href="#"
+                    aria-label="WhatsApp"
+                >
+                    <i class="fa-brands fa-whatsapp"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="copyright">
+
+            © تمامی حقوق برای
+
+            <strong>
+                SIDE WALK
+            </strong>
+
+            محفوظ است.
+
+        </div>
+
+    </footer>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
