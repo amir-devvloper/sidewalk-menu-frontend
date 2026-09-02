@@ -1,3 +1,11 @@
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("./assest/fonts/Estedad-v7.3/webfonts/variable/Estedad-FD[KSHD\,wght].woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --bg: #08070b;
     --bg-soft: #100d14;
@@ -420,18 +428,6 @@ body.light .header {
 
     overflow: hidden;
 
-    background:
-        radial-gradient(
-            circle at 20% 40%,
-            rgba(139, 61, 255, 0.22),
-            transparent 35%
-        ),
-        radial-gradient(
-            circle at 80% 70%,
-            rgba(255, 122, 0, 0.16),
-            transparent 30%
-        ),
-        #08070b;
 }
 
 .hero::before {
@@ -453,18 +449,7 @@ body.light .header {
     transform: scale(1.03);
 }
 
-.hero-overlay {
-    position: absolute;
-    inset: 0;
 
-    background:
-        linear-gradient(
-            90deg,
-            rgba(5, 3, 10, 0.94),
-            rgba(8, 5, 12, 0.62),
-            rgba(5, 3, 10, 0.90)
-        );
-}
 
 .hero-content {
     position: relative;
@@ -608,8 +593,7 @@ body.light .header {
 .hero-btn:hover {
     transform: translateY(-3px);
 
-    box-shadow:
-        0 20px 45px rgba(139, 61, 255, 0.35);
+
 }
 
 
@@ -3014,3 +2998,52 @@ body.light .payment-info-item {
     }
 }
 
+
+.order-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    color: var(--text);
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.order-option:hover {
+    background: var(--border);
+}
+
+.order-type h4 {
+    color: var(--text);
+}
+#address {
+    resize: none;
+}
+#map {
+    width: 100%;
+    height: 300px;
+    margin-top: 15px;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.location-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.location-confirm-btn,
+.location-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+.location-confirm-btn {
+    display: none;
+}

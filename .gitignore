@@ -6,4 +6,4 @@ node_modules/
 
 !.env.example
 
-backend/
+backend/git add .

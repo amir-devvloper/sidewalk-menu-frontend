@@ -23,21 +23,8 @@
 
     <!-- ================= FONTS ================= -->
 
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
 
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet"
-    >
 
     <!-- ================= FONT AWESOME ================= -->
 
@@ -53,6 +40,17 @@
         href="style.css"
     >
     <link rel="stylesheet" href="responsive.css">
+
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+></script>
+
 </head>
 
 
@@ -1509,6 +1507,49 @@
 
 
         <div class="cart-footer">
+            <div class="order-type">
+
+    <h4>
+        نحوه دریافت سفارش:
+    </h4>
+
+    <label class="order-option">
+        <input 
+            type="radio" 
+            name="orderType" 
+            value="restaurant"
+            checked
+        >
+        <span>
+            🍽️ صرف در رستوران
+        </span>
+    </label>
+
+
+    <label class="order-option">
+        <input 
+            type="radio" 
+            name="orderType" 
+            value="delivery"
+        >
+        <span>
+            🛵 ارسال با پیک
+        </span>
+    </label>
+
+
+    <label class="order-option">
+        <input 
+            type="radio" 
+            name="orderType" 
+            value="pickup"
+        >
+        <span>
+            🛍️ دریافت حضوری
+        </span>
+    </label>
+
+</div>
 
             <div class="total-row">
 
@@ -1668,8 +1709,10 @@
     <!-- =====================================================
          JAVASCRIPT
     ====================================================== -->
+         
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
 
 </body>
 
