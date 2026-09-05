@@ -114,6 +114,159 @@ const categoryOrder = [
 ];
 
 /* =========================================================
+   LOAD PRODUCTS FROM API (admin panel data)
+========================================================= */
+
+function escapeAttr(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+}
+
+function buildMenuCardHTML(product) {
+    const available = product.available !== false;
+    const rating = product.rating || "5.0";
+    const image = product.image || "assest/images/placeholder.webp";
+
+    return `
+        <article
+            class="menu-card${available ? "" : " sold-out"}"
+            data-id="${escapeAttr(product._id)}"
+            data-category="${escapeAttr(product.category)}"
+            data-name="${escapeAttr(product.name)}"
+            data-price="${escapeAttr(product.price)}"
+            data-rating="${escapeAttr(rating)}"
+            data-description="${escapeAttr(product.description)}"
+        >
+            <div class="card-image">
+                <img src="${escapeAttr(image)}" alt="${escapeAttr(product.name)}" loading="lazy">
+                <button class="favorite" data-id="${escapeAttr(product._id)}" aria-label="افزودن به علاقه‌مندی">
+                    <i class="fa-regular fa-heart"></i>
+                </button>
+                ${available ? "" : `
+                <span class="sold-out-badge" style="position:absolute;top:10px;left:10px;background:#000;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;">
+                    ناموجود
+                </span>`}
+            </div>
+
+            <div class="card-body">
+                <div class="card-title-row">
+                    <h3 class="card-title">${escapeAttr(product.name)}</h3>
+                    <span class="card-price">${formatPrice(product.price)}</span>
+                </div>
+
+                <p class="card-description">${escapeAttr(product.description)}</p>
+
+                <div class="card-bottom">
+                    <span class="rating">
+                        <i class="fa-solid fa-star"></i>
+                        ${escapeAttr(rating)}
+                    </span>
+
+                    <button
+                        class="add-btn"
+                        data-id="${escapeAttr(product._id)}"
+                        aria-label="افزودن به سبد"
+                        ${available ? "" : "disabled style=\"opacity:.4;pointer-events:none;\""}
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </article>
+    `;
+}
+
+function renderMenuFromProducts(products) {
+    if (!menuGrid) return;
+
+    if (!products.length) {
+        menuGrid.innerHTML = "";
+        if (noResult) noResult.style.display = "block";
+        return;
+    }
+
+    const grouped = {};
+
+    products.forEach(product => {
+        const category = product.category || "other";
+        if (!grouped[category]) grouped[category] = [];
+        grouped[category].push(product);
+    });
+
+    const orderedCategories = [
+        ...categoryOrder.filter(category => grouped[category]),
+        ...Object.keys(grouped).filter(category => !categoryOrder.includes(category))
+    ];
+
+    menuGrid.innerHTML = orderedCategories.map(category => {
+        const info = categoryInfo[category] || {
+            title: category,
+            english: category.toUpperCase(),
+            icon: "fa-utensils"
+        };
+
+        const cardsHTML = grouped[category]
+            .map(product => buildMenuCardHTML(product))
+            .join("");
+
+        return `
+            <section class="menu-category-section" data-category="${escapeAttr(category)}" id="category-${escapeAttr(category)}">
+                <div class="menu-category-heading">
+                    <div class="category-heading-icon">
+                        <i class="fa-solid ${info.icon}"></i>
+                    </div>
+                    <div class="category-heading-text">
+                        <span>${escapeAttr(info.english)}</span>
+                        <h2>${escapeAttr(info.title)}</h2>
+                    </div>
+                    <div class="category-heading-line"></div>
+                </div>
+                <div class="category-products">${cardsHTML}</div>
+            </section>
+        `;
+    }).join("");
+}
+
+async function loadProductsFromAPI() {
+    if (!menuGrid) return;
+
+    menuGrid.innerHTML = `
+        <div class="menu-loading" style="padding:60px 0;text-align:center;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i>
+            <p style="margin-top:12px;">در حال بارگذاری منو...</p>
+        </div>
+    `;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/products`);
+
+        if (!response.ok) {
+            throw new Error("خطا در دریافت منو");
+        }
+
+        const products = await response.json();
+
+        renderMenuFromProducts(products);
+
+    } catch (error) {
+        console.error(error);
+        menuGrid.innerHTML = `
+            <div class="menu-loading" style="padding:60px 0;text-align:center;">
+                <p>دریافت منو با مشکل مواجه شد. لطفاً صفحه را رفرش کنید.</p>
+            </div>
+        `;
+    } finally {
+        initializeProducts();
+        renderMenu();
+        renderCart();
+        renderFavorites();
+    }
+}
+
+/* =========================================================
    PRODUCTS
 ========================================================= */
 
@@ -125,7 +278,7 @@ function getProductData(card) {
     const image = card.querySelector(".card-image img");
 
     return {
-        id: Number(card.dataset.id),
+        id: card.dataset.id,
         name: card.dataset.name || "",
         category: card.dataset.category || "",
         price: Number(card.dataset.price) || 0,
@@ -175,7 +328,7 @@ function updateFavoriteButton(card) {
 
     if (!button) return;
 
-    const id = Number(card.dataset.id);
+    const id = card.dataset.id;
     const icon = button.querySelector("i");
     const active = isFavorite(id);
 
@@ -334,7 +487,7 @@ function renderCart() {
                 .forEach(button => {
                     button.addEventListener("click", () => {
                         changeQuantity(
-                            Number(button.dataset.id),
+                            button.dataset.id,
                             Number(button.dataset.change)
                         );
                     });
@@ -491,7 +644,7 @@ function initializeProducts() {
     const cards = getAllCards();
 
     cards.forEach(card => {
-        const id = Number(card.dataset.id);
+        const id = card.dataset.id;
 
         const favoriteButton =
             card.querySelector(".favorite");
@@ -974,7 +1127,7 @@ function renderFavorites() {
     const favoriteCards =
         getAllCards().filter(card =>
             isFavorite(
-                Number(card.dataset.id)
+                card.dataset.id
             )
         );
 
@@ -2651,7 +2804,4 @@ if (themeBtnElement) {
    INITIALIZE
 ========================================================= */
 
-initializeProducts();
-renderMenu();
-renderCart();
-renderFavorites();
+loadProductsFromAPI();

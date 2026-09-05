@@ -252,7 +252,16 @@
                 <h2 id="productFormTitle">افزودن محصول</h2>
 
                 <label>نام غذا <input type="text" id="pf_name" required></label>
-                <label>دسته‌بندی <input type="text" id="pf_category" required></label>
+                <label>دسته‌بندی
+                    <select id="pf_category" required>
+                        <option value="coffee">قهوه</option>
+                        <option value="drink">نوشیدنی</option>
+                        <option value="food">غذا</option>
+                        <option value="burger">برگر</option>
+                        <option value="pizza">پیتزا</option>
+                        <option value="dessert">دسر</option>
+                    </select>
+                </label>
                 <label>توضیحات <textarea id="pf_description" rows="3"></textarea></label>
                 <label>قیمت (تومان) <input type="number" id="pf_price" min="0" required></label>
                 <label>آدرس عکس (URL) <input type="text" id="pf_image" placeholder="https://..."></label>
