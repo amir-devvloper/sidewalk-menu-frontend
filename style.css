@@ -3047,3 +3047,251 @@ body.light .payment-info-item {
 .location-confirm-btn {
     display: none;
 }
+/* ==============================
+   روش دریافت سفارش - SIDE WALK
+   ============================== */
+
+.delivery-method {
+    width: 100%;
+    margin-top: 18px;
+    direction: rtl;
+}
+
+.delivery-method > label {
+    display: block;
+    margin-bottom: 8px;
+
+    font-size: 14px;
+    font-weight: 700;
+    color: inherit;
+}
+
+/* انتخاب روش دریافت */
+#deliveryMethod {
+    width: 100%;
+    height: 52px;
+
+    padding: 0 16px;
+
+    box-sizing: border-box;
+
+    /* هم‌رنگ صفحه */
+    background: transparent;
+    color: inherit;
+
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 12px;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    outline: none;
+    cursor: pointer;
+
+    direction: rtl;
+
+    transition: 0.2s ease;
+}
+
+#deliveryMethod:hover {
+    border-color: rgba(128, 128, 128, 0.65);
+}
+
+#deliveryMethod:focus {
+    border-color: currentColor;
+}
+
+/* گزینه‌های Select */
+#deliveryMethod option {
+    background: inherit;
+    color: #222;
+    font-family: inherit;
+}
+
+/* اطلاعات روش دریافت */
+#deliveryInfo {
+    width: 100%;
+    margin-top: 12px;
+}
+
+/* باکس اطلاعات */
+.delivery-info-box {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 15px;
+
+    /* سفید نباشد */
+    background: transparent;
+
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-radius: 12px;
+
+    direction: rtl;
+}
+
+.delivery-info-box strong {
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 14px;
+}
+
+.delivery-info-box p {
+    margin: 0;
+
+    font-size: 13px;
+    line-height: 1.8;
+
+    opacity: 0.7;
+}
+
+/* دکمه لوکیشن */
+#locationBtn {
+    width: 100%;
+
+    margin-top: 10px;
+    padding: 12px 15px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #222;
+    color: #fff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+#locationBtn:hover {
+    opacity: 0.85;
+}
+
+#locationBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* آدرس */
+.delivery-address {
+    margin-top: 10px;
+    padding: 12px;
+
+    background: transparent;
+
+    border: 1px solid rgba(128, 128, 128, 0.25);
+    border-radius: 10px;
+
+    font-size: 13px;
+    line-height: 1.8;
+
+    direction: rtl;
+}
+
+/* نقشه */
+#map {
+    width: 100%;
+    height: 260px;
+
+    margin-top: 12px;
+
+    border-radius: 12px;
+    overflow: hidden;
+
+    border: 1px solid rgba(128, 128, 128, 0.25);
+}
+
+/* تأیید موقعیت */
+#confirmLocationBtn {
+    width: 100%;
+
+    margin-top: 10px;
+    padding: 12px 15px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #222;
+    color: #fff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+/* موبایل */
+@media (max-width: 600px) {
+
+    .delivery-method {
+        margin-top: 15px;
+    }
+
+    #deliveryMethod {
+        height: 50px;
+        font-size: 13px;
+    }
+
+    #map {
+        height: 230px;
+    }
+}
+/* ==============================
+   دکمه تغییر موقعیت
+   ============================== */
+
+#changeLocationBtn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px 15px;
+
+    box-sizing: border-box;
+
+    /* هم‌رنگ صفحه */
+    background: transparent;
+    color: inherit;
+
+    border: 1px solid rgba(128, 128, 128, 0.35);
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+#changeLocationBtn:hover {
+    background: rgba(128, 128, 128, 0.08);
+    border-color: rgba(128, 128, 128, 0.6);
+}
+
+#changeLocationBtn:active {
+    transform: scale(0.98);
+}
+
+/* اگر دکمه تأیید موقعیت هم کنار آن باشد */
+#confirmLocationBtn,
+#changeLocationBtn {
+    min-height: 46px;
+}
+
+/* موبایل */
+@media (max-width: 600px) {
+    #changeLocationBtn {
+        padding: 12px;
+        font-size: 13px;
+    }
+}

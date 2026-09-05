@@ -9,7 +9,7 @@ let searchTerm = "";
 
 // Backend URL
 const API_BASE_URL =
-    window.SIDEWALK_API_URL || "http://localhost:5000/api";
+    window.SIDEWALK_API_URL || "https://sidewalk-menu-backend.onrender.com/api";
 
 /* =========================================================
    DELIVERY / LOCATION STATE
@@ -2203,6 +2203,49 @@ async function processPayment() {
     }
 
     try {
+        const orderPayload = {
+            customerName:
+                name,
+
+            tableNumber:
+                selectedDeliveryMethod ===
+                "restaurant"
+                    ? table
+                    : "",
+
+            customerPhone:
+                phone,
+
+            deliveryMethod:
+                selectedDeliveryMethod,
+
+            address:
+                selectedAddress,
+
+            location:
+                selectedLocation,
+
+            items
+        };
+
+        // TEMP DEBUG LOG - remove after troubleshooting
+        console.log(
+            "SIDE WALK order payload:",
+            orderPayload
+        );
+        console.log(
+            "SIDE WALK items.length:",
+            items.length
+        );
+        console.log(
+            "SIDE WALK items JSON:",
+            JSON.stringify(items)
+        );
+        console.log(
+            "SIDE WALK cart (raw):",
+            JSON.stringify(cart)
+        );
+
         const response =
             await fetch(
                 `${API_BASE_URL}/orders`,
@@ -2213,30 +2256,7 @@ async function processPayment() {
                             "application/json"
                     },
                     body:
-                        JSON.stringify({
-                            customerName:
-                                name,
-
-                            tableNumber:
-                                selectedDeliveryMethod ===
-                                "restaurant"
-                                    ? table
-                                    : "",
-
-                            customerPhone:
-                                phone,
-
-                            deliveryMethod:
-                                selectedDeliveryMethod,
-
-                            address:
-                                selectedAddress,
-
-                            location:
-                                selectedLocation,
-
-                            items
-                        })
+                        JSON.stringify(orderPayload)
                 }
             );
 
