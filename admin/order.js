@@ -282,13 +282,11 @@ function createOrderCard(order) {
                 <div class="info-item">
 
                     <span>
-                        شماره میز
+                        نوع سفارش
                     </span>
 
                     <strong>
-                        میز ${escapeHTML(
-                            order.tableNumber
-                        )}
+                        ${getDeliveryMethodHTML(order)}
                     </strong>
 
                 </div>
@@ -363,6 +361,56 @@ function createOrderCard(order) {
             </div>
 
         </article>
+    `;
+
+}
+
+
+// ===============================
+// Delivery Method Display
+// ===============================
+
+function getDeliveryMethodHTML(order) {
+
+    const method =
+        order.deliveryMethod || "restaurant";
+
+    if (method === "delivery") {
+
+        return `
+            🛵 ارسال با پیک
+            <br>
+            <span class="sub-info">
+                ${order.address
+                    ? escapeHTML(order.address)
+                    : "آدرس ثبت نشده"}
+            </span>
+        `;
+
+    }
+
+    if (method === "pickup") {
+
+        return `
+            🛍️ تحویل حضوری
+            <br>
+            <span class="sub-info">
+                ${order.pickupEta
+                    ? `${escapeHTML(order.pickupEta)} دقیقه دیگر`
+                    : "زمان ثبت نشده"}
+            </span>
+        `;
+
+    }
+
+    return `
+        🍽️ صرف در رستوران
+        <br>
+        <span class="sub-info">
+            میز ${order.tableNumber
+                ? escapeHTML(order.tableNumber)
+                : "—"}
+        </span>
     `;
 
 }
@@ -728,4 +776,3 @@ modalClose.addEventListener(
 // ===============================
 
 loadOrders();
-

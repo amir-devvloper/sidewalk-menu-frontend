@@ -582,6 +582,23 @@ body {
 }
 
 
+.info-item .sub-info {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 11px;
+
+    font-weight: 400;
+
+    color: var(--muted);
+
+    line-height: 1.6;
+
+    word-break: break-word;
+}
+
+
 /* Items */
 
 .order-items {
@@ -1052,4 +1069,3 @@ body {
     }
 
 }
-

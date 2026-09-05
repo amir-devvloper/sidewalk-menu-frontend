@@ -18,6 +18,7 @@ const API_BASE_URL =
 let selectedDeliveryMethod = "restaurant";
 let selectedLocation = null;
 let selectedAddress = "";
+let selectedPickupEta = "";
 
 let deliveryMap = null;
 let deliveryMarker = null;
@@ -1868,6 +1869,7 @@ function openCheckout() {
 
     selectedLocation = null;
     selectedAddress = "";
+    selectedPickupEta = "";
 
     destroyDeliveryMap();
 
@@ -2007,6 +2009,7 @@ function openCheckout() {
 
                     selectedLocation = null;
                     selectedAddress = "";
+                    selectedPickupEta = "";
 
                     deliveryInfo.innerHTML =
                         "";
@@ -2023,6 +2026,7 @@ function openCheckout() {
 
                     selectedLocation = null;
                     selectedAddress = "";
+                    selectedPickupEta = "";
 
                     deliveryInfo.innerHTML = `
                         <button
@@ -2061,12 +2065,39 @@ function openCheckout() {
 
                     selectedLocation = null;
                     selectedAddress = "";
+                    selectedPickupEta = "";
 
                     deliveryInfo.innerHTML = `
                         <p>
                             سفارش شما آماده تحویل حضوری خواهد بود.
                         </p>
+
+                        <label for="pickupEta">
+                            چند دقیقه دیگر در رستوران هستید؟
+                        </label>
+
+                        <input
+                            id="pickupEta"
+                            type="number"
+                            min="1"
+                            placeholder="مثلاً ۱۵"
+                        >
                     `;
+
+                    const pickupEtaInput =
+                        document.getElementById(
+                            "pickupEta"
+                        );
+
+                    if (pickupEtaInput) {
+                        pickupEtaInput.addEventListener(
+                            "input",
+                            () => {
+                                selectedPickupEta =
+                                    pickupEtaInput.value.trim();
+                            }
+                        );
+                    }
                 }
             }
         );
@@ -2157,6 +2188,18 @@ async function processPayment() {
         }
     }
 
+    if (
+        selectedDeliveryMethod ===
+        "pickup" &&
+        (!selectedPickupEta ||
+            Number(selectedPickupEta) <= 0)
+    ) {
+        alert(
+            "لطفاً زمان تقریبی رسیدن خود به رستوران را وارد کنید."
+        );
+        return;
+    }
+
     const items =
         cart
             .map(cartItem => {
@@ -2225,26 +2268,14 @@ async function processPayment() {
             location:
                 selectedLocation,
 
+            pickupEta:
+                selectedDeliveryMethod ===
+                "pickup"
+                    ? selectedPickupEta
+                    : "",
+
             items
         };
-
-        // TEMP DEBUG LOG - remove after troubleshooting
-        console.log(
-            "SIDE WALK order payload:",
-            orderPayload
-        );
-        console.log(
-            "SIDE WALK items.length:",
-            items.length
-        );
-        console.log(
-            "SIDE WALK items JSON:",
-            JSON.stringify(items)
-        );
-        console.log(
-            "SIDE WALK cart (raw):",
-            JSON.stringify(cart)
-        );
 
         const response =
             await fetch(
