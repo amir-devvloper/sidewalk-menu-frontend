@@ -1069,3 +1069,361 @@ body {
     }
 
 }
+
+/* =========================================================
+   NEW: Login screen
+========================================================= */
+
+.login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    padding: 24px;
+}
+
+.login-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 40px 32px;
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+}
+
+.login-logo {
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+}
+
+.login-card h1 {
+    font-size: 20px;
+    margin: 4px 0 0;
+}
+
+.login-sub {
+    color: var(--muted);
+    margin: 0 0 10px;
+}
+
+.login-card label {
+    width: 100%;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.login-card input {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.login-card button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login-card button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.login-error {
+    color: var(--red);
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   NEW: Sidebar sound toggle + logout
+========================================================= */
+
+.sound-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #cfcfcf;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: #f0f0f0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.logout-btn:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+
+/* =========================================================
+   NEW: Date filter
+========================================================= */
+
+.date-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.date-filter label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.date-filter input {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+}
+
+.clear-date-btn {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   NEW: Status select (جایگزین دکمه‌ی چرخشی)
+========================================================= */
+
+.status-select {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 13px;
+    background: var(--card);
+}
+
+
+/* =========================================================
+   NEW: Products view
+========================================================= */
+
+.products-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.product-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.product-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.product-category {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.product-price {
+    font-weight: 700;
+}
+
+.checkbox-label {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+#productForm {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: right;
+}
+
+#productForm label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+#productForm input,
+#productForm textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+}
+
+#productSaveBtn {
+    background: var(--primary);
+    color: #fff;
+}
+
+#productCancelBtn {
+    background: var(--bg);
+    border: 1px solid var(--border) !important;
+}
+
+
+/* =========================================================
+   NEW: Reports / charts
+========================================================= */
+
+.chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-top: 16px;
+}
+
+.chart-card h2 {
+    font-size: 16px;
+    margin: 0 0 14px;
+}
+
+
+/* =========================================================
+   NEW: Invoice (modal + print)
+========================================================= */
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 14px;
+}
+
+.invoice-table th,
+.invoice-table td {
+    border: 1px solid var(--border);
+    padding: 8px;
+    text-align: center;
+}
+
+.invoice-total {
+    font-size: 16px;
+}
+
+.print-area {
+    display: none;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .print-area,
+    .print-area * {
+        visibility: visible;
+    }
+
+    .print-area {
+        display: block;
+        position: absolute;
+        inset: 0;
+        padding: 24px;
+    }
+
+    .invoice {
+        font-family: inherit;
+    }
+
+    .invoice table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 12px 0;
+    }
+
+    .invoice th,
+    .invoice td {
+        border: 1px solid #000;
+        padding: 6px;
+        text-align: center;
+    }
+
+    .invoice-total-print {
+        font-size: 16px;
+        font-weight: 700;
+        margin-top: 10px;
+    }
+
+    .invoice-thanks {
+        text-align: center;
+        margin-top: 20px;
+        color: #444;
+    }
+}
+
+
+/* =========================================================
+   NEW: Views
+========================================================= */
+
+.view.hidden {
+    display: none;
+}

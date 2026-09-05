@@ -3,48 +3,54 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت | SIDE WALK</title>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <link rel="stylesheet" href="order.css">
 
-    <title>مدیریت سفارش‌ها | SIDE WALK</title>
-
-    <link 
-        rel="stylesheet" 
-        href="order.css"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
 
-    <div class="admin-layout">
+    <!-- ===================== Login Screen ===================== -->
+    <div id="loginScreen" class="login-screen">
+        <form id="loginForm" class="login-card">
+            <div class="brand-logo login-logo">SW</div>
+            <h1>ورود به پنل مدیریت</h1>
+            <p class="login-sub">SIDE WALK</p>
+
+            <label>
+                نام کاربری
+                <input type="text" id="loginUsername" autocomplete="username" required>
+            </label>
+
+            <label>
+                رمز عبور
+                <input type="password" id="loginPassword" autocomplete="current-password" required>
+            </label>
+
+            <button type="submit" id="loginSubmit">ورود</button>
+
+            <div id="loginError" class="login-error hidden"></div>
+        </form>
+    </div>
+
+    <!-- ===================== App Shell ===================== -->
+    <div class="admin-layout hidden" id="appShell">
 
         <!-- Sidebar -->
         <aside class="sidebar">
 
             <div class="brand">
-                <div class="brand-logo">
-                    SW
-                </div>
-
+                <div class="brand-logo">SW</div>
                 <div>
                     <strong>SIDE WALK</strong>
                     <span>مدیریت کافه</span>
@@ -52,27 +58,24 @@
             </div>
 
             <nav class="sidebar-nav">
-
-                <a href="#" class="nav-item active">
-                    <span>🧾</span>
-                    <span>سفارش‌ها</span>
+                <a href="#" class="nav-item active" data-view="orders">
+                    <span>🧾</span><span>سفارش‌ها</span>
                 </a>
-
-                <a href="#" class="nav-item">
-                    <span>🍔</span>
-                    <span>محصولات</span>
+                <a href="#" class="nav-item" data-view="products">
+                    <span>🍔</span><span>محصولات</span>
                 </a>
-
-                <a href="#" class="nav-item">
-                    <span>📊</span>
-                    <span>گزارش‌ها</span>
+                <a href="#" class="nav-item" data-view="reports">
+                    <span>📊</span><span>گزارش‌ها</span>
                 </a>
-
             </nav>
 
             <div class="sidebar-footer">
-                <span class="status-dot"></span>
-                سیستم آنلاین
+                <label class="sound-toggle">
+                    <input type="checkbox" id="soundToggle" checked>
+                    🔔 هشدار صوتی
+                </label>
+
+                <button id="logoutBtn" class="logout-btn">خروج</button>
             </div>
 
         </aside>
@@ -81,169 +84,148 @@
         <!-- Main -->
         <main class="main-content">
 
-            <!-- Header -->
-            <header class="topbar">
+            <!-- ================= ORDERS VIEW ================= -->
+            <section class="view" id="view-orders">
 
-                <div>
-                    <h1>سفارش‌ها</h1>
-                    <p>
-                        مدیریت سفارش‌های ثبت‌شده در کافه
-                    </p>
-                </div>
-
-                <button
-                    class="refresh-btn"
-                    id="refreshBtn"
-                >
-                    <span>↻</span>
-                    بروزرسانی
-                </button>
-
-            </header>
-
-
-            <!-- Stats -->
-            <section class="stats-grid">
-
-                <div class="stat-card">
-                    <div class="stat-icon new">
-                        🧾
-                    </div>
-
+                <header class="topbar">
                     <div>
-                        <span>کل سفارش‌ها</span>
-                        <strong id="totalOrders">
-                            0
-                        </strong>
+                        <h1>سفارش‌ها</h1>
+                        <p>مدیریت سفارش‌های ثبت‌شده در کافه</p>
                     </div>
-                </div>
+                    <button class="refresh-btn" id="refreshBtn">
+                        <span>↻</span> بروزرسانی
+                    </button>
+                </header>
 
-
-                <div class="stat-card">
-                    <div class="stat-icon pending">
-                        🔴
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon new">🧾</div>
+                        <div><span>کل سفارش‌ها</span><strong id="totalOrders">0</strong></div>
                     </div>
-
-                    <div>
-                        <span>جدید</span>
-                        <strong id="newOrders">
-                            0
-                        </strong>
+                    <div class="stat-card">
+                        <div class="stat-icon pending">🔴</div>
+                        <div><span>جدید</span><strong id="newOrders">0</strong></div>
                     </div>
-                </div>
-
-
-                <div class="stat-card">
-                    <div class="stat-icon preparing">
-                        🔥
+                    <div class="stat-card">
+                        <div class="stat-icon preparing">🔥</div>
+                        <div><span>در حال آماده‌سازی</span><strong id="preparingOrders">0</strong></div>
                     </div>
-
-                    <div>
-                        <span>در حال آماده‌سازی</span>
-                        <strong id="preparingOrders">
-                            0
-                        </strong>
+                    <div class="stat-card">
+                        <div class="stat-icon ready">✅</div>
+                        <div><span>آماده شده</span><strong id="readyOrders">0</strong></div>
                     </div>
-                </div>
+                </section>
 
-
-                <div class="stat-card">
-                    <div class="stat-icon ready">
-                        ✅
+                <section class="toolbar">
+                    <div class="search-box">
+                        <span>⌕</span>
+                        <input type="text" id="searchInput" placeholder="جستجو با شماره سفارش، نام یا میز...">
                     </div>
 
-                    <div>
-                        <span>آماده شده</span>
-                        <strong id="readyOrders">
-                            0
-                        </strong>
+                    <select id="statusFilter">
+                        <option value="all">همه سفارش‌ها</option>
+                        <option value="جدید">جدید</option>
+                        <option value="در حال آماده‌سازی">در حال آماده‌سازی</option>
+                        <option value="آماده شد">آماده شد</option>
+                        <option value="تحویل شد">تحویل شد</option>
+                        <option value="لغو شد">لغو شد</option>
+                    </select>
+
+                    <div class="date-filter">
+                        <label>از <input type="date" id="dateFrom"></label>
+                        <label>تا <input type="date" id="dateTo"></label>
+                        <button id="clearDateBtn" class="clear-date-btn" title="پاک کردن فیلتر تاریخ">✕</button>
                     </div>
-                </div>
+                </section>
+
+                <section class="orders-section">
+                    <div id="ordersContainer" class="orders-container"></div>
+
+                    <div id="emptyState" class="empty-state hidden">
+                        <div class="empty-icon">🧾</div>
+                        <h2>سفارشی پیدا نشد</h2>
+                        <p>هنوز سفارشی با این مشخصات ثبت نشده است.</p>
+                    </div>
+
+                    <div id="loadingState" class="loading-state">
+                        <div class="spinner"></div>
+                        <span>در حال دریافت سفارش‌ها...</span>
+                    </div>
+                </section>
 
             </section>
 
+            <!-- ================= PRODUCTS VIEW ================= -->
+            <section class="view hidden" id="view-products">
 
-            <!-- Toolbar -->
-            <section class="toolbar">
+                <header class="topbar">
+                    <div>
+                        <h1>محصولات</h1>
+                        <p>مدیریت آیتم‌های منو</p>
+                    </div>
+                    <button class="refresh-btn" id="addProductBtn">
+                        <span>+</span> افزودن محصول
+                    </button>
+                </header>
 
-                <div class="search-box">
+                <section class="toolbar">
+                    <div class="search-box">
+                        <span>⌕</span>
+                        <input type="text" id="productSearchInput" placeholder="جستجو در محصولات...">
+                    </div>
+                </section>
 
-                    <span>⌕</span>
+                <section class="orders-section">
+                    <div id="productsContainer" class="products-container"></div>
 
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="جستجو با شماره سفارش، نام یا میز..."
-                    >
+                    <div id="productsEmptyState" class="empty-state hidden">
+                        <div class="empty-icon">🍔</div>
+                        <h2>محصولی پیدا نشد</h2>
+                        <p>یک محصول جدید اضافه کنید.</p>
+                    </div>
 
-                </div>
-
-
-                <select id="statusFilter">
-
-                    <option value="all">
-                        همه سفارش‌ها
-                    </option>
-
-                    <option value="جدید">
-                        جدید
-                    </option>
-
-                    <option value="در حال آماده‌سازی">
-                        در حال آماده‌سازی
-                    </option>
-
-                    <option value="آماده شد">
-                        آماده شد
-                    </option>
-
-                    <option value="تحویل شد">
-                        تحویل شد
-                    </option>
-
-                    <option value="لغو شد">
-                        لغو شد
-                    </option>
-
-                </select>
+                    <div id="productsLoadingState" class="loading-state hidden">
+                        <div class="spinner"></div>
+                        <span>در حال دریافت محصولات...</span>
+                    </div>
+                </section>
 
             </section>
 
+            <!-- ================= REPORTS VIEW ================= -->
+            <section class="view hidden" id="view-reports">
 
-            <!-- Orders -->
-            <section class="orders-section">
-
-                <div
-                    id="ordersContainer"
-                    class="orders-container"
-                ></div>
-
-                <div
-                    id="emptyState"
-                    class="empty-state hidden"
-                >
-                    <div class="empty-icon">
-                        🧾
+                <header class="topbar">
+                    <div>
+                        <h1>گزارش‌ها</h1>
+                        <p>آمار فروش روزانه و هفتگی</p>
                     </div>
+                </header>
 
-                    <h2>
-                        سفارشی پیدا نشد
-                    </h2>
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon new">💰</div>
+                        <div><span>فروش امروز</span><strong id="todaySales">۰</strong></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon preparing">📅</div>
+                        <div><span>فروش ۷ روز اخیر</span><strong id="weekSales">۰</strong></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon ready">🧾</div>
+                        <div><span>تعداد سفارش (۷ روز)</span><strong id="weekOrderCount">۰</strong></div>
+                    </div>
+                </section>
 
-                    <p>
-                        هنوز سفارشی با این مشخصات ثبت نشده است.
-                    </p>
-                </div>
+                <section class="chart-card">
+                    <h2>فروش روزانه (۱۴ روز اخیر)</h2>
+                    <canvas id="dailyChart" height="90"></canvas>
+                </section>
 
-                <div
-                    id="loadingState"
-                    class="loading-state"
-                >
-                    <div class="spinner"></div>
-                    <span>
-                        در حال دریافت سفارش‌ها...
-                    </span>
-                </div>
+                <section class="chart-card">
+                    <h2>فروش هفتگی (۸ هفته اخیر)</h2>
+                    <canvas id="weeklyChart" height="90"></canvas>
+                </section>
 
             </section>
 
@@ -253,38 +235,46 @@
 
 
     <!-- Order Details Modal -->
-    <div
-        id="orderModal"
-        class="modal hidden"
-    >
-
+    <div id="orderModal" class="modal hidden">
         <div class="modal-overlay"></div>
-
         <div class="modal-content">
-
-            <button
-                class="modal-close"
-                id="modalClose"
-            >
-                ×
-            </button>
-
+            <button class="modal-close" id="modalClose">×</button>
             <div id="modalBody"></div>
-
         </div>
-
     </div>
 
+    <!-- Product Form Modal -->
+    <div id="productModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="productModalClose">×</button>
+            <form id="productForm">
+                <h2 id="productFormTitle">افزودن محصول</h2>
 
-    <div
-        id="toast"
-        class="toast"
-    ></div>
+                <label>نام غذا <input type="text" id="pf_name" required></label>
+                <label>دسته‌بندی <input type="text" id="pf_category" required></label>
+                <label>توضیحات <textarea id="pf_description" rows="3"></textarea></label>
+                <label>قیمت (تومان) <input type="number" id="pf_price" min="0" required></label>
+                <label>آدرس عکس (URL) <input type="text" id="pf_image" placeholder="https://..."></label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="pf_available" checked> موجود است
+                </label>
 
+                <div class="form-actions">
+                    <button type="submit" id="productSaveBtn">ذخیره</button>
+                    <button type="button" id="productCancelBtn">انصراف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Printable invoice (hidden on screen, shown only when printing) -->
+    <div id="printArea" class="print-area"></div>
+
+    <div id="toast" class="toast"></div>
 
     <script src="order.js"></script>
 
 </body>
 
 </html>
-
