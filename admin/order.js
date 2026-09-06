@@ -165,7 +165,7 @@ loginForm.addEventListener("submit", async event => {
 
     loginError.classList.add("hidden");
     loginSubmit.disabled = true;
-    loginSubmit.textContent = "در حال ورود...";
+    loginSubmit.innerHTML = '<span>در حال ورود...</span> <i class="fa-solid fa-spinner fa-spin"></i>';
 
     try {
         const response = await fetch(`${API_BASE}/admin/login`, {
@@ -192,7 +192,7 @@ loginForm.addEventListener("submit", async event => {
         loginError.classList.remove("hidden");
     } finally {
         loginSubmit.disabled = false;
-        loginSubmit.textContent = "ورود";
+        loginSubmit.innerHTML = '<span>ورود به پنل</span> <i class="fa-solid fa-arrow-left"></i>';
     }
 });
 

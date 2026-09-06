@@ -8,10 +8,12 @@
 
     <link rel="stylesheet" href="order.css">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap"
+        href="../assest/fonts/Estedad-v7.3/webfonts/statics/Estedad-Black.woff2"
         rel="stylesheet"
     >
 
@@ -22,25 +24,77 @@
 
     <!-- ===================== Login Screen ===================== -->
     <div id="loginScreen" class="login-screen">
-        <form id="loginForm" class="login-card">
-            <div class="brand-logo login-logo">SW</div>
-            <h1>ورود به پنل مدیریت</h1>
-            <p class="login-sub">SIDE WALK</p>
 
-            <label>
-                نام کاربری
-                <input type="text" id="loginUsername" autocomplete="username" required>
-            </label>
+        <div class="login-wrap">
 
-            <label>
-                رمز عبور
-                <input type="password" id="loginPassword" autocomplete="current-password" required>
-            </label>
+            <!-- Brand panel -->
+            <div class="login-brand">
 
-            <button type="submit" id="loginSubmit">ورود</button>
+                <div class="login-brand-glow"></div>
 
-            <div id="loginError" class="login-error hidden"></div>
-        </form>
+                <div class="login-brand-top">
+                    <div class="brand-logo login-logo">SW</div>
+                    <div class="login-brand-name">
+                        <strong>SIDE WALK</strong>
+                        <span>CAFE &amp; RESTAURANT</span>
+                    </div>
+                </div>
+
+                <div class="login-brand-mid">
+                    <h2>مدیریت هوشمند کافه، همه‌جا همراهت.</h2>
+                    <p>سفارش‌ها، محصولات و گزارش فروش رو از یک پنل ساده و سریع مدیریت کن.</p>
+                </div>
+
+                <ul class="login-brand-features">
+                    <li><i class="fa-solid fa-check"></i> مدیریت سفارش‌ها به‌صورت لحظه‌ای</li>
+                    <li><i class="fa-solid fa-check"></i> افزودن، ویرایش و حذف محصولات منو</li>
+                    <li><i class="fa-solid fa-check"></i> گزارش فروش روزانه و هفتگی</li>
+                </ul>
+
+            </div>
+
+            <!-- Form panel -->
+            <div class="login-form-panel">
+
+                <form id="loginForm" class="login-card">
+
+                    <h1>ورود به پنل مدیریت</h1>
+                    <p class="login-sub">برای ادامه، اطلاعات حساب خود را وارد کنید</p>
+
+                    <label>
+                        نام کاربری
+                        <div class="input-group">
+                            <i class="fa-regular fa-user"></i>
+                            <input type="text" id="loginUsername" autocomplete="username" placeholder="نام کاربری خود را وارد کنید" required>
+                        </div>
+                    </label>
+
+                    <label>
+                        رمز عبور
+                        <div class="input-group">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="loginPassword" autocomplete="current-password" placeholder="رمز عبور خود را وارد کنید" required>
+                            <button type="button" class="toggle-password" id="togglePassword" aria-label="نمایش رمز عبور">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </label>
+
+                    <button type="submit" id="loginSubmit">
+                        <span>ورود به پنل</span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+
+                    <div id="loginError" class="login-error hidden"></div>
+
+                    <div class="login-footer">© SIDE WALK — پنل مدیریت کافه</div>
+
+                </form>
+
+            </div>
+
+        </div>
+
     </div>
 
     <!-- ===================== App Shell ===================== -->
@@ -281,6 +335,17 @@
     <div id="printArea" class="print-area"></div>
 
     <div id="toast" class="toast"></div>
+
+    <script>
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const input = document.getElementById("loginPassword");
+            const icon = this.querySelector("i");
+            const showing = input.type === "text";
+
+            input.type = showing ? "password" : "text";
+            icon.className = showing ? "fa-regular fa-eye" : "fa-regular fa-eye-slash";
+        });
+    </script>
 
     <script src="order.js"></script>
 
