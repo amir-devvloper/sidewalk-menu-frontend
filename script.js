@@ -24,12 +24,11 @@ const cardQuantities = new Map();
 let trackPollInterval = null;
 
 const orderStatusMap = {
-    pending:     { label: "در حال بررسی سفارش", icon: "fa-hourglass-half" },
-    processing:  { label: "در حال آماده‌سازی",   icon: "fa-kitchen-set" },
-    ready:       { label: "آماده تحویل",         icon: "fa-box-open" },
-    delivering:  { label: "در حال ارسال",        icon: "fa-motorcycle" },
-    completed:   { label: "تحویل داده شد",       icon: "fa-circle-check" },
-    cancelled:   { label: "لغو شد",              icon: "fa-circle-xmark" }
+    "جدید":              { label: "در حال بررسی سفارش", icon: "fa-hourglass-half" },
+    "در حال آماده‌سازی": { label: "در حال آماده‌سازی",   icon: "fa-kitchen-set" },
+    "آماده شد":          { label: "آماده تحویل",         icon: "fa-box-open" },
+    "تحویل شد":          { label: "تحویل داده شد",       icon: "fa-circle-check" },
+    "لغو شد":            { label: "لغو شد",              icon: "fa-circle-xmark" }
 };
 
 /* =========================================================
@@ -3083,8 +3082,6 @@ async function fetchOrderStatus(orderCode) {
             `${API_BASE_URL}/orders/${encodeURIComponent(orderCode)}`
         );
     } catch (networkError) {
-        // fetch() itself throws only on a connection/CORS failure —
-        // this is NOT the same as "order not found".
         const err = new Error("خطا در اتصال به سرور.");
         err.type = "network";
         throw err;
@@ -3102,7 +3099,9 @@ async function fetchOrderStatus(orderCode) {
         throw err;
     }
 
-    return response.json();
+    const data = await response.json();
+
+    return data.order;
 }
 
 function renderTrackStatus(order) {
@@ -3110,9 +3109,9 @@ function renderTrackStatus(order) {
 
     if (!panel) return;
 
-    const status = order.status || "pending";
-    const info = orderStatusMap[status] || orderStatusMap.pending;
-    const steps = ["pending", "processing", "ready", "completed"];
+    const status = order.status || "جدید";
+    const info = orderStatusMap[status] || orderStatusMap["جدید"];
+    const steps = ["جدید", "در حال آماده‌سازی", "آماده شد", "تحویل شد"];
     const currentIndex = steps.indexOf(status);
 
     panel.innerHTML = `
@@ -3249,7 +3248,7 @@ function startTrackPolling(orderCode) {
             const order = await fetchOrderStatus(orderCode);
             renderTrackStatus(order);
 
-            if (order.status === "completed" || order.status === "cancelled") {
+            if (order.status === "تحویل شد" || order.status === "لغو شد") {
                 stopTrackPolling();
             }
         } catch (_) {}
