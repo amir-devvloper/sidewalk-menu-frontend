@@ -12,6 +12,27 @@ const API_BASE_URL =
     window.SIDEWALK_API_URL || "https://sidewalk-menu-backend.onrender.com/api";
 
 /* =========================================================
+   PRODUCT CARD QUANTITY STATE (before add to cart)
+========================================================= */
+
+const cardQuantities = new Map();
+
+/* =========================================================
+   ORDER TRACKING STATE
+========================================================= */
+
+let trackPollInterval = null;
+
+const orderStatusMap = {
+    pending:     { label: "در حال بررسی سفارش", icon: "fa-hourglass-half" },
+    processing:  { label: "در حال آماده‌سازی",   icon: "fa-kitchen-set" },
+    ready:       { label: "آماده تحویل",         icon: "fa-box-open" },
+    delivering:  { label: "در حال ارسال",        icon: "fa-motorcycle" },
+    completed:   { label: "تحویل داده شد",       icon: "fa-circle-check" },
+    cancelled:   { label: "لغو شد",              icon: "fa-circle-xmark" }
+};
+
+/* =========================================================
    DELIVERY / LOCATION STATE
 ========================================================= */
 
@@ -125,6 +146,150 @@ function escapeAttr(value) {
         .replaceAll(">", "&gt;");
 }
 
+const TOMAN_SVG = `<svg class="toman-svg" aria-hidden="true" focusable="false" xmlns:xlink="http://www.w3.org/1999/xlink" width="19" height="22" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.14878 6.91843C1.44428 6.91843 1.70285 6.87142 1.92447 6.77739C2.15282 6.68337 2.34422 6.55577 2.49869 6.39458C2.65316 6.2334 2.77069 6.04535 2.85128 5.83044C2.93187 5.62224 2.97888 5.40062 2.99231 5.16556H1.98492C1.6424 5.16556 1.36033 5.12862 1.1387 5.05474C0.917077 4.98087 0.742461 4.87341 0.614858 4.73238C0.487254 4.59134 0.396588 4.42344 0.34286 4.22868C0.295849 4.0272 0.272343 3.80221 0.272343 3.55372C0.272343 3.29852 0.309281 3.05674 0.383156 2.8284C0.457032 2.60005 0.564488 2.39857 0.705523 2.22396C0.846559 2.04934 1.02117 1.91167 1.22937 1.81093C1.44428 1.70347 1.68941 1.64974 1.96477 1.64974C2.1864 1.64974 2.39795 1.68668 2.59943 1.76056C2.80091 1.83443 2.97888 1.95196 3.13335 2.11315C3.28782 2.26761 3.40871 2.47245 3.49601 2.72766C3.59004 2.97615 3.63705 3.27837 3.63705 3.63431V4.47045H4.60415C4.68474 4.47045 4.73847 4.50068 4.76533 4.56112C4.79891 4.61485 4.8157 4.6988 4.8157 4.81297C4.8157 4.93386 4.79891 5.02452 4.76533 5.08497C4.73847 5.13869 4.68474 5.16556 4.60415 5.16556H3.6169C3.60347 5.49464 3.53631 5.80693 3.41542 6.10244C3.30125 6.39794 3.14007 6.65651 2.93187 6.87813C2.72368 7.09976 2.47518 7.27438 2.1864 7.40198C1.89761 7.5363 1.57188 7.60346 1.20922 7.60346H0.141381L0.0809373 6.91843H1.14878ZM0.896929 3.51343C0.896929 3.68133 0.913719 3.82572 0.947299 3.94661C0.987594 4.0675 1.0514 4.16823 1.1387 4.24883C1.23273 4.3227 1.35697 4.37979 1.51144 4.42008C1.66591 4.45366 1.86067 4.47045 2.09573 4.47045H3.00239V3.71491C3.00239 3.21792 2.90501 2.86198 2.71024 2.64707C2.51548 2.43215 2.24684 2.3247 1.90433 2.3247C1.58196 2.3247 1.33347 2.43215 1.15885 2.64707C0.984237 2.86198 0.896929 3.15076 0.896929 3.51343ZM6.26895 4.47045C6.35626 4.47045 6.41335 4.50068 6.44021 4.56112C6.47379 4.61485 6.49058 4.6988 6.49058 4.81297C6.49058 4.93386 6.47379 5.02452 6.44021 5.08497C6.41335 5.13869 6.35626 5.16556 6.26895 5.16556H4.60675C4.51944 5.16556 4.46235 5.13869 4.43549 5.08497C4.40191 5.03124 4.38512 4.94729 4.38512 4.83312C4.38512 4.71223 4.40191 4.62156 4.43549 4.56112C4.46235 4.50068 4.51944 4.47045 4.60675 4.47045H6.26895ZM7.93155 4.47045C8.01886 4.47045 8.07594 4.50068 8.10281 4.56112C8.13639 4.61485 8.15318 4.6988 8.15318 4.81297C8.15318 4.93386 8.13639 5.02452 8.10281 5.08497C8.07594 5.13869 8.01886 5.16556 7.93155 5.16556H6.26935C6.18204 5.16556 6.12495 5.13869 6.09809 5.08497C6.06451 5.03124 6.04772 4.94729 6.04772 4.83312C6.04772 4.71223 6.06451 4.62156 6.09809 4.56112C6.12495 4.50068 6.18204 4.47045 6.26935 4.47045H7.93155ZM9.59415 4.47045C9.68146 4.47045 9.73854 4.50068 9.76541 4.56112C9.79899 4.61485 9.81578 4.6988 9.81578 4.81297C9.81578 4.93386 9.79899 5.02452 9.76541 5.08497C9.73854 5.13869 9.68146 5.16556 9.59415 5.16556H7.93194C7.84464 5.16556 7.78755 5.13869 7.76069 5.08497C7.72711 5.03124 7.71032 4.94729 7.71032 4.83312C7.71032 4.71223 7.72711 4.62156 7.76069 4.56112C7.78755 4.50068 7.84464 4.47045 7.93194 4.47045H9.59415ZM11.2567 4.47045C11.3441 4.47045 11.4011 4.50068 11.428 4.56112C11.4616 4.61485 11.4784 4.6988 11.4784 4.81297C11.4784 4.93386 11.4616 5.02452 11.428 5.08497C11.4011 5.13869 11.3441 5.16556 11.2567 5.16556H9.59454C9.50723 5.16556 9.45015 5.13869 9.42328 5.08497C9.3897 5.03124 9.37291 4.94729 9.37291 4.83312C9.37291 4.71223 9.3897 4.62156 9.42328 4.56112C9.45015 4.50068 9.50723 4.47045 9.59454 4.47045H11.2567ZM12.1638 4.47045C12.4257 4.47045 12.6339 4.39994 12.7884 4.2589C12.9496 4.11787 13.0302 3.9231 13.0302 3.67461V2.2844H13.685V3.67461C13.685 4.15144 13.5506 4.52082 13.282 4.78275C13.0201 5.03795 12.6608 5.16556 12.2041 5.16556H11.2571C11.1698 5.16556 11.1127 5.13869 11.0859 5.08497C11.0523 5.03124 11.0355 4.94729 11.0355 4.83312C11.0355 4.71223 11.0523 4.62156 11.0859 4.56112C11.1127 4.50068 11.1698 4.47045 11.2571 4.47045H12.1638ZM13.7857 0.994934H12.9798V0.279683H13.7857V0.994934ZM12.5063 0.994934H11.7004V0.279683H12.5063V0.994934ZM5.64177 12.9641C5.64177 13.3267 5.58468 13.6659 5.47051 13.9815C5.35634 14.3039 5.1918 14.5826 4.97689 14.8177C4.76198 15.0595 4.50005 15.2509 4.19112 15.3919C3.8889 15.5329 3.54638 15.6035 3.16357 15.6035H2.56921C1.81702 15.6035 1.23273 15.3718 0.816337 14.9084C0.399946 14.445 0.191751 13.8103 0.191751 13.0044V11.2414H0.836485V12.9842C0.836485 13.273 0.870065 13.5349 0.937225 13.77C1.0111 14.0051 1.12191 14.2065 1.26967 14.3744C1.42413 14.549 1.61554 14.6834 1.84388 14.7774C2.07223 14.8714 2.34758 14.9184 2.66995 14.9184H3.1132C3.42885 14.9184 3.70421 14.8647 3.93927 14.7572C4.17433 14.6565 4.36909 14.5188 4.52356 14.3442C4.68474 14.1696 4.80227 13.9648 4.87615 13.7297C4.95674 13.4946 4.99703 13.2495 4.99703 12.9943V10.2844H5.64177V12.9641ZM3.21394 10.0628H2.36773V9.32738H3.21394V10.0628ZM8.24526 13.1656C8.07064 13.1656 7.90274 13.1421 7.74156 13.095C7.58038 13.0413 7.43598 12.954 7.30838 12.8331C7.18749 12.7122 7.09011 12.5544 7.01624 12.3596C6.94236 12.1582 6.90542 11.9097 6.90542 11.6142V6.9197H7.56023V11.4933C7.56023 11.7754 7.62067 12.0104 7.74156 12.1985C7.86916 12.3798 8.074 12.4705 8.35607 12.4705H8.52733C8.67508 12.4705 8.74896 12.5846 8.74896 12.813C8.74896 13.048 8.67508 13.1656 8.52733 13.1656H8.24526ZM8.69324 12.4705C8.95516 12.4705 9.15328 12.4067 9.2876 12.279C9.42192 12.1514 9.48908 11.9802 9.48908 11.7653V11.3825C9.48908 10.7982 9.63683 10.3415 9.93233 10.0124C10.2346 9.68332 10.6509 9.51878 11.1815 9.51878C11.4569 9.51878 11.6986 9.56243 11.9068 9.64974C12.115 9.73705 12.2863 9.8613 12.4206 10.0225C12.5616 10.1837 12.6657 10.3751 12.7329 10.5967C12.8001 10.8183 12.8336 11.0635 12.8336 11.3321C12.8336 11.9097 12.6825 12.3596 12.3803 12.682C12.0781 13.0044 11.6651 13.1656 11.1412 13.1656C10.8726 13.1656 10.614 13.1152 10.3655 13.0144C10.117 12.907 9.92226 12.7189 9.78123 12.4503C9.72078 12.6048 9.64691 12.729 9.5596 12.823C9.47229 12.9171 9.38162 12.9909 9.2876 13.0447C9.19358 13.0917 9.09284 13.1253 8.98538 13.1454C8.88464 13.1588 8.78726 13.1656 8.69324 13.1656H8.53205C8.44475 13.1656 8.38766 13.1387 8.3608 13.085C8.32722 13.0312 8.31043 12.9473 8.31043 12.8331C8.31043 12.7122 8.32722 12.6216 8.3608 12.5611C8.38766 12.5007 8.44475 12.4705 8.53205 12.4705H8.69324ZM12.1889 11.3925C12.1889 11.0433 12.1117 10.7612 11.9572 10.5463C11.8027 10.3247 11.5375 10.2139 11.1614 10.2139C10.4629 10.2139 10.1137 10.6202 10.1137 11.4328C10.1137 11.7754 10.2077 12.0339 10.3957 12.2085C10.5905 12.3831 10.839 12.4705 11.1412 12.4705C11.4837 12.4705 11.7423 12.3764 11.9169 12.1884C12.0982 12.0003 12.1889 11.7351 12.1889 11.3925Z" fill="currentColor"></path></svg>`;
+
+const cartTomanIcon = document.getElementById("cartTomanIcon");
+if (cartTomanIcon) cartTomanIcon.innerHTML = TOMAN_SVG;
+
+function renderStars(rating) {
+    const rounded = Math.min(5, Math.max(0, Math.round(Number(rating) || 5)));
+    let html = "";
+    for (let i = 1; i <= 5; i++) {
+        html += i <= rounded
+            ? '<i class="fa-solid fa-star" aria-hidden="true"></i>'
+            : '<i class="fa-regular fa-star" aria-hidden="true"></i>';
+    }
+    return html;
+}
+
+function normalizeRating(rating) {
+    const value = Number(rating);
+    return Number.isFinite(value) && value > 0
+        ? Math.min(5, Math.max(0, value))
+        : 5;
+}
+
+function ratingLabel(rating) {
+    const value = normalizeRating(rating);
+    return `امتیاز ${value.toLocaleString("fa-IR", { maximumFractionDigits: 1 })} از ۵`;
+}
+
+function showToast(message, type = "warning") {
+    if (!message) return;
+
+    let region = document.getElementById("toastRegion");
+
+    if (!region) {
+        region = document.createElement("div");
+        region.id = "toastRegion";
+        region.className = "toast-region";
+        region.setAttribute("aria-live", "polite");
+        region.setAttribute("aria-atomic", "true");
+        document.body.appendChild(region);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `app-toast app-toast--${type}`;
+    toast.setAttribute("role", "status");
+
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-circle-info";
+    icon.setAttribute("aria-hidden", "true");
+
+    const text = document.createElement("span");
+    text.textContent = String(message);
+
+    toast.append(icon, text);
+    region.replaceChildren(toast);
+
+    requestAnimationFrame(() => toast.classList.add("show"));
+
+    window.setTimeout(() => {
+        toast.classList.remove("show");
+        window.setTimeout(() => toast.remove(), 220);
+    }, 3200);
+}
+
+let lastModalTrigger = null;
+let lastCartTrigger = null;
+
+function syncBodyScrollLock() {
+    const modalOpen = productModal?.classList.contains("active");
+    const cartOpen = cartDrawer?.classList.contains("active");
+    document.body.classList.toggle("no-scroll", Boolean(modalOpen || cartOpen));
+}
+
+function getFocusableElements(container) {
+    if (!container) return [];
+
+    return Array.from(
+        container.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+    ).filter(element => !element.hasAttribute("hidden") && element.offsetParent !== null);
+}
+
+function trapFocus(container, event) {
+    if (event.key !== "Tab" || !container) return;
+
+    const focusable = getFocusableElements(container);
+
+    if (!focusable.length) {
+        event.preventDefault();
+        container.focus();
+        return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+}
+
+function openModalDialog(triggerElement, focusSelector) {
+    if (!productModal) return;
+
+    const wasOpen = productModal.classList.contains("active");
+
+    if (!wasOpen) {
+        lastModalTrigger = triggerElement || document.activeElement;
+    }
+
+    productModal.classList.add("active");
+    productModal.setAttribute("aria-hidden", "false");
+    syncBodyScrollLock();
+
+    requestAnimationFrame(() => {
+        const dialog = productModal.querySelector(".product-modal");
+        const preferred = focusSelector
+            ? productModal.querySelector(focusSelector)
+            : null;
+
+        (preferred || dialog)?.focus();
+    });
+}
+
+function resetModalContentScrolling() {
+    if (modalContent) {
+        modalContent.style.overflowY = "";
+        modalContent.style.overflowX = "";
+        modalContent.style.maxHeight = "";
+        modalContent.style.webkitOverflowScrolling = "";
+        modalContent.style.touchAction = "";
+        modalContent.style.overscrollBehavior = "";
+    }
+
+    if (productModal) {
+        productModal.style.overflow = "";
+    }
+}
+
 function buildMenuCardHTML(product) {
     const available = product.available !== false;
     const rating = product.rating || "5.0";
@@ -153,26 +318,38 @@ function buildMenuCardHTML(product) {
 
             <div class="card-body">
                 <div class="card-title-row">
-                    <h3 class="card-title">${escapeAttr(product.name)}</h3>
-                    <span class="card-price">${formatPrice(product.price)}</span>
+                    <h3 class="card-title">
+                        <button
+                            type="button"
+                            class="card-title-link"
+                            aria-label="مشاهده توضیحات ${escapeAttr(product.name)}"
+                        >${escapeAttr(product.name)}</button>
+                    </h3>
+                    <span class="card-price">${formatPrice(product.price)}${TOMAN_SVG}</span>
                 </div>
 
                 <p class="card-description">${escapeAttr(product.description)}</p>
 
                 <div class="card-bottom">
-                    <span class="rating">
-                        <i class="fa-solid fa-star"></i>
-                        ${escapeAttr(rating)}
-                    </span>
+                    <span class="rating" aria-label="${escapeAttr(ratingLabel(rating))}" title="${escapeAttr(ratingLabel(rating))}">${renderStars(rating)}</span>
 
-                    <button
-                        class="add-btn"
-                        data-id="${escapeAttr(product._id)}"
-                        aria-label="افزودن به سبد"
-                        ${available ? "" : "disabled style=\"opacity:.4;pointer-events:none;\""}
-                    >
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
+                    <div class="card-actions">
+                        <div class="qty-stepper" data-id="${escapeAttr(product._id)}">
+                            <button type="button" class="qty-btn qty-minus" aria-label="کم کردن">−</button>
+                            <span class="qty-value">1</span>
+                            <button type="button" class="qty-btn qty-plus" aria-label="زیاد کردن">+</button>
+                        </div>
+
+                        <button
+                            class="add-btn"
+                            data-id="${escapeAttr(product._id)}"
+                            aria-label="افزودن به سبد"
+                            ${available ? "" : "disabled style=\"opacity:.4;pointer-events:none;\""}
+                        >
+                            <span>افزودن به سبد خرید</span>
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </article>
@@ -367,17 +544,17 @@ function toggleFavorite(id) {
    CART
 ========================================================= */
 
-function addToCart(item) {
+function addToCart(item, qty = 1) {
     const existing = cart.find(
         cartItem => cartItem.id === item.id
     );
 
     if (existing) {
-        existing.quantity++;
+        existing.quantity += qty;
     } else {
         cart.push({
             id: item.id,
-            quantity: 1
+            quantity: qty
         });
     }
 
@@ -447,7 +624,7 @@ function renderCart() {
 
                     <span class="cart-item-price">
                         ${formatPrice(product.price)}
-                        تومان
+                        ${TOMAN_SVG}
                     </span>
 
                     <div class="quantity">
@@ -530,27 +707,51 @@ function renderCart() {
 ========================================================= */
 
 function openCart() {
+    lastCartTrigger = document.activeElement;
+
     if (cartDrawer) {
         cartDrawer.classList.add("active");
+        cartDrawer.setAttribute("aria-hidden", "false");
     }
 
     if (drawerOverlay) {
         drawerOverlay.classList.add("active");
     }
 
-    document.body.classList.add("no-scroll");
+    if (cartBtn) {
+        cartBtn.setAttribute("aria-expanded", "true");
+    }
+
+    syncBodyScrollLock();
+
+    requestAnimationFrame(() => {
+        (closeCart || cartDrawer)?.focus?.();
+    });
 }
 
-function closeCartDrawer() {
+function closeCartDrawer({ restoreFocus = true } = {}) {
+    const wasOpen = cartDrawer?.classList.contains("active");
+
     if (cartDrawer) {
         cartDrawer.classList.remove("active");
+        cartDrawer.setAttribute("aria-hidden", "true");
     }
 
     if (drawerOverlay) {
         drawerOverlay.classList.remove("active");
     }
 
-    document.body.classList.remove("no-scroll");
+    if (cartBtn) {
+        cartBtn.setAttribute("aria-expanded", "false");
+    }
+
+    syncBodyScrollLock();
+
+    if (restoreFocus && wasOpen && lastCartTrigger && document.contains(lastCartTrigger)) {
+        requestAnimationFrame(() => lastCartTrigger.focus?.());
+    }
+
+    if (restoreFocus) lastCartTrigger = null;
 }
 
 if (cartBtn) {
@@ -575,53 +776,89 @@ if (drawerOverlay) {
 function openProduct(item) {
     if (!modalContent || !productModal) return;
 
+    let modalQty = 1;
+
     modalContent.innerHTML = `
         <img
             class="modal-image"
-            src="${item.image}"
-            alt="${item.name}"
+            src="${escapeAttr(item.image)}"
+            alt="${escapeAttr(item.name)}"
         >
 
         <div class="modal-body">
-            <h2>${item.name}</h2>
-            <p>${item.description}</p>
+            <h2 id="modalDialogTitle">${escapeAttr(item.name)}</h2>
+            <div class="modal-rating" aria-label="${escapeAttr(ratingLabel(item.rating))}" title="${escapeAttr(ratingLabel(item.rating))}">${renderStars(item.rating || 5)}</div>
+            <p>${escapeAttr(item.description)}</p>
 
             <div class="modal-price">
                 ${formatPrice(item.price)}
-                تومان
+                ${TOMAN_SVG}
             </div>
 
-            <button
-                class="checkout-btn"
-                id="modalAdd"
-                style="margin-top:20px"
-                type="button"
-            >
-                افزودن به سبد
-                <i class="fa-solid fa-bag-shopping"></i>
-            </button>
+            <div class="modal-qty-row">
+                <div class="qty-stepper" id="modalQtyStepper">
+                    <button type="button" class="qty-btn qty-minus" aria-label="کم کردن">−</button>
+                    <span class="qty-value" id="modalQtyValue">1</span>
+                    <button type="button" class="qty-btn qty-plus" aria-label="زیاد کردن">+</button>
+                </div>
+
+                <button
+                    class="modal-add-btn"
+                    id="modalAdd"
+                    type="button"
+                >
+                    <span>افزودن به سبد خرید</span>
+                    <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+                </button>
+            </div>
         </div>
     `;
 
-    productModal.classList.add("active");
-    document.body.classList.add("no-scroll");
+    resetModalContentScrolling();
+    openModalDialog(item.__triggerElement || document.activeElement, "#modalAdd");
+
+    const modalQtyValue = document.getElementById("modalQtyValue");
+    const modalQtyStepper = document.getElementById("modalQtyStepper");
+
+    if (modalQtyStepper && modalQtyValue) {
+        modalQtyStepper.querySelector(".qty-minus").addEventListener("click", () => {
+            modalQty = Math.max(1, modalQty - 1);
+            modalQtyValue.textContent = modalQty;
+        });
+
+        modalQtyStepper.querySelector(".qty-plus").addEventListener("click", () => {
+            modalQty = Math.min(20, modalQty + 1);
+            modalQtyValue.textContent = modalQty;
+        });
+    }
 
     const modalAdd = document.getElementById("modalAdd");
 
     if (modalAdd) {
         modalAdd.addEventListener("click", () => {
-            addToCart(item);
+            addToCart(item, modalQty);
             closeProduct();
         });
     }
 }
 
 function closeProduct() {
+    const wasOpen = productModal?.classList.contains("active");
+
     if (productModal) {
         productModal.classList.remove("active");
+        productModal.setAttribute("aria-hidden", "true");
     }
 
-    document.body.classList.remove("no-scroll");
+    resetModalContentScrolling();
+    stopTrackPolling();
+    syncBodyScrollLock();
+
+    if (wasOpen && lastModalTrigger && document.contains(lastModalTrigger)) {
+        requestAnimationFrame(() => lastModalTrigger.focus?.());
+    }
+
+    lastModalTrigger = null;
 }
 
 if (modalClose) {
@@ -633,6 +870,38 @@ if (productModal) {
         if (event.target === productModal) {
             closeProduct();
         }
+    });
+}
+
+/* =========================================================
+   PRODUCT CARD QUANTITY STEPPER (before adding to cart)
+========================================================= */
+
+function attachQtyStepper(card) {
+    const id = card.dataset.id;
+    const stepper = card.querySelector(".qty-stepper");
+
+    if (!stepper) return;
+
+    if (!cardQuantities.has(id)) {
+        cardQuantities.set(id, 1);
+    }
+
+    const valueEl = stepper.querySelector(".qty-value");
+    valueEl.textContent = cardQuantities.get(id);
+
+    stepper.querySelector(".qty-minus").addEventListener("click", event => {
+        event.stopPropagation();
+        const current = Math.max(1, cardQuantities.get(id) - 1);
+        cardQuantities.set(id, current);
+        valueEl.textContent = current;
+    });
+
+    stepper.querySelector(".qty-plus").addEventListener("click", event => {
+        event.stopPropagation();
+        const current = Math.min(20, cardQuantities.get(id) + 1);
+        cardQuantities.set(id, current);
+        valueEl.textContent = current;
     });
 }
 
@@ -659,6 +928,8 @@ function initializeProducts() {
             );
         }
 
+        attachQtyStepper(card);
+
         const addButton =
             card.querySelector(".add-btn");
 
@@ -672,23 +943,37 @@ function initializeProducts() {
                         getProductById(id);
 
                     if (product) {
-                        addToCart(product);
+                        const qty = cardQuantities.get(id) || 1;
+                        addToCart(product, qty);
+
+                        cardQuantities.set(id, 1);
+                        const valueEl = card.querySelector(".qty-value");
+                        if (valueEl) valueEl.textContent = "1";
                     }
                 }
             );
         }
 
-        const image =
-            card.querySelector(".card-image img");
+        const titleButton = card.querySelector(".card-title-link");
 
-        if (image) {
-            image.addEventListener("click", () => {
-                const product =
-                    getProductById(id);
+        const openCardProduct = triggerElement => {
+            const product = getProductById(id);
+            if (!product) return;
+            product.__triggerElement = triggerElement || titleButton || document.activeElement;
+            openProduct(product);
+            delete product.__triggerElement;
+        };
 
-                if (product) {
-                    openProduct(product);
-                }
+        card.addEventListener("click", event => {
+            if (event.target.closest("button, .qty-stepper")) return;
+            openCardProduct(titleButton);
+        });
+
+        if (titleButton) {
+            titleButton.addEventListener("click", event => {
+                event.preventDefault();
+                event.stopPropagation();
+                openCardProduct(titleButton);
             });
         }
 
@@ -1173,23 +1458,57 @@ function renderFavorites() {
             >
 
             <div class="favorite-card-info">
-                <h3>${product.name}</h3>
+                <h3>
+                    <button
+                        type="button"
+                        class="favorite-title-link"
+                        aria-label="مشاهده توضیحات ${escapeAttr(product.name)}"
+                    >${escapeAttr(product.name)}</button>
+                </h3>
 
-                <span class="favorite-price">
-                    ${formatPrice(product.price)}
-                    تومان
-                </span>
+                <div class="favorite-meta">
+                    <span class="favorite-price">
+                        ${formatPrice(product.price)}
+                        ${TOMAN_SVG}
+                    </span>
+
+                    <span class="rating favorite-rating" aria-label="${escapeAttr(ratingLabel(product.rating))}" title="${escapeAttr(ratingLabel(product.rating))}">
+                        ${renderStars(product.rating || 5)}
+                    </span>
+                </div>
 
                 <button
                     class="favorite-add-cart"
                     data-id="${product.id}"
                     type="button"
                 >
-                    افزودن به سبد
+                    <span>افزودن به سبد خرید</span>
                     <i class="fa-solid fa-bag-shopping"></i>
                 </button>
             </div>
         `;
+
+        const favoriteTitleButton =
+            favoriteCard.querySelector(".favorite-title-link");
+
+        const openFavoriteProduct = () => {
+            product.__triggerElement = favoriteTitleButton || document.activeElement;
+            openProduct(product);
+            delete product.__triggerElement;
+        };
+
+        favoriteCard.addEventListener("click", event => {
+            if (event.target.closest("button")) return;
+            openFavoriteProduct();
+        });
+
+        if (favoriteTitleButton) {
+            favoriteTitleButton.addEventListener("click", event => {
+                event.preventDefault();
+                event.stopPropagation();
+                openFavoriteProduct();
+            });
+        }
 
         favoriteCard
             .querySelector(
@@ -1266,9 +1585,15 @@ if (
 
     favoritesButton.type = "button";
 
+    favoritesButton.setAttribute("aria-controls", "favoritesSection");
+    favoritesButton.setAttribute("aria-expanded", "false");
+    favoritesButton.setAttribute("aria-label", "نمایش علاقه‌مندی‌ها");
+
+    favoritesSection.setAttribute("aria-hidden", "true");
+
     favoritesButton.innerHTML = `
-        <i class="fa-solid fa-heart"></i>
-        علاقه‌مندی‌ها
+        <i class="fa-solid fa-heart" aria-hidden="true"></i>
+        <span>علاقه‌مندی‌ها</span>
     `;
 
     headerActions.prepend(
@@ -1278,19 +1603,23 @@ if (
     favoritesButton.addEventListener(
         "click",
         () => {
-            favoritesSection.classList.toggle(
-                "show"
-            );
+            favoritesSection.classList.toggle("show");
 
-            if (
-                favoritesSection.classList.contains(
-                    "show"
-                )
-            ) {
+            const isOpen = favoritesSection.classList.contains("show");
+            favoritesButton.setAttribute("aria-expanded", String(isOpen));
+            favoritesButton.setAttribute(
+                "aria-label",
+                isOpen ? "بستن علاقه‌مندی‌ها" : "نمایش علاقه‌مندی‌ها"
+            );
+            favoritesSection.setAttribute("aria-hidden", String(!isOpen));
+
+            if (isOpen) {
                 renderFavorites();
 
                 favoritesSection.scrollIntoView({
-                    behavior: "smooth",
+                    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                        ? "auto"
+                        : "smooth",
                     block: "start"
                 });
             }
@@ -1413,7 +1742,7 @@ function getUserLocation() {
         );
 
     if (!navigator.geolocation) {
-        alert(
+        showToast(
             "مرورگر شما از دریافت موقعیت مکانی پشتیبانی نمی‌کند."
         );
         return;
@@ -1450,7 +1779,7 @@ function getUserLocation() {
                         "📍 دریافت لوکیشن";
                 }
 
-                alert(
+                showToast(
                     "این فروشگاه فقط در شهر کرمان فعال است. موقعیت دریافت‌شده خارج از محدوده کرمان است. نقشه را روی کرمان باز کنید و موقعیت داخل کرمان را انتخاب کنید."
                 );
 
@@ -1496,25 +1825,25 @@ function getUserLocation() {
 
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    alert(
+                    showToast(
                         "دسترسی به موقعیت مکانی توسط مرورگر رد شد. اجازه Location را برای سایت فعال کنید."
                     );
                     break;
 
                 case error.POSITION_UNAVAILABLE:
-                    alert(
+                    showToast(
                         "موقعیت مکانی شما در دسترس نیست. GPS یا سرویس Location دستگاه را بررسی کنید."
                     );
                     break;
 
                 case error.TIMEOUT:
-                    alert(
+                    showToast(
                         "زمان دریافت موقعیت تمام شد. دوباره تلاش کنید."
                     );
                     break;
 
                 default:
-                    alert(
+                    showToast(
                         "خطایی در دریافت موقعیت رخ داد."
                     );
             }
@@ -1546,7 +1875,7 @@ async function showDeliveryMap(
     } catch (error) {
         console.error(error);
 
-        alert(
+        showToast(
             "نقشه بارگذاری نشد. اتصال اینترنت را بررسی کنید."
         );
 
@@ -1618,7 +1947,7 @@ async function showDeliveryMap(
                 );
                 selectedLocation = null;
                 selectedAddress = "";
-                alert("لطفاً موقعیت را داخل شهر کرمان انتخاب کنید.");
+                showToast("لطفاً موقعیت را داخل شهر کرمان انتخاب کنید.");
                 return;
             }
 
@@ -1854,7 +2183,7 @@ function createLocationConfirmButton() {
 
 function confirmLocation() {
     if (!selectedLocation) {
-        alert(
+        showToast(
             "ابتدا موقعیت خود را روی نقشه مشخص کنید."
         );
         return;
@@ -1968,7 +2297,7 @@ if (checkoutButton) {
         "click",
         () => {
             if (cart.length === 0) {
-                alert(
+                showToast(
                     "لطفاً ابتدا یک محصول به سبد سفارش اضافه کنید."
                 );
                 return;
@@ -1997,6 +2326,12 @@ function enableCheckoutScrolling() {
 }
 
 function openCheckout() {
+    if (cart.length === 0) {
+        showToast("لطفاً ابتدا یک محصول به سبد سفارش اضافه کنید.");
+        return;
+    }
+
+    closeCartDrawer({ restoreFocus: false });
     const total =
         cart.reduce(
             (sum, cartItem) => {
@@ -2031,7 +2366,7 @@ function openCheckout() {
 
             <div class="checkout-title">
                 <span>SIDE WALK</span>
-                <h2>ثبت سفارش</h2>
+                <h2 id="modalDialogTitle">ثبت سفارش</h2>
             </div>
 
             <div class="checkout-form">
@@ -2045,6 +2380,7 @@ function openCheckout() {
                     type="text"
                     placeholder="مثلاً امیر"
                     autocomplete="name"
+                    required
                 >
 
                 <div id="tableBox">
@@ -2068,6 +2404,7 @@ function openCheckout() {
                     type="tel"
                     placeholder="09xxxxxxxxx"
                     autocomplete="tel"
+                    required
                 >
 
                 <div class="delivery-method">
@@ -2099,7 +2436,7 @@ function openCheckout() {
 
                     <strong>
                         ${formatPrice(total)}
-                        تومان
+                        ${TOMAN_SVG}
                     </strong>
                 </div>
 
@@ -2116,8 +2453,7 @@ function openCheckout() {
         </div>
     `;
 
-    productModal.classList.add("active");
-    document.body.classList.add("no-scroll");
+    openModalDialog(cartBtn || document.activeElement, "#customerName");
 
     // Keep background locked while allowing the checkout form itself to scroll.
     enableCheckoutScrolling();
@@ -2305,8 +2641,15 @@ async function processPayment() {
             : "";
 
     if (!name) {
-        alert(
+        showToast(
             "لطفاً نام را وارد کنید."
+        );
+        return;
+    }
+
+    if (!phone) {
+        showToast(
+            "لطفاً شماره موبایل را وارد کنید."
         );
         return;
     }
@@ -2316,7 +2659,7 @@ async function processPayment() {
         "restaurant" &&
         !table
     ) {
-        alert(
+        showToast(
             "لطفاً شماره میز را وارد کنید."
         );
         return;
@@ -2327,14 +2670,14 @@ async function processPayment() {
         "delivery"
     ) {
         if (!selectedLocation) {
-            alert(
+            showToast(
                 "لطفاً ابتدا لوکیشن خود را دریافت و تأیید کنید."
             );
             return;
         }
 
         if (!selectedAddress) {
-            alert(
+            showToast(
                 "آدرس موقعیت هنوز آماده نیست. چند لحظه صبر کنید و دوباره تلاش کنید."
             );
             return;
@@ -2347,7 +2690,7 @@ async function processPayment() {
         (!selectedPickupEta ||
             Number(selectedPickupEta) <= 0)
     ) {
-        alert(
+        showToast(
             "لطفاً زمان تقریبی رسیدن خود به رستوران را وارد کنید."
         );
         return;
@@ -2381,7 +2724,7 @@ async function processPayment() {
             .filter(Boolean);
 
     if (!items.length) {
-        alert(
+        showToast(
             "سبد سفارش خالی است."
         );
         return;
@@ -2459,6 +2802,8 @@ async function processPayment() {
             data?.orderCode ||
             "—";
 
+        saveLastOrder(orderCode);
+
         cart = [];
         saveCart();
         renderCart();
@@ -2470,7 +2815,7 @@ async function processPayment() {
 
                 <div class="checkout-title">
                     <span>SIDE WALK</span>
-                    <h2>
+                    <h2 id="modalDialogTitle">
                         سفارش ثبت شد 🎉
                     </h2>
                 </div>
@@ -2555,16 +2900,41 @@ async function processPayment() {
                         سفارش شما برای کافه ارسال شد.
                     </small>
 
+                    <button
+                        class="checkout-btn"
+                        id="goTrackBtn"
+                        type="button"
+                        style="margin-top:14px;"
+                    >
+                        پیگیری سفارش
+                        <i class="fa-solid fa-location-arrow"></i>
+                    </button>
+
                 </div>
             </div>
         `;
+
+        const goTrackBtn =
+            document.getElementById(
+                "goTrackBtn"
+            );
+
+        if (goTrackBtn) {
+            goTrackBtn.addEventListener(
+                "click",
+                () => openTrackOrder(orderCode)
+            );
+        }
+
+        openModalDialog(null, "#goTrackBtn");
+        enableCheckoutScrolling();
     } catch (error) {
         console.error(
             "Order error:",
             error
         );
 
-        alert(
+        showToast(
             error.message ||
             "خطا در ثبت سفارش."
         );
@@ -2614,7 +2984,7 @@ function showPaymentPage(
                     SECURE PAYMENT
                 </span>
 
-                <h2>
+                <h2 id="modalDialogTitle">
                     پرداخت سفارش
                 </h2>
             </div>
@@ -2631,7 +3001,7 @@ function showPaymentPage(
 
                 <strong class="payment-price">
                     ${formatPrice(total)}
-                    تومان
+                    ${TOMAN_SVG}
                 </strong>
 
                 <div class="payment-info">
@@ -2672,8 +3042,8 @@ function showPaymentPage(
         </div>
     `;
 
-    productModal.classList.add("active");
-    document.body.classList.add("no-scroll");
+    openModalDialog(null, "#fakePay");
+    enableCheckoutScrolling();
 
     const fakePay =
         document.getElementById(
@@ -2684,12 +3054,219 @@ function showPaymentPage(
         fakePay.addEventListener(
             "click",
             () => {
-                alert(
+                showToast(
                     "برای اتصال پرداخت واقعی، API درگاه بانکی باید در بک‌اند قرار بگیرد."
                 );
             }
         );
     }
+}
+
+/* =========================================================
+   ORDER TRACKING
+========================================================= */
+
+function saveLastOrder(orderCode) {
+    if (!orderCode) return;
+    localStorage.setItem("sideWalkLastOrder", orderCode);
+}
+
+function getLastOrder() {
+    return localStorage.getItem("sideWalkLastOrder") || "";
+}
+
+async function fetchOrderStatus(orderCode) {
+    let response;
+
+    try {
+        response = await fetch(
+            `${API_BASE_URL}/orders/${encodeURIComponent(orderCode)}`
+        );
+    } catch (networkError) {
+        // fetch() itself throws only on a connection/CORS failure —
+        // this is NOT the same as "order not found".
+        const err = new Error("خطا در اتصال به سرور.");
+        err.type = "network";
+        throw err;
+    }
+
+    if (response.status === 404) {
+        const err = new Error("سفارشی با این شماره پیدا نشد.");
+        err.type = "not_found";
+        throw err;
+    }
+
+    if (!response.ok) {
+        const err = new Error("خطایی در سرور رخ داد.");
+        err.type = "server";
+        throw err;
+    }
+
+    return response.json();
+}
+
+function renderTrackStatus(order) {
+    const panel = document.getElementById("trackResult");
+
+    if (!panel) return;
+
+    const status = order.status || "pending";
+    const info = orderStatusMap[status] || orderStatusMap.pending;
+    const steps = ["pending", "processing", "ready", "completed"];
+    const currentIndex = steps.indexOf(status);
+
+    panel.innerHTML = `
+        <div class="track-status-box">
+            <div class="track-status-icon">
+                <i class="fa-solid ${info.icon}"></i>
+            </div>
+
+            <h3>${info.label}</h3>
+
+            <span class="track-order-code">
+                شماره سفارش: ${order.orderCode || ""}
+            </span>
+
+            <div class="track-steps">
+                ${steps.map((step, index) => `
+                    <div class="track-step ${index <= currentIndex ? "done" : ""}">
+                        <span class="track-dot"></span>
+                        <span class="track-step-label">${orderStatusMap[step].label}</span>
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+    `;
+}
+
+async function openTrackOrder(prefillCode) {
+    if (!productModal || !modalContent) return;
+
+    destroyDeliveryMap();
+
+    modalContent.innerHTML = `
+        <div class="checkout-page">
+            <div class="checkout-title">
+                <span>SIDE WALK</span>
+                <h2 id="modalDialogTitle">پیگیری سفارش</h2>
+            </div>
+
+            <div class="track-search-box">
+                <i class="fa-solid fa-hashtag track-hash-icon"></i>
+
+                <input
+                    id="trackCodeInput"
+                    type="text"
+                    placeholder="شماره سفارش را وارد کنید"
+                    value="${prefillCode || getLastOrder()}"
+                >
+
+                <button
+                    class="track-search-btn"
+                    id="trackSubmitBtn"
+                    type="button"
+                    aria-label="پیگیری سفارش"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+
+            <div id="trackResult"></div>
+        </div>
+    `;
+
+    openModalDialog(trackOrderBtnEl || document.activeElement, "#trackCodeInput");
+    enableCheckoutScrolling();
+
+    const submitBtn = document.getElementById("trackSubmitBtn");
+    const codeInput = document.getElementById("trackCodeInput");
+
+    async function runTrack(isRetry) {
+        const code = codeInput.value.trim();
+
+        if (!code) {
+            showToast("لطفاً شماره سفارش را وارد کنید.");
+            return;
+        }
+
+        const panel = document.getElementById("trackResult");
+
+        panel.innerHTML = isRetry
+            ? `<p style="text-align:center;padding:20px 0;">سرور در حال بیدار شدن است، لطفاً چند لحظه صبر کنید...</p>`
+            : `<p style="text-align:center;padding:20px 0;">در حال بررسی...</p>`;
+
+        try {
+            const order = await fetchOrderStatus(code);
+            saveLastOrder(code);
+            renderTrackStatus(order);
+            startTrackPolling(code);
+        } catch (error) {
+            // The backend runs on a free plan that goes to sleep after
+            // inactivity — the first request can fail while it wakes up.
+            // Retry automatically once before showing an error.
+            if (error.type === "network" && !isRetry) {
+                setTimeout(() => runTrack(true), 3500);
+                return;
+            }
+
+            if (error.type === "network") {
+                panel.innerHTML = `<p style="text-align:center;padding:20px 0;color:var(--orange);">اتصال به سرور برقرار نشد. اینترنت خود را بررسی کنید و دوباره تلاش کنید.</p>`;
+            } else if (error.type === "server") {
+                panel.innerHTML = `<p style="text-align:center;padding:20px 0;color:var(--orange);">خطایی در سرور رخ داد. کمی بعد دوباره امتحان کنید.</p>`;
+            } else {
+                panel.innerHTML = `<p style="text-align:center;padding:20px 0;color:var(--orange);">سفارشی با این شماره پیدا نشد.</p>`;
+            }
+
+            stopTrackPolling();
+        }
+    }
+
+    if (submitBtn) {
+        submitBtn.addEventListener("click", () => runTrack());
+    }
+
+    if (codeInput) {
+        codeInput.addEventListener("keydown", event => {
+            if (event.key === "Enter") runTrack();
+        });
+    }
+
+    if (codeInput.value) {
+        runTrack();
+    }
+}
+
+function startTrackPolling(orderCode) {
+    stopTrackPolling();
+
+    trackPollInterval = setInterval(async () => {
+        if (!document.getElementById("trackResult")) {
+            stopTrackPolling();
+            return;
+        }
+
+        try {
+            const order = await fetchOrderStatus(orderCode);
+            renderTrackStatus(order);
+
+            if (order.status === "completed" || order.status === "cancelled") {
+                stopTrackPolling();
+            }
+        } catch (_) {}
+    }, 6000);
+}
+
+function stopTrackPolling() {
+    if (trackPollInterval) {
+        clearInterval(trackPollInterval);
+        trackPollInterval = null;
+    }
+}
+
+const trackOrderBtnEl = document.getElementById("trackOrderBtn");
+
+if (trackOrderBtnEl) {
+    trackOrderBtnEl.addEventListener("click", () => openTrackOrder());
 }
 
 /* =========================================================
@@ -2699,10 +3276,21 @@ function showPaymentPage(
 document.addEventListener(
     "keydown",
     event => {
+        if (event.key === "Tab") {
+            if (productModal?.classList.contains("active")) {
+                trapFocus(productModal.querySelector(".product-modal"), event);
+            } else if (cartDrawer?.classList.contains("active")) {
+                trapFocus(cartDrawer, event);
+            }
+        }
+
         if (event.key === "Escape") {
-            closeCartDrawer();
-            closeProduct();
-            destroyDeliveryMap();
+            if (productModal?.classList.contains("active")) {
+                closeProduct();
+                destroyDeliveryMap();
+            } else if (cartDrawer?.classList.contains("active")) {
+                closeCartDrawer();
+            }
         }
     }
 );
@@ -2801,7 +3389,149 @@ if (themeBtnElement) {
 }
 
 /* =========================================================
+   HERO BURGER VIDEO (background removal + floating end state)
+   The source clip has a white studio background (plus thin black
+   letterbox bars top/bottom). We draw each frame onto a canvas at
+   a cropped region (to drop the letterbox) and make near-white
+   pixels transparent, so only the burger itself is visible over
+   the hero section — no background box around the video.
+========================================================= */
+
+function initHeroBurger() {
+    const wrap = document.getElementById('heroBurger');
+    const video = document.getElementById('heroBurgerVideo');
+    const canvas = document.getElementById('heroBurgerCanvas');
+
+    if (!wrap || !video || !canvas) return;
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    // Crop rect inside the source video (1080x720) that excludes
+    // the black letterbox bars, keeping only the white-background
+    // burger content.
+    const SRC = { x: 0, y: 58, w: 1080, h: 600 };
+
+    // Alpha fades out smoothly between these two thresholds so the
+    // burger's edges don't get a hard, jagged cutout line.
+    //
+    // The source studio background isn't flat white — it's a soft
+    // vignette that dims to ~220 near the frame edges. A brightness-only
+    // key (old thresholds: 200/244) never reached those darker corners,
+    // so a visible grey box was left floating behind the burger. We now
+    // also require the pixel to be near-neutral (low saturation) before
+    // keying it out, so the grey/white studio backdrop gets removed at
+    // a lower brightness while colored food highlights (cheese, tomato,
+    // sesame) are never touched, no matter how bright they are.
+    const WHITE_SOFT = 180;
+    const WHITE_FULL = 215;
+    const GRAY_TOLERANCE = 12;
+
+    let rafId = null;
+
+    function resizeCanvas() {
+        const rect = wrap.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        canvas.width = Math.max(1, Math.round(rect.width * dpr));
+        canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    }
+
+    function drawFrame() {
+        if (!canvas.width || !canvas.height) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(
+            video,
+            SRC.x, SRC.y, SRC.w, SRC.h,
+            0, 0, canvas.width, canvas.height
+        );
+
+        let frame;
+        try {
+            frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        } catch (e) {
+            return;
+        }
+
+        const data = frame.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i + 1], b = data[i + 2];
+            const minC = Math.min(r, g, b);
+            const maxC = Math.max(r, g, b);
+
+            // Only key out pixels that are both bright AND essentially
+            // gray/white (studio backdrop). Colored pixels — even very
+            // bright specular highlights on the cheese or tomato — are
+            // left fully opaque.
+            if (maxC - minC > GRAY_TOLERANCE) continue;
+
+            if (minC >= WHITE_FULL) {
+                data[i + 3] = 0;
+            } else if (minC > WHITE_SOFT) {
+                const t = (minC - WHITE_SOFT) / (WHITE_FULL - WHITE_SOFT);
+                data[i + 3] = Math.round(data[i + 3] * (1 - t));
+            }
+        }
+
+        ctx.putImageData(frame, 0, 0);
+    }
+
+    function loop() {
+        if (video.paused || video.ended) return;
+        drawFrame();
+        rafId = requestAnimationFrame(loop);
+    }
+
+    video.addEventListener('play', () => {
+        cancelAnimationFrame(rafId);
+        loop();
+    });
+
+    video.addEventListener('ended', () => {
+        cancelAnimationFrame(rafId);
+        drawFrame();
+        wrap.classList.add('float');
+    });
+
+    window.addEventListener('resize', () => {
+        if (video.ended) {
+            resizeCanvas();
+            drawFrame();
+        }
+    });
+
+    wrap.__playHeroBurger = function () {
+        wrap.classList.remove('float');
+        resizeCanvas();
+        wrap.classList.add('play');
+
+        try {
+            video.currentTime = 0;
+        } catch (e) {}
+
+        const playPromise = video.play();
+        if (playPromise && playPromise.catch) {
+            playPromise.catch(() => {});
+        }
+    };
+}
+
+initHeroBurger();
+
+/* =========================================================
    INITIALIZE
 ========================================================= */
 
 loadProductsFromAPI();
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    document.getElementById('loadingScreen').classList.add('hide');
+
+    const burger = document.getElementById('heroBurger');
+
+    if (burger && burger.__playHeroBurger) {
+        setTimeout(() => burger.__playHeroBurger(), 150);
+    }
+  }, 1700); // 5.5 ثانیه
+});

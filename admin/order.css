@@ -1,3 +1,11 @@
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../assest/fonts/Estedad-v7.3/webfonts/statics/Estedad-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
