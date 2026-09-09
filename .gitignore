@@ -1,9 +1,5 @@
 node_modules/
-
 .env
-
 .env.*
-
 !.env.example
-
-backend/git add .
+.DS_Store

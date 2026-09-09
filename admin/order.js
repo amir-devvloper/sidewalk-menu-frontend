@@ -3,9 +3,7 @@
 // ===============================
 
 const API_BASE =
-    "https://sidewalk-menu-backend.onrender.com/api";
-
-const TOKEN_KEY = "sw_admin_token";
+    window.SIDEWALK_API_URL || "https://sidewalk-menu-backend.onrender.com/api";
 
 const STATUSES = [
     "جدید",
@@ -85,25 +83,35 @@ const toast = document.getElementById("toast");
 // Auth helpers
 // ===============================
 
-function getToken() {
-    return localStorage.getItem(TOKEN_KEY);
-}
+function getCookie(name) {
+    const prefix = `${name}=`;
+    const entry = document.cookie
+        .split(";")
+        .map(value => value.trim())
+        .find(value => value.startsWith(prefix));
 
-function setToken(token) {
-    localStorage.setItem(TOKEN_KEY, token);
-}
-
-function clearToken() {
-    localStorage.removeItem(TOKEN_KEY);
+    return entry ? decodeURIComponent(entry.slice(prefix.length)) : "";
 }
 
 async function authFetch(url, options = {}) {
-    const headers = {
-        ...(options.headers || {}),
-        Authorization: `Bearer ${getToken()}`
-    };
+    const method = String(options.method || "GET").toUpperCase();
+    const headers = { ...(options.headers || {}) };
 
-    const response = await fetch(url, { ...options, headers });
+    if (!new Set(["GET", "HEAD", "OPTIONS"]).has(method)) {
+        const csrfToken = getCookie("sw_admin_csrf");
+        if (!csrfToken) {
+            showLoginScreen("نشست مدیریت نامعتبر است. دوباره وارد شوید.");
+            throw new Error("Unauthorized");
+        }
+        headers["X-CSRF-Token"] = csrfToken;
+    }
+
+    const response = await fetch(url, {
+        ...options,
+        method,
+        credentials: "include",
+        headers
+    });
 
     if (response.status === 401) {
         showLoginScreen("نشست شما منقضی شده، دوباره وارد شوید.");
@@ -115,7 +123,6 @@ async function authFetch(url, options = {}) {
 
 function showLoginScreen(message) {
     stopPolling();
-    clearToken();
 
     appShell.classList.add("hidden");
     loginScreen.classList.remove("hidden");
@@ -135,27 +142,19 @@ function showApp() {
 }
 
 async function checkExistingSession() {
-    const token = getToken();
-
-    if (!token) {
-        loginScreen.classList.remove("hidden");
-        return;
-    }
-
     try {
         const response = await fetch(`${API_BASE}/admin/me`, {
-            headers: { Authorization: `Bearer ${token}` }
+            credentials: "include"
         });
 
         if (!response.ok) {
-            clearToken();
             loginScreen.classList.remove("hidden");
             return;
         }
 
         showApp();
-
     } catch (error) {
+        console.error(error);
         loginScreen.classList.remove("hidden");
     }
 }
@@ -170,6 +169,7 @@ loginForm.addEventListener("submit", async event => {
     try {
         const response = await fetch(`${API_BASE}/admin/login`, {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username: loginUsername.value.trim(),
@@ -177,18 +177,16 @@ loginForm.addEventListener("submit", async event => {
             })
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (!response.ok || !data.success) {
             throw new Error(data.message || "ورود ناموفق بود.");
         }
 
-        setToken(data.token);
         loginPassword.value = "";
         showApp();
-
     } catch (error) {
-        loginError.textContent = error.message;
+        loginError.textContent = error.message || "ورود ناموفق بود.";
         loginError.classList.remove("hidden");
     } finally {
         loginSubmit.disabled = false;
@@ -196,8 +194,14 @@ loginForm.addEventListener("submit", async event => {
     }
 });
 
-logoutBtn.addEventListener("click", () => {
-    showLoginScreen();
+logoutBtn.addEventListener("click", async () => {
+    try {
+        await authFetch(`${API_BASE}/admin/logout`, { method: "POST" });
+    } catch (_) {
+        // The local UI is reset even if the logout request fails.
+    } finally {
+        showLoginScreen();
+    }
 });
 
 
