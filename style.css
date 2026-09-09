@@ -1582,6 +1582,94 @@ body.light .categories {
 
 
 /* =========================================================
+   NEW: Cancel order button (tracking view)
+========================================================= */
+
+.track-cancel-btn {
+    display: block;
+    width: 100%;
+    margin-top: 22px;
+
+    padding: 12px;
+    border: 1px solid var(--orange);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--orange);
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.track-cancel-btn:hover {
+    background: rgba(255, 122, 0, 0.08);
+}
+
+
+/* =========================================================
+   NEW: Table QR auto-fill note
+========================================================= */
+
+.qr-table-note {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   NEW: Order history list
+========================================================= */
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 12px 14px;
+    border: 1px solid rgba(184, 142, 71, 0.25);
+    border-radius: 12px;
+    background: transparent;
+
+    font-family: inherit;
+    cursor: pointer;
+    text-align: right;
+    width: 100%;
+}
+
+.history-item:hover {
+    border-color: var(--neon);
+}
+
+.history-item-code {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.history-item-status {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.history-item-total {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--neon);
+    white-space: nowrap;
+}
+
+
+/* =========================================================
    HERO BURGER ANIMATION
 ========================================================= */
 

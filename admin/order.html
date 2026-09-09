@@ -16,6 +16,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -119,6 +120,9 @@
                 <a href="#" class="nav-item" data-view="reports">
                     <span>📊</span><span>گزارش‌ها</span>
                 </a>
+                <a href="#" class="nav-item" data-view="qrcodes">
+                    <span>📱</span><span>QR میزها</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -144,9 +148,14 @@
                         <h1>سفارش‌ها</h1>
                         <p>مدیریت سفارش‌های ثبت‌شده در کافه</p>
                     </div>
-                    <button class="refresh-btn" id="refreshBtn">
-                        <span>↻</span> بروزرسانی
-                    </button>
+                    <div class="topbar-actions">
+                        <button class="refresh-btn" id="manualOrderBtn">
+                            <span>+</span> سفارش دستی
+                        </button>
+                        <button class="refresh-btn" id="refreshBtn">
+                            <span>↻</span> بروزرسانی
+                        </button>
+                    </div>
                 </header>
 
                 <section class="stats-grid">
@@ -179,6 +188,7 @@
                         <option value="جدید">جدید</option>
                         <option value="در حال آماده‌سازی">در حال آماده‌سازی</option>
                         <option value="آماده شد">آماده شد</option>
+                        <option value="در حال ارسال">در حال ارسال</option>
                         <option value="تحویل شد">تحویل شد</option>
                         <option value="لغو شد">لغو شد</option>
                     </select>
@@ -279,6 +289,88 @@
                     <canvas id="weeklyChart" height="90"></canvas>
                 </section>
 
+                <!-- Advanced report (from backend aggregation) -->
+                <section class="chart-card" id="advancedReportCard">
+                    <h2>گزارش پیشرفته</h2>
+
+                    <div class="toolbar">
+                        <select id="reportGroup">
+                            <option value="day">بر اساس روز</option>
+                            <option value="week">بر اساس هفته</option>
+                            <option value="month">بر اساس ماه</option>
+                        </select>
+
+                        <label>از <input type="date" id="reportFrom"></label>
+                        <label>تا <input type="date" id="reportTo"></label>
+
+                        <button class="action-btn" id="runReportBtn">اعمال</button>
+                        <button class="action-btn" id="exportCsvBtn">📄 خروجی CSV</button>
+                    </div>
+
+                    <section class="stats-grid" id="advancedStats">
+                        <div class="stat-card">
+                            <div class="stat-icon new">🧾</div>
+                            <div><span>تعداد سفارش</span><strong id="rpOrderCount">۰</strong></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon preparing">💰</div>
+                            <div><span>مبلغ فروش</span><strong id="rpTotalSales">۰</strong></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon ready">📈</div>
+                            <div><span>میانگین سفارش</span><strong id="rpAvgOrder">۰</strong></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon pending">🚫</div>
+                            <div><span>سفارش لغو شده</span><strong id="rpCancelled">۰</strong></div>
+                        </div>
+                    </section>
+
+                    <div class="report-columns">
+                        <div>
+                            <h3>پرفروش‌ترین محصولات</h3>
+                            <table class="report-table" id="topProductsTable">
+                                <thead><tr><th>محصول</th><th>تعداد</th><th>فروش</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div>
+                            <h3>تفکیک نوع سفارش</h3>
+                            <table class="report-table" id="deliveryBreakdownTable">
+                                <thead><tr><th>نوع سفارش</th><th>تعداد</th><th>فروش</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- ================= QR CODES VIEW ================= -->
+            <section class="view hidden" id="view-qrcodes">
+
+                <header class="topbar">
+                    <div>
+                        <h1>QR میزها</h1>
+                        <p>برای هر میز یک QR اختصاصی بساز که با اسکن، شماره میز خودکار پر می‌شود</p>
+                    </div>
+                </header>
+
+                <section class="toolbar">
+                    <label>آدرس سایت مشتری
+                        <input type="text" id="qrSiteUrl" placeholder="https://your-domain.example" style="width:280px">
+                    </label>
+                    <label>از میز <input type="number" id="qrFrom" min="1" value="1" style="width:80px"></label>
+                    <label>تا میز <input type="number" id="qrTo" min="1" value="12" style="width:80px"></label>
+                    <button class="action-btn" id="generateQrBtn">تولید QR</button>
+                    <button class="action-btn" id="printQrBtn">🖨️ چاپ همه</button>
+                </section>
+
+                <section class="orders-section">
+                    <div id="qrGrid" class="qr-grid"></div>
+                </section>
+
             </section>
 
         </main>
@@ -329,8 +421,46 @@
         </div>
     </div>
 
+    <!-- Manual Order Modal (staff entry from the panel) -->
+    <div id="manualOrderModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="manualOrderModalClose">×</button>
+            <form id="manualOrderForm">
+                <h2>ثبت سفارش دستی</h2>
+
+                <label>نام مشتری <input type="text" id="mo_customerName" placeholder="مشتری حضوری"></label>
+                <label>شماره موبایل (اختیاری) <input type="tel" id="mo_customerPhone" placeholder="09xxxxxxxxx"></label>
+
+                <label>روش تحویل
+                    <select id="mo_deliveryMethod">
+                        <option value="restaurant">🍽️ صرف در رستوران</option>
+                        <option value="delivery">🛵 ارسال با پیک</option>
+                        <option value="pickup">🛍️ دریافت حضوری</option>
+                    </select>
+                </label>
+
+                <label id="mo_tableBox">شماره میز <input type="text" id="mo_tableNumber"></label>
+                <label id="mo_addressBox" class="hidden">آدرس <input type="text" id="mo_address"></label>
+                <label id="mo_etaBox" class="hidden">زمان تحویل (دقیقه) <input type="number" id="mo_pickupEta" min="1"></label>
+
+                <div id="mo_itemsPicker" class="mo-items-picker"></div>
+
+                <div class="mo-total">جمع کل: <strong id="mo_total">۰ تومان</strong></div>
+
+                <div class="form-actions">
+                    <button type="submit" id="manualOrderSaveBtn">ثبت سفارش</button>
+                    <button type="button" id="manualOrderCancelBtn">انصراف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Printable invoice (hidden on screen, shown only when printing) -->
     <div id="printArea" class="print-area"></div>
+
+    <!-- Printable QR sheet -->
+    <div id="qrPrintArea" class="print-area"></div>
 
     <div id="toast" class="toast"></div>
 

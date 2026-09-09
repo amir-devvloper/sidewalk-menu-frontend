@@ -9,6 +9,7 @@ const STATUSES = [
     "جدید",
     "در حال آماده‌سازی",
     "آماده شد",
+    "در حال ارسال",
     "تحویل شد",
     "لغو شد"
 ];
@@ -78,42 +79,89 @@ const pf_available = document.getElementById("pf_available");
 const printArea = document.getElementById("printArea");
 const toast = document.getElementById("toast");
 
+// Manual order entry
+const manualOrderBtn = document.getElementById("manualOrderBtn");
+const manualOrderModal = document.getElementById("manualOrderModal");
+const manualOrderModalClose = document.getElementById("manualOrderModalClose");
+const manualOrderForm = document.getElementById("manualOrderForm");
+const manualOrderCancelBtn = document.getElementById("manualOrderCancelBtn");
+const mo_customerName = document.getElementById("mo_customerName");
+const mo_customerPhone = document.getElementById("mo_customerPhone");
+const mo_deliveryMethod = document.getElementById("mo_deliveryMethod");
+const mo_tableBox = document.getElementById("mo_tableBox");
+const mo_tableNumber = document.getElementById("mo_tableNumber");
+const mo_addressBox = document.getElementById("mo_addressBox");
+const mo_address = document.getElementById("mo_address");
+const mo_etaBox = document.getElementById("mo_etaBox");
+const mo_pickupEta = document.getElementById("mo_pickupEta");
+const mo_itemsPicker = document.getElementById("mo_itemsPicker");
+const mo_total = document.getElementById("mo_total");
+let manualOrderQuantities = new Map();
+
+// QR codes
+const qrSiteUrl = document.getElementById("qrSiteUrl");
+const qrFrom = document.getElementById("qrFrom");
+const qrTo = document.getElementById("qrTo");
+const generateQrBtn = document.getElementById("generateQrBtn");
+const printQrBtn = document.getElementById("printQrBtn");
+const qrGrid = document.getElementById("qrGrid");
+const qrPrintArea = document.getElementById("qrPrintArea");
+
+// Advanced reports
+const reportGroup = document.getElementById("reportGroup");
+const reportFrom = document.getElementById("reportFrom");
+const reportTo = document.getElementById("reportTo");
+const runReportBtn = document.getElementById("runReportBtn");
+const exportCsvBtn = document.getElementById("exportCsvBtn");
+
 
 // ===============================
 // Auth helpers
 // ===============================
 
-function getCookie(name) {
-    const prefix = `${name}=`;
-    const entry = document.cookie
-        .split(";")
-        .map(value => value.trim())
-        .find(value => value.startsWith(prefix));
+const ADMIN_TOKEN_KEY = "sidewalk_admin_token";
 
-    return entry ? decodeURIComponent(entry.slice(prefix.length)) : "";
+function getAdminToken() {
+    try {
+        return localStorage.getItem(ADMIN_TOKEN_KEY) || "";
+    } catch (_) {
+        return "";
+    }
+}
+
+function setAdminToken(token) {
+    try {
+        localStorage.setItem(ADMIN_TOKEN_KEY, token);
+    } catch (error) {
+        console.error("Could not save admin token:", error);
+    }
+}
+
+function clearAdminToken() {
+    try {
+        localStorage.removeItem(ADMIN_TOKEN_KEY);
+    } catch (error) {
+        console.error("Could not remove admin token:", error);
+    }
 }
 
 async function authFetch(url, options = {}) {
     const method = String(options.method || "GET").toUpperCase();
     const headers = { ...(options.headers || {}) };
+    const token = getAdminToken();
 
-    if (!new Set(["GET", "HEAD", "OPTIONS"]).has(method)) {
-        const csrfToken = getCookie("sw_admin_csrf");
-        if (!csrfToken) {
-            showLoginScreen("نشست مدیریت نامعتبر است. دوباره وارد شوید.");
-            throw new Error("Unauthorized");
-        }
-        headers["X-CSRF-Token"] = csrfToken;
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
     }
 
     const response = await fetch(url, {
         ...options,
         method,
-        credentials: "include",
         headers
     });
 
     if (response.status === 401) {
+        clearAdminToken();
         showLoginScreen("نشست شما منقضی شده، دوباره وارد شوید.");
         throw new Error("Unauthorized");
     }
@@ -142,20 +190,30 @@ function showApp() {
 }
 
 async function checkExistingSession() {
+    const token = getAdminToken();
+
+    if (!token) {
+        loginScreen.classList.remove("hidden");
+        appShell.classList.add("hidden");
+        return;
+    }
+
     try {
-        const response = await fetch(`${API_BASE}/admin/me`, {
-            credentials: "include"
-        });
+        const response = await authFetch(`${API_BASE}/admin/me`);
 
         if (!response.ok) {
+            clearAdminToken();
             loginScreen.classList.remove("hidden");
+            appShell.classList.add("hidden");
             return;
         }
 
         showApp();
     } catch (error) {
         console.error(error);
+        clearAdminToken();
         loginScreen.classList.remove("hidden");
+        appShell.classList.add("hidden");
     }
 }
 
@@ -169,8 +227,9 @@ loginForm.addEventListener("submit", async event => {
     try {
         const response = await fetch(`${API_BASE}/admin/login`, {
             method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
                 username: loginUsername.value.trim(),
                 password: loginPassword.value
@@ -179,13 +238,17 @@ loginForm.addEventListener("submit", async event => {
 
         const data = await response.json().catch(() => ({}));
 
-        if (!response.ok || !data.success) {
+        if (!response.ok || !data.success || !data.token) {
             throw new Error(data.message || "ورود ناموفق بود.");
         }
 
+        setAdminToken(data.token);
         loginPassword.value = "";
+
         showApp();
     } catch (error) {
+        console.error(error);
+        clearAdminToken();
         loginError.textContent = error.message || "ورود ناموفق بود.";
         loginError.classList.remove("hidden");
     } finally {
@@ -196,10 +259,17 @@ loginForm.addEventListener("submit", async event => {
 
 logoutBtn.addEventListener("click", async () => {
     try {
-        await authFetch(`${API_BASE}/admin/logout`, { method: "POST" });
+        const token = getAdminToken();
+
+        if (token) {
+            await authFetch(`${API_BASE}/admin/logout`, {
+                method: "POST"
+            });
+        }
     } catch (_) {
-        // The local UI is reset even if the logout request fails.
+        // Token is cleared below even if the server logout fails.
     } finally {
+        clearAdminToken();
         showLoginScreen();
     }
 });
@@ -231,6 +301,7 @@ document.querySelectorAll(".nav-item").forEach(item => {
 
         if (view === "reports") {
             renderReports();
+            loadAdvancedReport();
         }
     });
 });
@@ -551,6 +622,8 @@ function openOrderDetails(orderCode) {
         `)
         .join("");
 
+    const historyHTML = renderCustomerHistoryHTML(order);
+
     modalBody.innerHTML = `
         <h2>سفارش ${escapeHTML(order.orderCode)}</h2>
         <p><strong>مشتری:</strong> ${escapeHTML(order.customerName)}</p>
@@ -571,9 +644,45 @@ function openOrderDetails(orderCode) {
         <button type="button" class="action-btn" onclick="printInvoice('${escapeJS(order.orderCode)}')">
             🖨️ چاپ فاکتور
         </button>
+
+        ${historyHTML}
     `;
 
     orderModal.classList.remove("hidden");
+}
+
+// Simple client-side history: same phone number, loaded orders only
+// (the admin panel already keeps the last 500 orders in memory).
+function renderCustomerHistoryHTML(order) {
+    if (!order.customerPhone) return "";
+
+    const others = orders.filter(
+        o => o.customerPhone === order.customerPhone && o.orderCode !== order.orderCode
+    );
+
+    if (others.length === 0) {
+        return `<h3 class="history-title">تاریخچه مشتری</h3><p class="sub-info">سفارش دیگری از این مشتری ثبت نشده.</p>`;
+    }
+
+    const rows = others
+        .slice(0, 10)
+        .map(o => `
+            <tr>
+                <td>${escapeHTML(o.orderCode)}</td>
+                <td>${formatDate(o.createdAt)}</td>
+                <td>${formatPrice(o.total)}</td>
+                <td><span class="status-badge ${getStatusClass(o.status)}">${escapeHTML(o.status)}</span></td>
+            </tr>
+        `)
+        .join("");
+
+    return `
+        <h3 class="history-title">تاریخچه مشتری (${others.length} سفارش قبلی)</h3>
+        <table class="invoice-table">
+            <thead><tr><th>کد سفارش</th><th>تاریخ</th><th>جمع</th><th>وضعیت</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
 }
 
 function printInvoice(orderCode) {
@@ -664,6 +773,131 @@ function updateStats() {
 
 
 // ===============================
+// Manual order entry (staff, from the panel)
+// ===============================
+
+function updateManualOrderConditionalFields() {
+    const method = mo_deliveryMethod.value;
+    mo_tableBox.classList.toggle("hidden", method !== "restaurant");
+    mo_addressBox.classList.toggle("hidden", method !== "delivery");
+    mo_etaBox.classList.toggle("hidden", method !== "pickup");
+}
+
+mo_deliveryMethod.addEventListener("change", updateManualOrderConditionalFields);
+
+function renderManualOrderItemsPicker() {
+    if (products.length === 0) {
+        mo_itemsPicker.innerHTML = `<p class="sub-info">ابتدا از بخش «محصولات» چند آیتم اضافه کنید.</p>`;
+        return;
+    }
+
+    mo_itemsPicker.innerHTML = products
+        .filter(p => p.availableNow !== false)
+        .map(product => {
+            const qty = manualOrderQuantities.get(product._id) || 0;
+            return `
+                <div class="mo-item-row" data-product="${escapeHTML(product._id)}">
+                    <span class="mo-item-name">${escapeHTML(product.name)}</span>
+                    <span class="mo-item-price">${formatPrice(product.price)}</span>
+                    <div class="mo-item-qty">
+                        <button type="button" onclick="changeManualQty('${escapeJS(product._id)}', -1)">−</button>
+                        <span>${qty}</span>
+                        <button type="button" onclick="changeManualQty('${escapeJS(product._id)}', 1)">+</button>
+                    </div>
+                </div>
+            `;
+        })
+        .join("");
+}
+
+function changeManualQty(productId, delta) {
+    const current = manualOrderQuantities.get(productId) || 0;
+    const next = Math.max(0, Math.min(50, current + delta));
+
+    if (next === 0) manualOrderQuantities.delete(productId);
+    else manualOrderQuantities.set(productId, next);
+
+    renderManualOrderItemsPicker();
+    updateManualOrderTotal();
+}
+
+function updateManualOrderTotal() {
+    let total = 0;
+    for (const [productId, qty] of manualOrderQuantities.entries()) {
+        const product = products.find(p => p._id === productId);
+        if (product) total += Number(product.price) * qty;
+    }
+    mo_total.textContent = `${formatPrice(total)} تومان`;
+}
+
+manualOrderBtn.addEventListener("click", async () => {
+    manualOrderForm.reset();
+    manualOrderQuantities = new Map();
+    updateManualOrderConditionalFields();
+
+    if (products.length === 0) {
+        await loadProducts();
+    }
+
+    renderManualOrderItemsPicker();
+    updateManualOrderTotal();
+    manualOrderModal.classList.remove("hidden");
+});
+
+[manualOrderModalClose, manualOrderCancelBtn].forEach(btn =>
+    btn.addEventListener("click", () => manualOrderModal.classList.add("hidden"))
+);
+
+manualOrderForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const items = [...manualOrderQuantities.entries()].map(([productId, quantity]) => ({
+        productId,
+        quantity
+    }));
+
+    if (items.length === 0) {
+        showToast("حداقل یک محصول برای سفارش دستی انتخاب کنید.");
+        return;
+    }
+
+    const payload = {
+        customerName: mo_customerName.value.trim(),
+        customerPhone: mo_customerPhone.value.trim(),
+        deliveryMethod: mo_deliveryMethod.value,
+        tableNumber: mo_tableNumber.value.trim(),
+        address: mo_address.value.trim(),
+        pickupEta: mo_pickupEta.value.trim(),
+        items
+    };
+
+    try {
+        const response = await authFetch(`${API_BASE}/orders/manual`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "ثبت سفارش دستی ناموفق بود.");
+        }
+
+        manualOrderModal.classList.add("hidden");
+        showToast("سفارش دستی با موفقیت ثبت شد.");
+        loadOrders();
+
+    } catch (error) {
+        console.error(error);
+        if (error.message !== "Unauthorized") {
+            showToast(error.message);
+        }
+    }
+});
+
+
+// ===============================
 // Products
 // ===============================
 
@@ -713,6 +947,8 @@ function renderProducts() {
 }
 
 function createProductCard(product) {
+    const soldOutToday = Boolean(product.soldOutToday);
+
     return `
         <article class="product-card" data-product="${escapeHTML(product._id)}">
             <div class="product-top">
@@ -724,12 +960,51 @@ function createProductCard(product) {
             <div class="product-category">${escapeHTML(product.category)}</div>
             <div class="product-price">${formatPrice(product.price)} تومان</div>
 
+            ${soldOutToday ? `<div class="sub-info sold-out-today-badge">⛔ امروز موجود نیست</div>` : ""}
+
             <div class="order-actions">
                 <button class="action-btn" onclick="editProduct('${escapeJS(product._id)}')">ویرایش</button>
+                <button
+                    class="action-btn ${soldOutToday ? "" : "delete-btn"}"
+                    onclick="toggleSoldOutToday('${escapeJS(product._id)}', ${!soldOutToday})"
+                >
+                    ${soldOutToday ? "برگرداندن به موجودی" : "اتمام امروز"}
+                </button>
                 <button class="action-btn delete-btn" onclick="deleteProduct('${escapeJS(product._id)}')">حذف</button>
             </div>
         </article>
     `;
+}
+
+async function toggleSoldOutToday(id, soldOut) {
+    try {
+        const response = await authFetch(
+            `${API_BASE}/products/${encodeURIComponent(id)}/sold-out-today`,
+            {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ soldOut })
+            }
+        );
+
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.message || "تغییر وضعیت انجام نشد.");
+        }
+
+        const updated = await response.json();
+        const index = products.findIndex(p => p._id === id);
+        if (index !== -1) products[index] = updated;
+
+        renderProducts();
+        showToast(soldOut ? "محصول برای امروز ناموجود شد." : "محصول دوباره موجود شد.");
+
+    } catch (error) {
+        console.error(error);
+        if (error.message !== "Unauthorized") {
+            showToast(error.message);
+        }
+    }
 }
 
 productSearchInput.addEventListener("input", renderProducts);
@@ -958,6 +1233,192 @@ function renderWeeklyChart(activeOrders, startOfToday) {
 
 
 // ===============================
+// QR codes per table
+// ===============================
+
+const QR_SITE_URL_KEY = "sidewalk_qr_site_url";
+
+function loadSavedQrSiteUrl() {
+    try {
+        qrSiteUrl.value = localStorage.getItem(QR_SITE_URL_KEY) || window.location.origin.replace("/admin", "") || "";
+    } catch (_) {
+        // ignore
+    }
+}
+
+generateQrBtn.addEventListener("click", () => {
+    const baseUrl = qrSiteUrl.value.trim().replace(/\/+$/, "");
+    const from = Math.max(1, Number(qrFrom.value) || 1);
+    const to = Math.max(from, Number(qrTo.value) || from);
+
+    if (!baseUrl) {
+        showToast("لطفاً آدرس سایت مشتری را وارد کنید.");
+        return;
+    }
+
+    if (to - from > 200) {
+        showToast("تعداد میزها بیش از حد مجاز است.");
+        return;
+    }
+
+    try {
+        localStorage.setItem(QR_SITE_URL_KEY, baseUrl);
+    } catch (_) {
+        // ignore
+    }
+
+    qrGrid.innerHTML = "";
+
+    for (let table = from; table <= to; table++) {
+        const cardId = `qr-card-${table}`;
+        qrGrid.insertAdjacentHTML(
+            "beforeend",
+            `<div class="qr-card" id="${cardId}">
+                <div class="qr-canvas"></div>
+                <strong>میز ${table}</strong>
+            </div>`
+        );
+
+        const url = `${baseUrl}/?table=${encodeURIComponent(table)}`;
+        const container = document.querySelector(`#${cardId} .qr-canvas`);
+
+        // eslint-disable-next-line no-undef
+        new QRCode(container, {
+            text: url,
+            width: 160,
+            height: 160,
+            colorDark: "#1c1208",
+            colorLight: "#ffffff"
+        });
+    }
+
+    showToast(`${to - from + 1} کد QR ساخته شد.`);
+});
+
+printQrBtn.addEventListener("click", () => {
+    if (!qrGrid.children.length) {
+        showToast("ابتدا کد QR بساز.");
+        return;
+    }
+
+    qrPrintArea.innerHTML = `
+        <div class="qr-print-sheet">
+            ${qrGrid.innerHTML}
+        </div>
+    `;
+
+    window.print();
+});
+
+loadSavedQrSiteUrl();
+
+
+// ===============================
+// Advanced reports (backend aggregation)
+// ===============================
+
+function defaultReportRange() {
+    const to = new Date();
+    const from = new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return {
+        from: from.toISOString().slice(0, 10),
+        to: to.toISOString().slice(0, 10)
+    };
+}
+
+function initReportDateInputs() {
+    const range = defaultReportRange();
+    if (!reportFrom.value) reportFrom.value = range.from;
+    if (!reportTo.value) reportTo.value = range.to;
+}
+
+function buildReportQuery() {
+    const params = new URLSearchParams();
+    params.set("group", reportGroup.value || "day");
+    if (reportFrom.value) params.set("from", new Date(`${reportFrom.value}T00:00:00`).toISOString());
+    if (reportTo.value) params.set("to", new Date(`${reportTo.value}T23:59:59`).toISOString());
+    return params.toString();
+}
+
+const DELIVERY_METHOD_LABELS = {
+    restaurant: "🍽️ صرف در رستوران",
+    delivery: "🛵 ارسال با پیک",
+    pickup: "🛍️ دریافت حضوری"
+};
+
+async function loadAdvancedReport() {
+    initReportDateInputs();
+
+    try {
+        const response = await authFetch(`${API_BASE}/admin/reports?${buildReportQuery()}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "دریافت گزارش پیشرفته ناموفق بود.");
+        }
+
+        const report = data.report;
+
+        document.getElementById("rpOrderCount").textContent = report.totalOrders;
+        document.getElementById("rpTotalSales").textContent = `${formatPrice(report.totalSales)} تومان`;
+        document.getElementById("rpAvgOrder").textContent = `${formatPrice(report.averageOrder)} تومان`;
+        document.getElementById("rpCancelled").textContent = report.cancelledCount;
+
+        const topProductsBody = document.querySelector("#topProductsTable tbody");
+        topProductsBody.innerHTML = report.topProducts
+            .map(p => `<tr><td>${escapeHTML(p.name)}</td><td>${p.quantity}</td><td>${formatPrice(p.revenue)}</td></tr>`)
+            .join("") || `<tr><td colspan="3" class="sub-info">داده‌ای برای این بازه نیست</td></tr>`;
+
+        const deliveryBody = document.querySelector("#deliveryBreakdownTable tbody");
+        deliveryBody.innerHTML = Object.keys(report.byDeliveryMethod)
+            .map(method => `
+                <tr>
+                    <td>${DELIVERY_METHOD_LABELS[method] || method}</td>
+                    <td>${report.byDeliveryMethod[method]}</td>
+                    <td>${formatPrice(report.byDeliveryMethodSales[method])}</td>
+                </tr>
+            `)
+            .join("");
+
+    } catch (error) {
+        console.error(error);
+        if (error.message !== "Unauthorized") {
+            showToast(error.message);
+        }
+    }
+}
+
+runReportBtn.addEventListener("click", loadAdvancedReport);
+
+exportCsvBtn.addEventListener("click", async () => {
+    try {
+        const response = await authFetch(`${API_BASE}/admin/reports/export.csv?${buildReportQuery()}`);
+
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.message || "خروجی CSV ناموفق بود.");
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "orders-report.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error(error);
+        if (error.message !== "Unauthorized") {
+            showToast(error.message);
+        }
+    }
+});
+
+
+// ===============================
 // Helpers
 // ===============================
 
@@ -966,6 +1427,7 @@ function getStatusClass(status) {
         case "جدید": return "status-new";
         case "در حال آماده‌سازی": return "status-preparing";
         case "آماده شد": return "status-ready";
+        case "در حال ارسال": return "status-shipping";
         case "تحویل شد": return "status-delivered";
         case "لغو شد": return "status-cancelled";
         default: return "";

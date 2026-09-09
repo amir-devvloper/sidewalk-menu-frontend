@@ -12,6 +12,13 @@ const API_BASE_URL =
     window.SIDEWALK_API_URL || "https://sidewalk-menu-backend.onrender.com/api";
 
 /* =========================================================
+   TABLE QR CODE (?table=N in the URL)
+========================================================= */
+
+const qrTableNumber =
+    new URLSearchParams(window.location.search).get("table") || "";
+
+/* =========================================================
    PRODUCT CARD QUANTITY STATE (before add to cart)
 ========================================================= */
 
@@ -27,6 +34,7 @@ const orderStatusMap = {
     "جدید":              { label: "در حال بررسی سفارش", icon: "fa-hourglass-half" },
     "در حال آماده‌سازی": { label: "در حال آماده‌سازی",   icon: "fa-kitchen-set" },
     "آماده شد":          { label: "آماده تحویل",         icon: "fa-box-open" },
+    "در حال ارسال":      { label: "در حال ارسال با پیک", icon: "fa-motorcycle" },
     "تحویل شد":          { label: "تحویل داده شد",       icon: "fa-circle-check" },
     "لغو شد":            { label: "لغو شد",              icon: "fa-circle-xmark" }
 };
@@ -2482,6 +2490,29 @@ function openCheckout() {
             "tableBox"
         );
 
+    // Table number came from a table QR code — prefill it and let the
+    // customer know it was auto-detected instead of typed in.
+    if (qrTableNumber) {
+        const tableInputEl =
+            document.getElementById("tableNumber");
+
+        if (tableInputEl) {
+            tableInputEl.value = qrTableNumber;
+            tableInputEl.readOnly = true;
+            tableInputEl.setAttribute(
+                "title",
+                "شماره میز از QR کد شناسایی شد"
+            );
+        }
+
+        if (tableBox) {
+            tableBox.insertAdjacentHTML(
+                "beforeend",
+                `<small class="qr-table-note">📱 شماره میز از QR کد میز خوانده شد</small>`
+            );
+        }
+    }
+
     if (deliverySelect) {
         deliverySelect.value =
             selectedDeliveryMethod;
@@ -2817,6 +2848,7 @@ async function submitOrder() {
             "—";
 
         saveLastOrder(orderCode);
+        saveLastPhone(phone);
 
         cart = [];
         saveCart();
@@ -2975,6 +3007,48 @@ function getLastOrder() {
     return localStorage.getItem("sideWalkLastOrder") || "";
 }
 
+function saveLastPhone(phone) {
+    if (!phone) return;
+    localStorage.setItem("sideWalkLastPhone", phone);
+}
+
+function getLastPhone() {
+    return localStorage.getItem("sideWalkLastPhone") || "";
+}
+
+async function cancelOrderRequest(orderCode, phone) {
+    const response = await fetch(
+        `${API_BASE_URL}/orders/${encodeURIComponent(orderCode)}/cancel`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ customerPhone: phone })
+        }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.success) {
+        throw new Error(data.message || "لغو سفارش انجام نشد.");
+    }
+
+    return data.order;
+}
+
+async function fetchOrderHistory(phone) {
+    const response = await fetch(
+        `${API_BASE_URL}/orders/history/${encodeURIComponent(phone)}`
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.success) {
+        throw new Error(data.message || "دریافت تاریخچه سفارش‌ها ناموفق بود.");
+    }
+
+    return data.orders || [];
+}
+
 async function fetchOrderStatus(orderCode) {
     let response;
 
@@ -3012,8 +3086,18 @@ function renderTrackStatus(order) {
 
     const status = order.status || "جدید";
     const info = orderStatusMap[status] || orderStatusMap["جدید"];
-    const steps = ["جدید", "در حال آماده‌سازی", "آماده شد", "تحویل شد"];
+    const steps =
+        order.deliveryMethod === "delivery"
+            ? ["جدید", "در حال آماده‌سازی", "آماده شد", "در حال ارسال", "تحویل شد"]
+            : ["جدید", "در حال آماده‌سازی", "آماده شد", "تحویل شد"];
     const currentIndex = steps.indexOf(status);
+
+    const cancelButtonHTML =
+        status === "جدید"
+            ? `<button type="button" class="track-cancel-btn" id="cancelOrderBtn">
+                    لغو سفارش
+               </button>`
+            : "";
 
     panel.innerHTML = `
         <div class="track-status-box">
@@ -3035,8 +3119,39 @@ function renderTrackStatus(order) {
                     </div>
                 `).join("")}
             </div>
+
+            ${cancelButtonHTML}
         </div>
     `;
+
+    const cancelBtn = document.getElementById("cancelOrderBtn");
+    if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => onCancelOrderClick(order.orderCode));
+    }
+}
+
+async function onCancelOrderClick(orderCode) {
+    const confirmed = confirm("آیا از لغو این سفارش مطمئن هستید؟");
+    if (!confirmed) return;
+
+    let phone = getLastPhone();
+    if (!phone) {
+        phone = (prompt("برای لغو سفارش، شماره موبایلی که با آن سفارش داده‌اید را وارد کنید:") || "").trim();
+    }
+
+    if (!phone) {
+        showToast("برای لغو سفارش، شماره موبایل لازم است.");
+        return;
+    }
+
+    try {
+        const order = await cancelOrderRequest(orderCode, phone);
+        showToast("سفارش با موفقیت لغو شد.");
+        renderTrackStatus(order);
+        stopTrackPolling();
+    } catch (error) {
+        showToast(error.message || "لغو سفارش انجام نشد.");
+    }
 }
 
 async function openTrackOrder(prefillCode) {
@@ -3167,6 +3282,123 @@ const trackOrderBtnEl = document.getElementById("trackOrderBtn");
 
 if (trackOrderBtnEl) {
     trackOrderBtnEl.addEventListener("click", () => openTrackOrder());
+}
+
+/* =========================================================
+   ORDER HISTORY ("سفارش‌های قبلی من")
+========================================================= */
+
+function renderHistoryList(ordersList) {
+    if (!ordersList.length) {
+        return `<p style="text-align:center;padding:20px 0;">هنوز سفارشی با این شماره ثبت نشده.</p>`;
+    }
+
+    return `
+        <div class="history-list">
+            ${ordersList.map(order => `
+                <button
+                    type="button"
+                    class="history-item"
+                    data-order-code="${escapeHTML(order.orderCode)}"
+                >
+                    <span class="history-item-code">${escapeHTML(order.orderCode)}</span>
+                    <span class="history-item-status">${escapeHTML(order.status)}</span>
+                    <span class="history-item-total">${formatPrice(order.total)} ${TOMAN_SVG}</span>
+                </button>
+            `).join("")}
+        </div>
+    `;
+}
+
+async function openOrderHistory() {
+    if (!productModal || !modalContent) return;
+
+    destroyDeliveryMap();
+
+    const savedPhone = getLastPhone();
+
+    modalContent.innerHTML = `
+        <div class="checkout-page">
+            <div class="checkout-title">
+                <span>SIDE WALK</span>
+                <h2 id="modalDialogTitle">سفارش‌های قبلی من</h2>
+            </div>
+
+            <div class="track-search-box">
+                <i class="fa-solid fa-mobile-screen track-hash-icon"></i>
+
+                <input
+                    id="historyPhoneInput"
+                    type="tel"
+                    placeholder="شماره موبایل خود را وارد کنید"
+                    value="${savedPhone}"
+                >
+
+                <button
+                    class="track-search-btn"
+                    id="historySubmitBtn"
+                    type="button"
+                    aria-label="نمایش سفارش‌ها"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+
+            <div id="historyResult"></div>
+        </div>
+    `;
+
+    openModalDialog(document.getElementById("orderHistoryBtn") || document.activeElement, "#historyPhoneInput");
+    enableCheckoutScrolling();
+
+    const phoneInput = document.getElementById("historyPhoneInput");
+    const submitBtn = document.getElementById("historySubmitBtn");
+    const resultPanel = document.getElementById("historyResult");
+
+    async function runHistoryLookup() {
+        const phone = phoneInput.value.trim();
+
+        if (!phone) {
+            showToast("لطفاً شماره موبایل را وارد کنید.");
+            return;
+        }
+
+        resultPanel.innerHTML = `<p style="text-align:center;padding:20px 0;">در حال بررسی...</p>`;
+
+        try {
+            const historyOrders = await fetchOrderHistory(phone);
+            saveLastPhone(phone);
+            resultPanel.innerHTML = renderHistoryList(historyOrders);
+
+            resultPanel.querySelectorAll(".history-item").forEach(button => {
+                button.addEventListener("click", () => {
+                    openTrackOrder(button.dataset.orderCode);
+                });
+            });
+        } catch (error) {
+            resultPanel.innerHTML = `<p style="text-align:center;padding:20px 0;color:var(--orange);">${escapeHTML(error.message || "خطا در دریافت سفارش‌ها.")}</p>`;
+        }
+    }
+
+    if (submitBtn) {
+        submitBtn.addEventListener("click", runHistoryLookup);
+    }
+
+    if (phoneInput) {
+        phoneInput.addEventListener("keydown", event => {
+            if (event.key === "Enter") runHistoryLookup();
+        });
+    }
+
+    if (phoneInput.value) {
+        runHistoryLookup();
+    }
+}
+
+const orderHistoryBtnEl = document.getElementById("orderHistoryBtn");
+
+if (orderHistoryBtnEl) {
+    orderHistoryBtnEl.addEventListener("click", () => openOrderHistory());
 }
 
 /* =========================================================
