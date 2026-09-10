@@ -327,9 +327,9 @@ function buildMenuCardHTML(product) {
                     <i class="fa-regular fa-heart"></i>
                 </button>
                 ${available ? "" : `
-<span class="sold-out-badge" style="position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;">
-    ناموجود
-</span>
+                <span class="sold-out-badge" style="position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;white-space:nowrap;">
+                    ناموجود
+                </span>`}
             </div>
 
             <div class="card-body">
