@@ -539,20 +539,20 @@ function getDeliveryMethodHTML(order) {
 
     if (method === "delivery") {
         return `
-            🛵 ارسال با پیک
+            <span class="delivery-tag"><i class="fa-solid fa-motorcycle"></i> ارسال با پیک</span>
             <br><span class="sub-info">${order.address ? escapeHTML(order.address) : "آدرس ثبت نشده"}</span>
         `;
     }
 
     if (method === "pickup") {
         return `
-            🛍️ تحویل حضوری
+            <span class="delivery-tag"><i class="fa-solid fa-bag-shopping"></i> تحویل حضوری</span>
             <br><span class="sub-info">${order.pickupEta ? `${escapeHTML(order.pickupEta)} دقیقه دیگر` : "زمان ثبت نشده"}</span>
         `;
     }
 
     return `
-        🍽️ صرف در رستوران
+        <span class="delivery-tag"><i class="fa-solid fa-utensils"></i> صرف در رستوران</span>
         <br><span class="sub-info">میز ${order.tableNumber ? escapeHTML(order.tableNumber) : "—"}</span>
     `;
 }
@@ -625,27 +625,29 @@ function openOrderDetails(orderCode) {
     const historyHTML = renderCustomerHistoryHTML(order);
 
     modalBody.innerHTML = `
-        <h2>سفارش ${escapeHTML(order.orderCode)}</h2>
-        <p><strong>مشتری:</strong> ${escapeHTML(order.customerName)}</p>
-        <p><strong>تماس:</strong> ${order.customerPhone ? escapeHTML(order.customerPhone) : "—"}</p>
-        <p><strong>نوع سفارش:</strong> ${getDeliveryMethodHTML(order)}</p>
-        <p><strong>وضعیت:</strong> ${escapeHTML(order.status)}</p>
-        <p><strong>تاریخ:</strong> ${formatDate(order.createdAt)}</p>
+        <div class="order-detail">
+            <h2><i class="fa-solid fa-receipt"></i> سفارش ${escapeHTML(order.orderCode)}</h2>
+            <p><strong>مشتری:</strong> ${escapeHTML(order.customerName)}</p>
+            <p><strong>تماس:</strong> ${order.customerPhone ? escapeHTML(order.customerPhone) : "—"}</p>
+            <p><strong>نوع سفارش:</strong> ${getDeliveryMethodHTML(order)}</p>
+            <p><strong>وضعیت:</strong> <span class="status-badge ${getStatusClass(order.status)}">${escapeHTML(order.status)}</span></p>
+            <p><strong>تاریخ:</strong> ${formatDate(order.createdAt)}</p>
 
-        <table class="invoice-table">
-            <thead>
-                <tr><th>نام</th><th>تعداد</th><th>قیمت واحد</th><th>جمع</th></tr>
-            </thead>
-            <tbody>${itemsRows}</tbody>
-        </table>
+            <table class="invoice-table">
+                <thead>
+                    <tr><th>نام</th><th>تعداد</th><th>قیمت واحد</th><th>جمع</th></tr>
+                </thead>
+                <tbody>${itemsRows}</tbody>
+            </table>
 
-        <p class="invoice-total"><strong>جمع کل:</strong> ${formatPrice(order.total)} تومان</p>
+            <p class="invoice-total"><strong>جمع کل:</strong> ${formatPrice(order.total)} تومان</p>
 
-        <button type="button" class="action-btn" onclick="printInvoice('${escapeJS(order.orderCode)}')">
-            🖨️ چاپ فاکتور
-        </button>
+            <button type="button" class="action-btn primary-btn" onclick="printInvoice('${escapeJS(order.orderCode)}')">
+                <i class="fa-solid fa-print"></i> چاپ فاکتور
+            </button>
 
-        ${historyHTML}
+            ${historyHTML}
+        </div>
     `;
 
     orderModal.classList.remove("hidden");
@@ -949,8 +951,16 @@ function renderProducts() {
 function createProductCard(product) {
     const soldOutToday = Boolean(product.soldOutToday);
 
+    const imageHTML = product.image
+        ? `<img src="${escapeHTML(product.image)}" alt="${escapeHTML(product.name)}" class="product-image" loading="lazy" onerror="this.closest('.product-image-wrap').classList.add('no-image'); this.remove();">`
+        : "";
+
     return `
         <article class="product-card" data-product="${escapeHTML(product._id)}">
+            <div class="product-image-wrap${product.image ? "" : " no-image"}">
+                ${imageHTML}
+                <i class="fa-solid fa-utensils product-image-fallback"></i>
+            </div>
             <div class="product-top">
                 <strong>${escapeHTML(product.name)}</strong>
                 <span class="status-badge ${product.available ? "status-ready" : "status-cancelled"}">
@@ -960,7 +970,7 @@ function createProductCard(product) {
             <div class="product-category">${escapeHTML(product.category)}</div>
             <div class="product-price">${formatPrice(product.price)} تومان</div>
 
-            ${soldOutToday ? `<div class="sub-info sold-out-today-badge">⛔ امروز موجود نیست</div>` : ""}
+            ${soldOutToday ? `<div class="sub-info sold-out-today-badge"><i class="fa-solid fa-ban"></i> امروز موجود نیست</div>` : ""}
 
             <div class="order-actions">
                 <button class="action-btn" onclick="editProduct('${escapeJS(product._id)}')">ویرایش</button>
@@ -1341,9 +1351,9 @@ function buildReportQuery() {
 }
 
 const DELIVERY_METHOD_LABELS = {
-    restaurant: "🍽️ صرف در رستوران",
-    delivery: "🛵 ارسال با پیک",
-    pickup: "🛍️ دریافت حضوری"
+    restaurant: '<span class="delivery-tag"><i class="fa-solid fa-utensils"></i> صرف در رستوران</span>',
+    delivery: '<span class="delivery-tag"><i class="fa-solid fa-motorcycle"></i> ارسال با پیک</span>',
+    pickup: '<span class="delivery-tag"><i class="fa-solid fa-bag-shopping"></i> دریافت حضوری</span>'
 };
 
 async function loadAdvancedReport() {

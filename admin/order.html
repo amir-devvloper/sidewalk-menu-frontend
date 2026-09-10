@@ -112,26 +112,29 @@
 
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" data-view="orders">
-                    <span>🧾</span><span>سفارش‌ها</span>
+                    <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span><span>سفارش‌ها</span>
                 </a>
                 <a href="#" class="nav-item" data-view="products">
-                    <span>🍔</span><span>محصولات</span>
+                    <span class="nav-icon"><i class="fa-solid fa-utensils"></i></span><span>محصولات</span>
                 </a>
                 <a href="#" class="nav-item" data-view="reports">
-                    <span>📊</span><span>گزارش‌ها</span>
+                    <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span><span>گزارش‌ها</span>
                 </a>
                 <a href="#" class="nav-item" data-view="qrcodes">
-                    <span>📱</span><span>QR میزها</span>
+                    <span class="nav-icon"><i class="fa-solid fa-qrcode"></i></span><span>QR میزها</span>
                 </a>
             </nav>
 
             <div class="sidebar-footer">
                 <label class="sound-toggle">
-                    <input type="checkbox" id="soundToggle" checked>
-                    🔔 هشدار صوتی
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </span>
+                    <span class="toggle-label"><i class="fa-solid fa-bell"></i> هشدار صوتی</span>
                 </label>
 
-                <button id="logoutBtn" class="logout-btn">خروج</button>
+                <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
             </div>
 
         </aside>
@@ -150,36 +153,36 @@
                     </div>
                     <div class="topbar-actions">
                         <button class="refresh-btn" id="manualOrderBtn">
-                            <span>+</span> سفارش دستی
+                            <i class="fa-solid fa-plus"></i> سفارش دستی
                         </button>
-                        <button class="refresh-btn" id="refreshBtn">
-                            <span>↻</span> بروزرسانی
+                        <button class="refresh-btn ghost" id="refreshBtn">
+                            <i class="fa-solid fa-arrows-rotate"></i> بروزرسانی
                         </button>
                     </div>
                 </header>
 
                 <section class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon new">🧾</div>
+                        <div class="stat-icon new"><i class="fa-solid fa-receipt"></i></div>
                         <div><span>کل سفارش‌ها</span><strong id="totalOrders">0</strong></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon pending">🔴</div>
+                        <div class="stat-icon pending"><i class="fa-solid fa-circle-exclamation"></i></div>
                         <div><span>جدید</span><strong id="newOrders">0</strong></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon preparing">🔥</div>
+                        <div class="stat-icon preparing"><i class="fa-solid fa-fire"></i></div>
                         <div><span>در حال آماده‌سازی</span><strong id="preparingOrders">0</strong></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon ready">✅</div>
+                        <div class="stat-icon ready"><i class="fa-solid fa-circle-check"></i></div>
                         <div><span>آماده شده</span><strong id="readyOrders">0</strong></div>
                     </div>
                 </section>
 
                 <section class="toolbar">
                     <div class="search-box">
-                        <span>⌕</span>
+                        <span><i class="fa-solid fa-magnifying-glass"></i></span>
                         <input type="text" id="searchInput" placeholder="جستجو با شماره سفارش، نام یا میز...">
                     </div>
 
@@ -196,7 +199,7 @@
                     <div class="date-filter">
                         <label>از <input type="date" id="dateFrom"></label>
                         <label>تا <input type="date" id="dateTo"></label>
-                        <button id="clearDateBtn" class="clear-date-btn" title="پاک کردن فیلتر تاریخ">✕</button>
+                        <button id="clearDateBtn" class="clear-date-btn" title="پاک کردن فیلتر تاریخ"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </section>
 
@@ -204,7 +207,7 @@
                     <div id="ordersContainer" class="orders-container"></div>
 
                     <div id="emptyState" class="empty-state hidden">
-                        <div class="empty-icon">🧾</div>
+                        <div class="empty-icon"><i class="fa-solid fa-receipt"></i></div>
                         <h2>سفارشی پیدا نشد</h2>
                         <p>هنوز سفارشی با این مشخصات ثبت نشده است.</p>
                     </div>
@@ -226,13 +229,13 @@
                         <p>مدیریت آیتم‌های منو</p>
                     </div>
                     <button class="refresh-btn" id="addProductBtn">
-                        <span>+</span> افزودن محصول
+                        <i class="fa-solid fa-plus"></i> افزودن محصول
                     </button>
                 </header>
 
                 <section class="toolbar">
                     <div class="search-box">
-                        <span>⌕</span>
+                        <span><i class="fa-solid fa-magnifying-glass"></i></span>
                         <input type="text" id="productSearchInput" placeholder="جستجو در محصولات...">
                     </div>
                 </section>
@@ -241,7 +244,7 @@
                     <div id="productsContainer" class="products-container"></div>
 
                     <div id="productsEmptyState" class="empty-state hidden">
-                        <div class="empty-icon">🍔</div>
+                        <div class="empty-icon"><i class="fa-solid fa-utensils"></i></div>
                         <h2>محصولی پیدا نشد</h2>
                         <p>یک محصول جدید اضافه کنید.</p>
                     </div>
@@ -266,15 +269,15 @@
 
                 <section class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon new">💰</div>
+                        <div class="stat-icon new"><i class="fa-solid fa-sack-dollar"></i></div>
                         <div><span>فروش امروز</span><strong id="todaySales">۰</strong></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon preparing">📅</div>
+                        <div class="stat-icon preparing"><i class="fa-solid fa-calendar-days"></i></div>
                         <div><span>فروش ۷ روز اخیر</span><strong id="weekSales">۰</strong></div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon ready">🧾</div>
+                        <div class="stat-icon ready"><i class="fa-solid fa-receipt"></i></div>
                         <div><span>تعداد سفارش (۷ روز)</span><strong id="weekOrderCount">۰</strong></div>
                     </div>
                 </section>
@@ -300,28 +303,28 @@
                             <option value="month">بر اساس ماه</option>
                         </select>
 
-                        <label>از <input type="date" id="reportFrom"></label>
-                        <label>تا <input type="date" id="reportTo"></label>
+                        <label class="field-inline">از <input type="date" id="reportFrom"></label>
+                        <label class="field-inline">تا <input type="date" id="reportTo"></label>
 
-                        <button class="action-btn" id="runReportBtn">اعمال</button>
-                        <button class="action-btn" id="exportCsvBtn">📄 خروجی CSV</button>
+                        <button class="action-btn primary-btn" id="runReportBtn"><i class="fa-solid fa-filter"></i> اعمال</button>
+                        <button class="action-btn" id="exportCsvBtn"><i class="fa-solid fa-file-export"></i> خروجی CSV</button>
                     </div>
 
                     <section class="stats-grid" id="advancedStats">
                         <div class="stat-card">
-                            <div class="stat-icon new">🧾</div>
+                            <div class="stat-icon new"><i class="fa-solid fa-receipt"></i></div>
                             <div><span>تعداد سفارش</span><strong id="rpOrderCount">۰</strong></div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon preparing">💰</div>
+                            <div class="stat-icon preparing"><i class="fa-solid fa-sack-dollar"></i></div>
                             <div><span>مبلغ فروش</span><strong id="rpTotalSales">۰</strong></div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon ready">📈</div>
+                            <div class="stat-icon ready"><i class="fa-solid fa-chart-line"></i></div>
                             <div><span>میانگین سفارش</span><strong id="rpAvgOrder">۰</strong></div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon pending">🚫</div>
+                            <div class="stat-icon pending"><i class="fa-solid fa-ban"></i></div>
                             <div><span>سفارش لغو شده</span><strong id="rpCancelled">۰</strong></div>
                         </div>
                     </section>
@@ -358,13 +361,13 @@
                 </header>
 
                 <section class="toolbar">
-                    <label>آدرس سایت مشتری
-                        <input type="text" id="qrSiteUrl" placeholder="https://your-domain.example" style="width:280px">
+                    <label class="field-inline field-wide">آدرس سایت مشتری
+                        <input type="text" id="qrSiteUrl" placeholder="https://your-domain.example">
                     </label>
-                    <label>از میز <input type="number" id="qrFrom" min="1" value="1" style="width:80px"></label>
-                    <label>تا میز <input type="number" id="qrTo" min="1" value="12" style="width:80px"></label>
-                    <button class="action-btn" id="generateQrBtn">تولید QR</button>
-                    <button class="action-btn" id="printQrBtn">🖨️ چاپ همه</button>
+                    <label class="field-inline field-narrow">از میز <input type="number" id="qrFrom" min="1" value="1"></label>
+                    <label class="field-inline field-narrow">تا میز <input type="number" id="qrTo" min="1" value="12"></label>
+                    <button class="action-btn primary-btn" id="generateQrBtn"><i class="fa-solid fa-qrcode"></i> تولید QR</button>
+                    <button class="action-btn" id="printQrBtn"><i class="fa-solid fa-print"></i> چاپ همه</button>
                 </section>
 
                 <section class="orders-section">
@@ -382,7 +385,7 @@
     <div id="orderModal" class="modal hidden">
         <div class="modal-overlay"></div>
         <div class="modal-content">
-            <button class="modal-close" id="modalClose">×</button>
+            <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
             <div id="modalBody"></div>
         </div>
     </div>
@@ -391,7 +394,7 @@
     <div id="productModal" class="modal hidden">
         <div class="modal-overlay"></div>
         <div class="modal-content">
-            <button class="modal-close" id="productModalClose">×</button>
+            <button class="modal-close" id="productModalClose"><i class="fa-solid fa-xmark"></i></button>
             <form id="productForm">
                 <h2 id="productFormTitle">افزودن محصول</h2>
 
@@ -410,12 +413,16 @@
                 <label>قیمت (تومان) <input type="number" id="pf_price" min="0" required></label>
                 <label>آدرس عکس (URL) <input type="text" id="pf_image" placeholder="https://..."></label>
                 <label class="checkbox-label">
-                    <input type="checkbox" id="pf_available" checked> موجود است
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="pf_available" checked>
+                        <span class="toggle-slider"></span>
+                    </span>
+                    موجود است
                 </label>
 
                 <div class="form-actions">
-                    <button type="submit" id="productSaveBtn">ذخیره</button>
-                    <button type="button" id="productCancelBtn">انصراف</button>
+                    <button type="submit" id="productSaveBtn"><i class="fa-solid fa-check"></i> ذخیره</button>
+                    <button type="button" id="productCancelBtn"><i class="fa-solid fa-xmark"></i> انصراف</button>
                 </div>
             </form>
         </div>
@@ -425,7 +432,7 @@
     <div id="manualOrderModal" class="modal hidden">
         <div class="modal-overlay"></div>
         <div class="modal-content">
-            <button class="modal-close" id="manualOrderModalClose">×</button>
+            <button class="modal-close" id="manualOrderModalClose"><i class="fa-solid fa-xmark"></i></button>
             <form id="manualOrderForm">
                 <h2>ثبت سفارش دستی</h2>
 
@@ -449,8 +456,8 @@
                 <div class="mo-total">جمع کل: <strong id="mo_total">۰ تومان</strong></div>
 
                 <div class="form-actions">
-                    <button type="submit" id="manualOrderSaveBtn">ثبت سفارش</button>
-                    <button type="button" id="manualOrderCancelBtn">انصراف</button>
+                    <button type="submit" id="manualOrderSaveBtn"><i class="fa-solid fa-check"></i> ثبت سفارش</button>
+                    <button type="button" id="manualOrderCancelBtn"><i class="fa-solid fa-xmark"></i> انصراف</button>
                 </div>
             </form>
         </div>
