@@ -307,7 +307,7 @@ function resetModalContentScrolling() {
 }
 
 function buildMenuCardHTML(product) {
-    const available = product.available !== false;
+    const available = product.availableNow !== false;
     const rating = product.rating || "5.0";
     const image = product.image || "assest/images/placeholder.webp";
 
