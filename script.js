@@ -490,7 +490,10 @@ function getProductById(id) {
 }
 
 function getValidCartItems() {
-    return cart.filter(item => getProductById(item.id) !== null);
+    return cart.filter(item => {
+        const product = getProductById(item.id);
+        return product !== null && product.available !== false;
+    });
 }
 
 function formatPrice(price) {
