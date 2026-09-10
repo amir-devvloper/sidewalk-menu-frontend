@@ -297,7 +297,12 @@
                     <h2>گزارش پیشرفته</h2>
 
                     <div class="toolbar">
-                        <select id="reportGroup">
+                        <div class="report-group-toggle" id="reportGroupToggle" role="group" aria-label="بازه گزارش">
+                            <button type="button" class="report-group-btn active" data-value="day"><i class="fa-solid fa-calendar-day"></i> بر اساس روز</button>
+                            <button type="button" class="report-group-btn" data-value="week"><i class="fa-solid fa-calendar-week"></i> بر اساس هفته</button>
+                            <button type="button" class="report-group-btn" data-value="month"><i class="fa-solid fa-calendar"></i> بر اساس ماه</button>
+                        </div>
+                        <select id="reportGroup" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
                             <option value="day">بر اساس روز</option>
                             <option value="week">بر اساس هفته</option>
                             <option value="month">بر اساس ماه</option>

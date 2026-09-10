@@ -109,6 +109,7 @@ const qrPrintArea = document.getElementById("qrPrintArea");
 
 // Advanced reports
 const reportGroup = document.getElementById("reportGroup");
+const reportGroupButtons = document.querySelectorAll("#reportGroupToggle .report-group-btn");
 const reportFrom = document.getElementById("reportFrom");
 const reportTo = document.getElementById("reportTo");
 const runReportBtn = document.getElementById("runReportBtn");
@@ -959,7 +960,10 @@ function createProductCard(product) {
         <article class="product-card" data-product="${escapeHTML(product._id)}">
             <div class="product-image-wrap${product.image ? "" : " no-image"}">
                 ${imageHTML}
-                <i class="fa-solid fa-utensils product-image-fallback"></i>
+                <div class="product-image-fallback">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span>بدون عکس</span>
+                </div>
             </div>
             <div class="product-top">
                 <strong>${escapeHTML(product.name)}</strong>
@@ -1398,6 +1402,15 @@ async function loadAdvancedReport() {
     }
 }
 
+reportGroupButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        reportGroupButtons.forEach(b => b.classList.remove("active"));
+        void btn.offsetWidth; // restart the pop animation even if clicked again
+        btn.classList.add("active");
+        reportGroup.value = btn.dataset.value;
+    });
+});
+
 runReportBtn.addEventListener("click", loadAdvancedReport);
 
 exportCsvBtn.addEventListener("click", async () => {
@@ -1495,6 +1508,22 @@ refreshBtn.addEventListener("click", loadOrders);
 
 modalClose.addEventListener("click", () => {
     orderModal.classList.add("hidden");
+});
+
+// Tap/click feedback on order cards: colored pulse on every tap,
+// and tapping anywhere on the card (outside its buttons/select) opens the details.
+ordersContainer.addEventListener("click", (e) => {
+    const card = e.target.closest(".order-card");
+    if (!card) return;
+
+    card.classList.remove("order-card--pulse");
+    void card.offsetWidth; // restart animation even on rapid repeated taps
+    card.classList.add("order-card--pulse");
+
+    if (e.target.closest("button, select, option, a")) return;
+
+    const orderCode = card.dataset.order;
+    if (orderCode) openOrderDetails(orderCode);
 });
 
 
