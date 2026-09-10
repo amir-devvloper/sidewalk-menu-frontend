@@ -489,6 +489,10 @@ function getProductById(id) {
     return card ? getProductData(card) : null;
 }
 
+function getValidCartItems() {
+    return cart.filter(item => getProductById(item.id) !== null);
+}
+
 function formatPrice(price) {
     return Number(price).toLocaleString("fa-IR");
 }
@@ -2318,7 +2322,12 @@ if (checkoutButton) {
     checkoutButton.addEventListener(
         "click",
         () => {
-            if (cart.length === 0) {
+            const validItems = getValidCartItems();
+
+            if (validItems.length === 0) {
+                cart = validItems;
+                saveCart();
+                renderCart();
                 showToast(
                     "لطفاً ابتدا یک محصول به سبد سفارش اضافه کنید."
                 );
@@ -2348,7 +2357,12 @@ function enableCheckoutScrolling() {
 }
 
 function openCheckout() {
-    if (cart.length === 0) {
+    const validItems = getValidCartItems();
+
+    if (validItems.length === 0) {
+        cart = validItems;
+        saveCart();
+        renderCart();
         showToast("لطفاً ابتدا یک محصول به سبد سفارش اضافه کنید.");
         return;
     }
