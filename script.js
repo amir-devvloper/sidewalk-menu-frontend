@@ -770,8 +770,10 @@ function closeCartDrawer({ restoreFocus = true } = {}) {
 
     syncBodyScrollLock();
 
-    if (restoreFocus && wasOpen && lastCartTrigger && document.contains(lastCartTrigger)) {
-        requestAnimationFrame(() => lastCartTrigger.focus?.());
+    const triggerToRestore = lastCartTrigger;
+
+    if (restoreFocus && wasOpen && triggerToRestore && document.contains(triggerToRestore)) {
+        requestAnimationFrame(() => triggerToRestore.focus?.());
     }
 
     if (restoreFocus) lastCartTrigger = null;
