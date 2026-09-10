@@ -320,6 +320,7 @@ function buildMenuCardHTML(product) {
             data-price="${escapeAttr(product.price)}"
             data-rating="${escapeAttr(rating)}"
             data-description="${escapeAttr(product.description)}"
+            data-available="${available ? "1" : "0"}"
         >
             <div class="card-image">
                 <img src="${escapeAttr(image)}" alt="${escapeAttr(product.name)}" loading="lazy">
@@ -477,7 +478,8 @@ function getProductData(card) {
         price: Number(card.dataset.price) || 0,
         rating: Number(card.dataset.rating) || 0,
         description: card.dataset.description || "",
-        image: image ? image.getAttribute("src") : ""
+        image: image ? image.getAttribute("src") : "",
+        available: card.dataset.available !== "0"
     };
 }
 
@@ -568,6 +570,11 @@ function toggleFavorite(id) {
 ========================================================= */
 
 function addToCart(item, qty = 1) {
+    if (item.available === false) {
+        showToast("این محصول در حال حاضر ناموجود است.");
+        return;
+    }
+
     const existing = cart.find(
         cartItem => cartItem.id === item.id
     );
@@ -802,6 +809,7 @@ function openProduct(item) {
     if (!modalContent || !productModal) return;
 
     let modalQty = 1;
+    const available = item.available !== false;
 
     modalContent.innerHTML = `
         <img
@@ -820,6 +828,11 @@ function openProduct(item) {
                 ${TOMAN_SVG}
             </div>
 
+            ${available ? "" : `
+            <div class="modal-sold-out-notice" style="color:#e53935;font-weight:600;margin:8px 0;">
+                این محصول در حال حاضر ناموجود است.
+            </div>`}
+
             <div class="modal-qty-row">
                 <div class="qty-stepper" id="modalQtyStepper">
                     <button type="button" class="qty-btn qty-minus" aria-label="کم کردن">−</button>
@@ -831,6 +844,7 @@ function openProduct(item) {
                     class="modal-add-btn"
                     id="modalAdd"
                     type="button"
+                    ${available ? "" : "disabled style=\"opacity:.4;pointer-events:none;\""}
                 >
                     <span>افزودن به سبد خرید</span>
                     <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
@@ -859,7 +873,7 @@ function openProduct(item) {
 
     const modalAdd = document.getElementById("modalAdd");
 
-    if (modalAdd) {
+    if (modalAdd && available) {
         modalAdd.addEventListener("click", () => {
             addToCart(item, modalQty);
             closeProduct();
@@ -1512,8 +1526,9 @@ function renderFavorites() {
                     class="favorite-add-cart"
                     data-id="${product.id}"
                     type="button"
+                    ${product.available === false ? "disabled style=\"opacity:.4;pointer-events:none;\"" : ""}
                 >
-                    <span>افزودن به سبد خرید</span>
+                    <span>${product.available === false ? "ناموجود" : "افزودن به سبد خرید"}</span>
                     <i class="fa-solid fa-bag-shopping"></i>
                 </button>
             </div>
@@ -1550,6 +1565,7 @@ function renderFavorites() {
                 event => {
                     event.preventDefault();
                     event.stopPropagation();
+                    if (product.available === false) return;
                     addToCart(product);
                 }
             );
