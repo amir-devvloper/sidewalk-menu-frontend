@@ -4741,3 +4741,513 @@ body.light .app-toast {
         scroll-behavior: auto !important;
     }
 }
+/* =========================================================
+   SIDE WALK — PREMIUM QR + REPORTS
+   IMPORTANT: This section is additive.
+   All original CSS above remains untouched.
+   ========================================================= */
+
+/* ---------- Shared admin controls ---------- */
+
+#view-reports .toolbar,
+#view-qrcodes .toolbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    margin-bottom: 22px;
+    border: 1px solid rgba(184, 142, 71, 0.18);
+    border-radius: 20px;
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.045), rgba(184,142,71,0.035)),
+        var(--card);
+    box-shadow:
+        0 18px 45px rgba(0,0,0,0.20),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+#view-reports .toolbar::before,
+#view-qrcodes .toolbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(
+        115deg,
+        transparent 20%,
+        rgba(184,142,71,0.06) 50%,
+        transparent 80%
+    );
+}
+
+#view-reports .toolbar input,
+#view-reports .toolbar select,
+#view-qrcodes .toolbar input,
+#view-qrcodes .toolbar select {
+    position: relative;
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    outline: none;
+    background: var(--bg);
+    color: var(--text);
+    padding: 0 13px;
+    transition: var(--transition);
+}
+
+#view-reports .toolbar input:focus,
+#view-reports .toolbar select:focus,
+#view-qrcodes .toolbar input:focus,
+#view-qrcodes .toolbar select:focus {
+    border-color: rgba(184,142,71,0.65);
+    box-shadow: 0 0 0 4px rgba(184,142,71,0.10);
+}
+
+#view-reports .toolbar button,
+#view-qrcodes .toolbar button {
+    position: relative;
+    min-height: 44px;
+    padding: 0 17px;
+    border-radius: 12px;
+    font-weight: 800;
+    transition: var(--transition);
+}
+
+#view-reports .toolbar button:hover,
+#view-qrcodes .toolbar button:hover {
+    transform: translateY(-2px);
+}
+
+/* ---------- Reports stats ---------- */
+
+#view-reports .stats-grid,
+#view-reports .report-stats {
+    gap: 16px;
+}
+
+#view-reports .stat-card,
+#view-reports .report-stat,
+#view-reports .stats-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(184,142,71,0.14);
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(184,142,71,0.09), transparent 38%),
+        var(--card);
+    box-shadow:
+        0 14px 38px rgba(0,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+    transition: var(--transition);
+}
+
+#view-reports .stat-card::after,
+#view-reports .report-stat::after,
+#view-reports .stats-card::after {
+    content: "";
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 0;
+    height: 2px;
+    border-radius: 99px 99px 0 0;
+    background: linear-gradient(90deg, transparent, var(--neon), transparent);
+    opacity: .55;
+}
+
+#view-reports .stat-card:hover,
+#view-reports .report-stat:hover,
+#view-reports .stats-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(184,142,71,0.30);
+    box-shadow:
+        0 22px 48px rgba(0,0,0,0.25),
+        0 8px 25px rgba(184,142,71,0.08);
+}
+
+/* ---------- Report charts ---------- */
+
+#view-reports .chart-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(184,142,71,0.14);
+    border-radius: 22px;
+    background:
+        linear-gradient(145deg, rgba(255,255,255,0.025), transparent 45%),
+        var(--card);
+    box-shadow:
+        0 18px 45px rgba(0,0,0,0.20),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+    padding: 20px;
+}
+
+#view-reports .chart-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 24px;
+    left: 24px;
+    height: 2px;
+    border-radius: 0 0 99px 99px;
+    background: linear-gradient(90deg, transparent, var(--neon), transparent);
+    opacity: .7;
+}
+
+#view-reports .chart-card h3 {
+    position: relative;
+    margin-bottom: 16px;
+    font-size: 15px;
+    font-weight: 900;
+}
+
+#view-reports .chart-card h3::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: var(--neon);
+    box-shadow: 0 0 12px rgba(184,142,71,0.55);
+}
+
+/* ---------- Advanced report ---------- */
+
+#advancedReportCard {
+    position: relative;
+    overflow: hidden;
+    margin-top: 22px;
+    border: 1px solid rgba(184,142,71,0.18);
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 0% 100%, rgba(139,61,255,0.06), transparent 34%),
+        radial-gradient(circle at 100% 0%, rgba(184,142,71,0.07), transparent 34%),
+        var(--card);
+    box-shadow:
+        0 22px 55px rgba(0,0,0,0.23),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+#advancedReportCard::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 8%;
+    left: 8%;
+    height: 2px;
+    border-radius: 0 0 99px 99px;
+    background: linear-gradient(90deg, transparent, var(--neon), transparent);
+}
+
+#advancedReportCard .toolbar {
+    margin: 0 0 18px;
+}
+
+#advancedReportCard #advancedStats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+#advancedReportCard #advancedStats > * {
+    min-width: 0;
+    padding: 17px;
+    border: 1px solid rgba(184,142,71,0.13);
+    border-radius: 17px;
+    background: rgba(255,255,255,0.025);
+    transition: var(--transition);
+}
+
+#advancedReportCard #advancedStats > *:hover {
+    transform: translateY(-3px);
+    border-color: rgba(184,142,71,0.28);
+    background: rgba(184,142,71,0.045);
+}
+
+/* ---------- Report tables ---------- */
+
+#advancedReportCard .report-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+#advancedReportCard .report-columns > div {
+    min-width: 0;
+    padding: 17px;
+    border: 1px solid var(--border);
+    border-radius: 19px;
+    background: rgba(255,255,255,0.018);
+}
+
+#advancedReportCard .report-columns h3 {
+    margin-bottom: 13px;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+#advancedReportCard .report-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--bg);
+}
+
+#advancedReportCard .report-table th {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(184,142,71,0.075);
+    color: var(--neon);
+    font-size: 11px;
+    font-weight: 900;
+    text-align: right;
+}
+
+#advancedReportCard .report-table td {
+    padding: 11px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.045);
+    color: var(--muted);
+    font-size: 11px;
+    text-align: right;
+    transition: background .2s ease, color .2s ease;
+}
+
+#advancedReportCard .report-table tr:last-child td {
+    border-bottom: 0;
+}
+
+#advancedReportCard .report-table tbody tr:hover td {
+    background: rgba(184,142,71,0.045);
+    color: var(--text);
+}
+
+/* ---------- QR section ---------- */
+
+#view-qrcodes .orders-section {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(184,142,71,0.16);
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(184,142,71,0.08), transparent 32%),
+        linear-gradient(145deg, rgba(255,255,255,0.025), transparent 55%),
+        var(--card);
+    box-shadow:
+        0 22px 55px rgba(0,0,0,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+}
+
+#view-qrcodes .orders-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 8%;
+    left: 8%;
+    height: 2px;
+    border-radius: 0 0 99px 99px;
+    background: linear-gradient(90deg, transparent, var(--neon), transparent);
+    opacity: .7;
+}
+
+#qrGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    padding: 4px;
+}
+
+#qrGrid .qr-card {
+    position: relative;
+    min-height: 245px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+    padding: 20px;
+    border: 1px solid rgba(184,142,71,0.16);
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(184,142,71,0.10), transparent 48%),
+        var(--bg);
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+    transition: var(--transition);
+}
+
+#qrGrid .qr-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 18%;
+    left: 18%;
+    height: 2px;
+    border-radius: 0 0 99px 99px;
+    background: linear-gradient(90deg, transparent, var(--neon), transparent);
+    opacity: .65;
+}
+
+#qrGrid .qr-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(184,142,71,0.36);
+    box-shadow:
+        0 22px 42px rgba(0,0,0,0.27),
+        0 8px 28px rgba(184,142,71,0.08);
+}
+
+#qrGrid .qr-canvas {
+    width: 178px;
+    height: 178px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px;
+    border: 1px solid rgba(184,142,71,0.22);
+    border-radius: 17px;
+    background: #fff;
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.28),
+        0 0 0 5px rgba(184,142,71,0.035);
+}
+
+#qrGrid .qr-canvas canvas,
+#qrGrid .qr-canvas img {
+    display: block;
+    width: 160px !important;
+    height: 160px !important;
+    max-width: none;
+    border-radius: 5px;
+}
+
+#qrGrid .qr-card > strong {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 92px;
+    padding: 7px 15px;
+    border: 1px solid rgba(184,142,71,0.22);
+    border-radius: 999px;
+    background: rgba(184,142,71,0.075);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 900;
+}
+
+#qrGrid:empty::before {
+    content: "هنوز QR کدی ساخته نشده است";
+    grid-column: 1 / -1;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed rgba(184,142,71,0.22);
+    border-radius: 18px;
+    color: var(--muted);
+    background: rgba(255,255,255,0.015);
+}
+
+/* ---------- QR print ---------- */
+
+.qr-print-sheet {
+    padding: 24px;
+}
+
+.qr-print-sheet .qr-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+@media print {
+    .qr-print-sheet {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+        padding: 10px;
+        background: #fff !important;
+    }
+
+    .qr-print-sheet .qr-card {
+        min-height: 220px;
+        border: 1px solid #ddd !important;
+        border-radius: 12px;
+        box-shadow: none !important;
+        background: #fff !important;
+        color: #111 !important;
+    }
+
+    .qr-print-sheet .qr-card::before {
+        display: none;
+    }
+
+    .qr-print-sheet .qr-card > strong {
+        color: #111 !important;
+        border-color: #ddd !important;
+        background: #f5f5f5 !important;
+    }
+
+    .qr-print-sheet .qr-canvas {
+        box-shadow: none !important;
+        border-color: #ddd !important;
+    }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1050px) {
+    #qrGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #advancedReportCard #advancedStats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    #advancedReportCard .report-columns {
+        grid-template-columns: 1fr;
+    }
+
+    #view-reports .toolbar,
+    #view-qrcodes .toolbar {
+        padding: 13px;
+        border-radius: 17px;
+    }
+
+    #view-reports .toolbar input,
+    #view-reports .toolbar select,
+    #view-qrcodes .toolbar input,
+    #view-qrcodes .toolbar select {
+        flex: 1 1 150px;
+    }
+}
+
+@media (max-width: 520px) {
+    #qrGrid {
+        grid-template-columns: 1fr;
+    }
+
+    #advancedReportCard #advancedStats {
+        grid-template-columns: 1fr;
+    }
+
+    #view-reports .chart-card,
+    #advancedReportCard,
+    #view-qrcodes .orders-section {
+        border-radius: 18px;
+    }
+
+    #qrGrid .qr-card {
+        min-height: 230px;
+    }
+}
