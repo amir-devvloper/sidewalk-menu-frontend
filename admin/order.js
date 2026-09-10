@@ -1131,7 +1131,7 @@ function renderReports() {
 
     const lastWeekOrders = activeOrders.filter(
         o => new Date(o.createdAt) >= sevenDaysAgo
-    );
+    );1
 
     document.getElementById("todaySales").textContent = `${formatPrice(todaySalesValue)} تومان`;
     document.getElementById("weekSales").textContent =
