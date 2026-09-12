@@ -2890,8 +2890,9 @@ async function submitOrder() {
             null;
 
         if (!paymentUrl) {
+            console.error("Payment URL missing from backend response:", data);
             throw new Error(
-                "سفارش ثبت شد اما لینک پرداخت از سرور دریافت نشد. لطفاً تنظیمات درگاه Aban را بررسی کنید."
+                "سفارش ثبت شد اما لینک پرداخت از سرور دریافت نشد. تنظیمات درگاه Aban را بررسی کنید."
             );
         }
 
@@ -2901,10 +2902,147 @@ async function submitOrder() {
         cart = [];
         saveCart();
         renderCart();
+
         destroyDeliveryMap();
 
-        // Navigate in the same tab so the browser does not block the payment page.
-        window.location.assign(paymentUrl);
+        modalContent.innerHTML = `
+            <div class="checkout-page">
+
+                <div class="checkout-title">
+                    <span>SIDE WALK</span>
+                    <h2 id="modalDialogTitle">
+                        سفارش ثبت شد 🎉
+                    </h2>
+                </div>
+
+                <div class="payment-box">
+
+                    <div class="payment-icon">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+
+                    <h3>
+                        سفارش شما با موفقیت ثبت شد.
+                    </h3>
+
+                    <div class="payment-info">
+
+                        <div class="payment-info-item">
+                            <span>
+                                شماره سفارش
+                            </span>
+
+                            <strong>
+                                ${escapeHTML(orderCode)}
+                            </strong>
+                        </div>
+
+                        <div class="payment-info-item">
+                            <span>
+                                روش دریافت
+                            </span>
+
+                            <strong>
+                                ${
+                                    selectedDeliveryMethod ===
+                                    "restaurant"
+                                        ? "صرف در رستوران"
+                                        : selectedDeliveryMethod ===
+                                          "delivery"
+                                            ? "ارسال با پیک"
+                                            : "دریافت حضوری"
+                                }
+                            </strong>
+                        </div>
+
+                        ${
+                            selectedDeliveryMethod ===
+                            "restaurant"
+                                ? `
+                                    <div class="payment-info-item">
+                                        <span>
+                                            شماره میز
+                                        </span>
+
+                                        <strong>
+                                            ${escapeHTML(table)}
+                                        </strong>
+                                    </div>
+                                `
+                                : ""
+                        }
+
+                        ${
+                            selectedDeliveryMethod ===
+                            "delivery"
+                                ? `
+                                    <div class="payment-info-item">
+                                        <span>
+                                            آدرس
+                                        </span>
+
+                                        <strong>
+                                            ${escapeHTML(selectedAddress)}
+                                        </strong>
+                                    </div>
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+                    <div style="margin-top:18px; padding:14px; border-radius:14px; background:rgba(0,0,0,.04);">
+                        <strong style="display:block; margin-bottom:7px;">پرداخت آنلاین</strong>
+                        <small>برای نهایی شدن سفارش، مبلغ سفارش را در درگاه Aban پرداخت کنید.</small>
+                    </div>
+
+                    <button
+                        class="checkout-btn"
+                        id="goPaymentBtn"
+                        type="button"
+                        style="margin-top:14px;"
+                    >
+                        پرداخت آنلاین
+                        <i class="fa-solid fa-credit-card"></i>
+                    </button>
+
+                    <button
+                        class="checkout-btn"
+                        id="goTrackBtn"
+                        type="button"
+                        style="margin-top:10px;"
+                    >
+                        پیگیری سفارش
+                        <i class="fa-solid fa-location-arrow"></i>
+                    </button>
+
+                </div>
+            </div>
+        `;
+
+        const goPaymentBtn =
+            document.getElementById("goPaymentBtn");
+
+        if (goPaymentBtn) {
+            goPaymentBtn.addEventListener("click", () => {
+                window.location.href = paymentUrl;
+            });
+        }
+
+        const goTrackBtn =
+            document.getElementById(
+                "goTrackBtn"
+            );
+
+        if (goTrackBtn) {
+            goTrackBtn.addEventListener(
+                "click",
+                () => openTrackOrder(orderCode)
+            );
+        }
+
+        openModalDialog(null, "#goTrackBtn");
+        enableCheckoutScrolling();
     } catch (error) {
         console.error(
             "Order error:",
@@ -3587,29 +3725,7 @@ initHeroBurger();
 ========================================================= */
 
 loadProductsFromAPI();
-function handlePaymentResultFromAban() {
-    const params = new URLSearchParams(window.location.search);
-    const payment = params.get("payment");
-    const orderCode = params.get("order_code");
-    if (!payment) return;
-
-    if (payment === "success") {
-        showToast(
-            orderCode
-                ? `پرداخت سفارش ${orderCode} با موفقیت تأیید شد.`
-                : "پرداخت با موفقیت تأیید شد.",
-            "success"
-        );
-    } else if (payment === "failed") {
-        showToast("پرداخت تأیید نشد. اگر مبلغ از حساب شما کم شده، سفارش را پیگیری کنید.", "warning");
-    }
-
-    const cleanUrl = `${window.location.pathname}${params.has("table") ? `?table=${encodeURIComponent(params.get("table"))}` : ""}${window.location.hash}`;
-    window.history.replaceState({}, document.title, cleanUrl);
-}
-
 window.addEventListener('load', function() {
-    handlePaymentResultFromAban();
   setTimeout(function() {
     document.getElementById('loadingScreen').classList.add('hide');
 
