@@ -998,6 +998,43 @@ body {
 }
 
 
+/* =========================================================
+   NEW: Payment status badges (Aban gateway patch)
+   Independent from the order-status badges above — shown next
+   to them, never instead of them.
+========================================================= */
+
+.order-top-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+
+.status-payment-pending {
+    background: var(--badge-orange-bg);
+
+    color: var(--badge-orange-text);
+}
+
+
+.status-payment-paid {
+    background: var(--badge-green-bg);
+
+    color: var(--badge-green-text);
+}
+
+
+.status-payment-expired,
+.status-payment-cancelled {
+    background: var(--badge-grey-bg);
+
+    color: var(--badge-grey-text);
+}
+
+
 /* Customer */
 
 .order-info {

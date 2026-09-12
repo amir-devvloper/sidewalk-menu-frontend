@@ -31,6 +31,47 @@ function getStatusesForOrder(order) {
     });
 }
 
+// ===============================
+// Payment status (درگاه Aban)
+// ===============================
+// order.paymentStatus is a SEPARATE field from order.status above: it comes
+// from the Aban Gateway online-payment patch (backend "payment_status"
+// column) and tracks the online payment link, not the kitchen/delivery
+// workflow. It must never be merged into STATUSES / the status-select
+// dropdown, because the backend's PUT /orders/:code/status endpoint only
+// accepts ORDER_STATUSES values and would reject anything else with a 400.
+//
+// Backend values -> what staff should see:
+//   pending   -> "در حال انتظار"   (لینک پرداخت آبان ارسال شده، منتظر پرداخت مشتری)
+//   paid      -> "پرداخت شده"
+//   expired   -> "لینک پرداخت منقضی شد"
+//   cancelled -> "پرداخت لغو شد"
+//   unpaid    -> پیش‌فرض (سفارش‌های نقدی/حضوری) — بج نشون داده نمی‌شه
+const PAYMENT_STATUS_LABELS = {
+    pending: "در حال انتظار",
+    paid: "پرداخت شده",
+    expired: "لینک پرداخت منقضی شد",
+    cancelled: "پرداخت لغو شد"
+};
+
+const PAYMENT_STATUS_CLASSES = {
+    pending: "status-payment-pending",
+    paid: "status-payment-paid",
+    expired: "status-payment-expired",
+    cancelled: "status-payment-cancelled"
+};
+
+// Returns "" (nothing rendered) for "unpaid" and for any unknown/missing
+// value, so a cash order or a future backend status never shows a raw
+// English string to staff.
+function getPaymentStatusBadgeHTML(order) {
+    const label = PAYMENT_STATUS_LABELS[order.paymentStatus];
+    if (!label) return "";
+
+    const cls = PAYMENT_STATUS_CLASSES[order.paymentStatus] || "";
+    return `<span class="status-badge ${cls}">${escapeHTML(label)}</span>`;
+}
+
 let orders = [];
 let products = [];
 let pollTimer = null;
@@ -549,7 +590,10 @@ function createOrderCard(order) {
                     <div class="order-code">${escapeHTML(order.orderCode)}</div>
                     <div class="order-time">${formatDate(order.createdAt)}</div>
                 </div>
-                <span class="status-badge ${statusClass}">${escapeHTML(order.status)}</span>
+                <div class="order-top-badges">
+                    <span class="status-badge ${statusClass}">${escapeHTML(order.status)}</span>
+                    ${getPaymentStatusBadgeHTML(order)}
+                </div>
             </div>
 
             <div class="order-info">
@@ -691,6 +735,7 @@ function openOrderDetails(orderCode) {
             <p><strong>تماس:</strong> ${order.customerPhone ? escapeHTML(order.customerPhone) : "—"}</p>
             <p><strong>نوع سفارش:</strong> ${getDeliveryMethodHTML(order)}</p>
             <p><strong>وضعیت:</strong> <span class="status-badge ${getStatusClass(order.status)}">${escapeHTML(order.status)}</span></p>
+            ${getPaymentStatusBadgeHTML(order) ? `<p><strong>وضعیت پرداخت:</strong> ${getPaymentStatusBadgeHTML(order)}</p>` : ""}
             <p><strong>تاریخ:</strong> ${formatDate(order.createdAt)}</p>
 
             <table class="invoice-table">
