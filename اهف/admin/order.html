@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت | SIDE WALK</title>
+
+    <!-- Apply saved theme before first paint to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            var saved = localStorage.getItem("sidewalkAdminTheme");
+            var theme = saved === "dark" ? "dark" : "light";
+            document.documentElement.setAttribute("data-theme", theme);
+        })();
+    </script>
+
+    <link rel="stylesheet" href="order.css">
+    <link rel="stylesheet" href="responsive.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+
+<body>
+
+    <!-- ===================== Login Screen ===================== -->
+    <div id="loginScreen" class="login-screen">
+
+        <div class="login-wrap">
+
+            <!-- Brand panel -->
+            <div class="login-brand">
+
+                <div class="login-brand-glow"></div>
+
+                <div class="login-brand-top">
+                    <div class="brand-logo login-logo">SW</div>
+                    <div class="login-brand-name">
+                        <strong>SIDE WALK</strong>
+                        <span>CAFE &amp; RESTAURANT</span>
+                    </div>
+                </div>
+
+                <div class="login-brand-mid">
+                    <h2>مدیریت هوشمند کافه، همه‌جا همراهت.</h2>
+                    <p>سفارش‌ها، محصولات و گزارش فروش رو از یک پنل ساده و سریع مدیریت کن.</p>
+                </div>
+
+                <ul class="login-brand-features">
+                    <li><i class="fa-solid fa-check"></i> مدیریت سفارش‌ها به‌صورت لحظه‌ای</li>
+                    <li><i class="fa-solid fa-check"></i> افزودن، ویرایش و حذف محصولات منو</li>
+                    <li><i class="fa-solid fa-check"></i> گزارش فروش روزانه و هفتگی</li>
+                </ul>
+
+            </div>
+
+            <!-- Form panel -->
+            <div class="login-form-panel">
+
+                <form id="loginForm" class="login-card">
+
+                    <h1>ورود به پنل مدیریت</h1>
+                    <p class="login-sub">برای ادامه، اطلاعات حساب خود را وارد کنید</p>
+
+                    <label>
+                        نام کاربری
+                        <div class="input-group">
+                            <i class="fa-regular fa-user"></i>
+                            <input type="text" id="loginUsername" autocomplete="username" placeholder="نام کاربری خود را وارد کنید" required>
+                        </div>
+                    </label>
+
+                    <label>
+                        رمز عبور
+                        <div class="input-group">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="loginPassword" autocomplete="current-password" placeholder="رمز عبور خود را وارد کنید" required>
+                            <button type="button" class="toggle-password" id="togglePassword" aria-label="نمایش رمز عبور">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </label>
+
+                    <button type="submit" id="loginSubmit">
+                        <span>ورود به پنل</span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+
+                    <div id="loginError" class="login-error hidden"></div>
+
+                    <div class="login-footer">© SIDE WALK — پنل مدیریت کافه</div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================== App Shell ===================== -->
+    <div class="admin-layout hidden" id="appShell">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-logo">SW</div>
+                <div>
+                    <strong>SIDE WALK</strong>
+                    <span>مدیریت کافه</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-view="orders">
+                    <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span><span>سفارش‌ها</span>
+                </a>
+                <a href="#" class="nav-item" data-view="products">
+                    <span class="nav-icon"><i class="fa-solid fa-utensils"></i></span><span>محصولات</span>
+                </a>
+                <a href="#" class="nav-item" data-view="reports">
+                    <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span><span>گزارش‌ها</span>
+                </a>
+                <a href="#" class="nav-item" data-view="qrcodes">
+                    <span class="nav-icon"><i class="fa-solid fa-qrcode"></i></span><span>QR میزها</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <label class="sound-toggle">
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </span>
+                    <span class="toggle-label"><i class="fa-solid fa-bell"></i> هشدار صوتی</span>
+                </label>
+
+                <label class="theme-toggle">
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="toggle-slider"></span>
+                    </span>
+                    <span class="toggle-label"><i class="fa-solid fa-moon"></i> حالت شب</span>
+                </label>
+
+                <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
+            </div>
+
+        </aside>
+
+
+        <!-- Main -->
+        <main class="main-content">
+
+            <!-- ================= ORDERS VIEW ================= -->
+            <section class="view" id="view-orders">
+
+                <header class="topbar">
+                    <div>
+                        <h1>سفارش‌ها</h1>
+                        <p>مدیریت سفارش‌های ثبت‌شده در کافه</p>
+                    </div>
+                    <div class="topbar-actions">
+                        <button class="refresh-btn" id="manualOrderBtn">
+                            <i class="fa-solid fa-plus"></i> سفارش دستی
+                        </button>
+                        <button class="refresh-btn ghost" id="refreshBtn">
+                            <i class="fa-solid fa-arrows-rotate"></i> بروزرسانی
+                        </button>
+                    </div>
+                </header>
+
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon new"><i class="fa-solid fa-receipt"></i></div>
+                        <div><span>کل سفارش‌ها</span><strong id="totalOrders">0</strong></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pending"><i class="fa-solid fa-circle-exclamation"></i></div>
+                        <div><span>جدید</span><strong id="newOrders">0</strong></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon preparing"><i class="fa-solid fa-fire"></i></div>
+                        <div><span>در حال آماده‌سازی</span><strong id="preparingOrders">0</strong></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon ready"><i class="fa-solid fa-circle-check"></i></div>
+                        <div><span>آماده شده</span><strong id="readyOrders">0</strong></div>
+                    </div>
+                </section>
+
+                <section class="toolbar">
+                    <div class="search-box">
+                        <span><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="searchInput" placeholder="جستجو با شماره سفارش، نام یا میز...">
+                    </div>
+
+                    <div class="status-filter-toggle" id="statusFilterToggle" role="group" aria-label="فیلتر وضعیت سفارش">
+                        <button type="button" class="status-filter-btn active" data-value="all"><i class="fa-solid fa-layer-group"></i> همه سفارش‌ها</button>
+                        <button type="button" class="status-filter-btn" data-value="جدید"><i class="fa-solid fa-circle-exclamation"></i> جدید</button>
+                        <button type="button" class="status-filter-btn" data-value="در حال آماده‌سازی"><i class="fa-solid fa-fire"></i> در حال آماده‌سازی</button>
+                        <button type="button" class="status-filter-btn" data-value="آماده شد"><i class="fa-solid fa-circle-check"></i> آماده شد</button>
+                        <button type="button" class="status-filter-btn" data-value="در حال ارسال"><i class="fa-solid fa-motorcycle"></i> در حال ارسال</button>
+                        <button type="button" class="status-filter-btn" data-value="تحویل شد"><i class="fa-solid fa-flag-checkered"></i> تحویل شد</button>
+                        <button type="button" class="status-filter-btn" data-value="لغو شد"><i class="fa-solid fa-ban"></i> لغو شد</button>
+                    </div>
+                    <select id="statusFilter" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+                        <option value="all">همه سفارش‌ها</option>
+                        <option value="جدید">جدید</option>
+                        <option value="در حال آماده‌سازی">در حال آماده‌سازی</option>
+                        <option value="آماده شد">آماده شد</option>
+                        <option value="در حال ارسال">در حال ارسال</option>
+                        <option value="تحویل شد">تحویل شد</option>
+                        <option value="لغو شد">لغو شد</option>
+                    </select>
+                </section>
+
+                <section class="date-filter-bar">
+                    <span class="date-filter-label"><i class="fa-solid fa-calendar-days"></i> بازه تاریخ</span>
+                    <div class="date-filter">
+                        <label>از <input type="date" id="dateFrom"></label>
+                        <label>تا <input type="date" id="dateTo"></label>
+                        <button id="clearDateBtn" class="clear-date-btn" title="پاک کردن فیلتر تاریخ"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </section>
+
+                <section class="orders-section">
+                    <div id="ordersContainer" class="orders-container"></div>
+
+                    <div id="emptyState" class="empty-state hidden">
+                        <div class="empty-icon"><i class="fa-solid fa-receipt"></i></div>
+                        <h2>سفارشی پیدا نشد</h2>
+                        <p>هنوز سفارشی با این مشخصات ثبت نشده است.</p>
+                    </div>
+
+                    <div id="loadingState" class="loading-state">
+                        <div class="spinner"></div>
+                        <span>در حال دریافت سفارش‌ها...</span>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- ================= PRODUCTS VIEW ================= -->
+            <section class="view hidden" id="view-products">
+
+                <header class="topbar">
+                    <div>
+                        <h1>محصولات</h1>
+                        <p>مدیریت آیتم‌های منو</p>
+                    </div>
+                    <button class="refresh-btn" id="addProductBtn">
+                        <i class="fa-solid fa-plus"></i> افزودن محصول
+                    </button>
+                </header>
+
+                <section class="toolbar">
+                    <div class="search-box">
+                        <span><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="productSearchInput" placeholder="جستجو در محصولات...">
+                    </div>
+                </section>
+
+                <section class="orders-section">
+                    <div id="productsContainer" class="products-container"></div>
+
+                    <div id="productsEmptyState" class="empty-state hidden">
+                        <div class="empty-icon"><i class="fa-solid fa-utensils"></i></div>
+                        <h2>محصولی پیدا نشد</h2>
+                        <p>یک محصول جدید اضافه کنید.</p>
+                    </div>
+
+                    <div id="productsLoadingState" class="loading-state hidden">
+                        <div class="spinner"></div>
+                        <span>در حال دریافت محصولات...</span>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- ================= REPORTS VIEW ================= -->
+            <section class="view hidden" id="view-reports">
+
+                <header class="topbar">
+                    <div>
+                        <h1>گزارش‌ها</h1>
+                        <p>آمار فروش روزانه و هفتگی</p>
+                    </div>
+                </header>
+
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon new"><i class="fa-solid fa-sack-dollar"></i></div>
+                        <div><span>فروش امروز</span><strong id="todaySales">۰</strong></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon preparing"><i class="fa-solid fa-calendar-days"></i></div>
+                        <div><span>فروش ۷ روز اخیر</span><strong id="weekSales">۰</strong></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon ready"><i class="fa-solid fa-receipt"></i></div>
+                        <div><span>تعداد سفارش (۷ روز)</span><strong id="weekOrderCount">۰</strong></div>
+                    </div>
+                </section>
+
+                <section class="chart-card">
+                    <h2>فروش روزانه (۱۴ روز اخیر)</h2>
+                    <canvas id="dailyChart" height="90"></canvas>
+                </section>
+
+                <section class="chart-card">
+                    <h2>فروش هفتگی (۸ هفته اخیر)</h2>
+                    <canvas id="weeklyChart" height="90"></canvas>
+                </section>
+
+                <!-- Advanced report (from backend aggregation) -->
+                <section class="chart-card" id="advancedReportCard">
+                    <h2>گزارش پیشرفته</h2>
+
+                    <div class="toolbar">
+                        <div class="report-group-toggle" id="reportGroupToggle" role="group" aria-label="بازه گزارش">
+                            <button type="button" class="report-group-btn active" data-value="day"><i class="fa-solid fa-calendar-day"></i> بر اساس روز</button>
+                            <button type="button" class="report-group-btn" data-value="week"><i class="fa-solid fa-calendar-week"></i> بر اساس هفته</button>
+                            <button type="button" class="report-group-btn" data-value="month"><i class="fa-solid fa-calendar"></i> بر اساس ماه</button>
+                        </div>
+                        <select id="reportGroup" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+                            <option value="day">بر اساس روز</option>
+                            <option value="week">بر اساس هفته</option>
+                            <option value="month">بر اساس ماه</option>
+                        </select>
+
+                        <label class="field-inline">از <input type="date" id="reportFrom"></label>
+                        <label class="field-inline">تا <input type="date" id="reportTo"></label>
+
+                        <button class="action-btn primary-btn" id="runReportBtn"><i class="fa-solid fa-filter"></i> اعمال</button>
+                        <button class="action-btn" id="exportCsvBtn"><i class="fa-solid fa-file-export"></i> خروجی CSV</button>
+                    </div>
+
+                    <section class="stats-grid" id="advancedStats">
+                        <div class="stat-card">
+                            <div class="stat-icon new"><i class="fa-solid fa-receipt"></i></div>
+                            <div><span>تعداد سفارش</span><strong id="rpOrderCount">۰</strong></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon preparing"><i class="fa-solid fa-sack-dollar"></i></div>
+                            <div><span>مبلغ فروش</span><strong id="rpTotalSales">۰</strong></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon ready"><i class="fa-solid fa-chart-line"></i></div>
+                            <div><span>میانگین سفارش</span><strong id="rpAvgOrder">۰</strong></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon pending"><i class="fa-solid fa-ban"></i></div>
+                            <div><span>سفارش لغو شده</span><strong id="rpCancelled">۰</strong></div>
+                        </div>
+                    </section>
+
+                    <div class="report-columns">
+                        <div>
+                            <h3>پرفروش‌ترین محصولات</h3>
+                            <table class="report-table" id="topProductsTable">
+                                <thead><tr><th>محصول</th><th>تعداد</th><th>فروش</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div>
+                            <h3>تفکیک نوع سفارش</h3>
+                            <table class="report-table" id="deliveryBreakdownTable">
+                                <thead><tr><th>نوع سفارش</th><th>تعداد</th><th>فروش</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+
+            <!-- ================= QR CODES VIEW ================= -->
+            <section class="view hidden" id="view-qrcodes">
+
+                <header class="topbar">
+                    <div>
+                        <h1>QR میزها</h1>
+                        <p>برای هر میز یک QR اختصاصی بساز که با اسکن، شماره میز خودکار پر می‌شود</p>
+                    </div>
+                </header>
+
+                <section class="toolbar">
+                    <label class="field-inline field-wide">آدرس سایت مشتری
+                        <input type="text" id="qrSiteUrl" placeholder="https://your-domain.example">
+                    </label>
+                    <label class="field-inline field-narrow">از میز <input type="number" id="qrFrom" min="1" value="1"></label>
+                    <label class="field-inline field-narrow">تا میز <input type="number" id="qrTo" min="1" value="12"></label>
+                    <button class="action-btn primary-btn" id="generateQrBtn"><i class="fa-solid fa-qrcode"></i> تولید QR</button>
+                    <button class="action-btn" id="printQrBtn"><i class="fa-solid fa-print"></i> چاپ همه</button>
+                </section>
+
+                <section class="orders-section">
+                    <div id="qrGrid" class="qr-grid"></div>
+                </section>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Product Form Modal -->
+    <div id="productModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="productModalClose"><i class="fa-solid fa-xmark"></i></button>
+            <form id="productForm">
+                <h2 id="productFormTitle">افزودن محصول</h2>
+
+                <label>نام غذا <input type="text" id="pf_name" required></label>
+                <label>دسته‌بندی
+                    <select id="pf_category" required>
+                        <option value="coffee">قهوه</option>
+                        <option value="drink">نوشیدنی</option>
+                        <option value="food">غذا</option>
+                        <option value="burger">برگر</option>
+                        <option value="pizza">پیتزا</option>
+                        <option value="dessert">دسر</option>
+                    </select>
+                </label>
+                <label>توضیحات <textarea id="pf_description" rows="3"></textarea></label>
+                <label>قیمت (تومان) <input type="number" id="pf_price" min="0" required></label>
+                <label>آدرس عکس (URL) <input type="text" id="pf_image" placeholder="https://..."></label>
+                <label class="checkbox-label">
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="pf_available" checked>
+                        <span class="toggle-slider"></span>
+                    </span>
+                    موجود است
+                </label>
+
+                <div class="form-actions">
+                    <button type="submit" id="productSaveBtn"><i class="fa-solid fa-check"></i> ذخیره</button>
+                    <button type="button" id="productCancelBtn"><i class="fa-solid fa-xmark"></i> انصراف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manual Order Modal (staff entry from the panel) -->
+    <div id="manualOrderModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="manualOrderModalClose"><i class="fa-solid fa-xmark"></i></button>
+            <form id="manualOrderForm">
+                <h2>ثبت سفارش دستی</h2>
+
+                <label>نام مشتری <input type="text" id="mo_customerName" placeholder="مشتری حضوری"></label>
+                <label>شماره موبایل (اختیاری) <input type="tel" id="mo_customerPhone" placeholder="09xxxxxxxxx"></label>
+
+                <label>روش تحویل
+                    <select id="mo_deliveryMethod">
+                        <option value="restaurant">🍽️ صرف در رستوران</option>
+                        <option value="delivery">🛵 ارسال با پیک</option>
+                        <option value="pickup">🛍️ دریافت حضوری</option>
+                    </select>
+                </label>
+
+                <label id="mo_tableBox">شماره میز <input type="text" id="mo_tableNumber"></label>
+                <label id="mo_addressBox" class="hidden">آدرس <input type="text" id="mo_address"></label>
+                <label id="mo_etaBox" class="hidden">زمان تحویل (دقیقه) <input type="number" id="mo_pickupEta" min="1"></label>
+
+                <div class="search-box mo-search-box">
+                    <span><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" id="mo_itemSearch" placeholder="جستجوی محصول...">
+                </div>
+
+                <div id="mo_itemsPicker" class="mo-items-picker"></div>
+
+                <div class="mo-total">جمع کل: <strong id="mo_total">۰ تومان</strong></div>
+
+                <div class="form-actions">
+                    <button type="submit" id="manualOrderSaveBtn"><i class="fa-solid fa-check"></i> ثبت سفارش</button>
+                    <button type="button" id="manualOrderCancelBtn"><i class="fa-solid fa-xmark"></i> انصراف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Printable invoice (hidden on screen, shown only when printing) -->
+    <div id="printArea" class="print-area"></div>
+
+    <!-- Printable QR sheet -->
+    <div id="qrPrintArea" class="print-area"></div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const input = document.getElementById("loginPassword");
+            const icon = this.querySelector("i");
+            const showing = input.type === "text";
+
+            input.type = showing ? "password" : "text";
+            icon.className = showing ? "fa-regular fa-eye" : "fa-regular fa-eye-slash";
+        });
+    </script>
+
+    <script src="order.js"></script>
+
+</body>
+
+</html>
