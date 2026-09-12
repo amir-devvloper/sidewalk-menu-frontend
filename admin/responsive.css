@@ -219,6 +219,11 @@ textarea {
         min-width: 0;
     }
 
+    .status-filter-toggle {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
     .date-filter {
         flex: 1 1 100%;
         min-width: 0;
@@ -379,6 +384,10 @@ textarea {
     .toolbar > select {
         flex: 1 1 100%;
         min-height: 43px;
+    }
+
+    .status-filter-toggle {
+        flex: 1 1 100%;
     }
 
     .date-filter {

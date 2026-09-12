@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت | SIDE WALK</title>
 
+    <!-- Apply saved theme before first paint to avoid a flash of the wrong theme -->
+    <script>
+        (function () {
+            var saved = localStorage.getItem("sidewalkAdminTheme");
+            var theme = saved === "dark" ? "dark" : "light";
+            document.documentElement.setAttribute("data-theme", theme);
+        })();
+    </script>
+
     <link rel="stylesheet" href="order.css">
     <link rel="stylesheet" href="responsive.css">
 
@@ -135,6 +144,14 @@
                     <span class="toggle-label"><i class="fa-solid fa-bell"></i> هشدار صوتی</span>
                 </label>
 
+                <label class="theme-toggle">
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="toggle-slider"></span>
+                    </span>
+                    <span class="toggle-label"><i class="fa-solid fa-moon"></i> حالت شب</span>
+                </label>
+
                 <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
             </div>
 
@@ -187,7 +204,16 @@
                         <input type="text" id="searchInput" placeholder="جستجو با شماره سفارش، نام یا میز...">
                     </div>
 
-                    <select id="statusFilter">
+                    <div class="status-filter-toggle" id="statusFilterToggle" role="group" aria-label="فیلتر وضعیت سفارش">
+                        <button type="button" class="status-filter-btn active" data-value="all"><i class="fa-solid fa-layer-group"></i> همه سفارش‌ها</button>
+                        <button type="button" class="status-filter-btn" data-value="جدید"><i class="fa-solid fa-circle-exclamation"></i> جدید</button>
+                        <button type="button" class="status-filter-btn" data-value="در حال آماده‌سازی"><i class="fa-solid fa-fire"></i> در حال آماده‌سازی</button>
+                        <button type="button" class="status-filter-btn" data-value="آماده شد"><i class="fa-solid fa-circle-check"></i> آماده شد</button>
+                        <button type="button" class="status-filter-btn" data-value="در حال ارسال"><i class="fa-solid fa-motorcycle"></i> در حال ارسال</button>
+                        <button type="button" class="status-filter-btn" data-value="تحویل شد"><i class="fa-solid fa-flag-checkered"></i> تحویل شد</button>
+                        <button type="button" class="status-filter-btn" data-value="لغو شد"><i class="fa-solid fa-ban"></i> لغو شد</button>
+                    </div>
+                    <select id="statusFilter" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
                         <option value="all">همه سفارش‌ها</option>
                         <option value="جدید">جدید</option>
                         <option value="در حال آماده‌سازی">در حال آماده‌سازی</option>
@@ -456,6 +482,11 @@
                 <label id="mo_tableBox">شماره میز <input type="text" id="mo_tableNumber"></label>
                 <label id="mo_addressBox" class="hidden">آدرس <input type="text" id="mo_address"></label>
                 <label id="mo_etaBox" class="hidden">زمان تحویل (دقیقه) <input type="number" id="mo_pickupEta" min="1"></label>
+
+                <div class="search-box mo-search-box">
+                    <span><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" id="mo_itemSearch" placeholder="جستجوی محصول...">
+                </div>
 
                 <div id="mo_itemsPicker" class="mo-items-picker"></div>
 

@@ -31,6 +31,29 @@
     --green: #35a66f;
     --blue: #4285f4;
 
+    /* Soft tint backgrounds (stat icons, status badges, delete button) */
+    --tint-neutral: linear-gradient(150deg, #f4f4f4 0%, #e6e6e6 100%);
+    --tint-neutral-color: #333;
+    --tint-red: #fff0f0;
+    --tint-red-strong: #ffe1e1;
+    --tint-red-hover: #ffe6e6;
+    --tint-orange: linear-gradient(150deg, #fff6e7 0%, #ffecc7 100%);
+    --tint-orange-flat: #fff5df;
+    --tint-orange-text: #bd7711;
+    --tint-green: linear-gradient(150deg, #eaf8f1 0%, #d7f2e4 100%);
+
+    --badge-red-bg: #fff0f0;
+    --badge-orange-bg: #fff5df;
+    --badge-orange-text: #bd7711;
+    --badge-green-bg: #e8f7ef;
+    --badge-green-text: #258456;
+    --badge-blue-bg: #eaf1ff;
+    --badge-blue-text: #3168c5;
+    --badge-purple-bg: #eef1ff;
+    --badge-purple-text: #4f4fd1;
+    --badge-grey-bg: #eeeeee;
+    --badge-grey-text: #666666;
+
     --radius-sm: 9px;
     --radius-md: 13px;
     --radius-lg: 18px;
@@ -49,6 +72,86 @@
     --shadow-accent:
         0 10px 26px rgba(214, 168, 95, 0.35);
 }
+
+/* =========================================================
+   Dark mode — toggled by adding data-theme="dark" on <html>
+   (see the sidebar "حالت شب" switch)
+========================================================= */
+:root[data-theme="dark"] {
+    --primary: #efefef;
+    --primary-light: #ffffff;
+
+    --bg: #14151a;
+    --card: #1d1e25;
+
+    --text: #f1f1f3;
+    --muted: #9a9aa5;
+    --border: #34353f;
+
+    --tint-neutral: linear-gradient(150deg, #262730 0%, #1f2027 100%);
+    --tint-neutral-color: #d8d8dc;
+    --tint-red: rgba(229, 72, 77, 0.16);
+    --tint-red-strong: rgba(229, 72, 77, 0.3);
+    --tint-red-hover: rgba(229, 72, 77, 0.24);
+    --tint-orange: linear-gradient(150deg, rgba(230, 154, 45, 0.18) 0%, rgba(230, 154, 45, 0.1) 100%);
+    --tint-orange-flat: rgba(230, 154, 45, 0.18);
+    --tint-orange-text: #f0b559;
+    --tint-green: linear-gradient(150deg, rgba(53, 166, 111, 0.2) 0%, rgba(53, 166, 111, 0.1) 100%);
+
+    --badge-red-bg: rgba(229, 72, 77, 0.16);
+    --badge-orange-bg: rgba(230, 154, 45, 0.18);
+    --badge-orange-text: #f0b559;
+    --badge-green-bg: rgba(53, 166, 111, 0.2);
+    --badge-green-text: #4fcf93;
+    --badge-blue-bg: rgba(66, 133, 244, 0.18);
+    --badge-blue-text: #7aa6ff;
+    --badge-purple-bg: rgba(79, 79, 209, 0.22);
+    --badge-purple-text: #a3a3f7;
+    --badge-grey-bg: rgba(255, 255, 255, 0.08);
+    --badge-grey-text: #b7b7bf;
+
+    --shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35);
+
+    --shadow-md:
+        0 14px 36px rgba(0, 0, 0, 0.4);
+
+    --shadow-lg:
+        0 25px 70px rgba(0, 0, 0, 0.55);
+
+    color-scheme: dark;
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #45464f;
+    border-color: var(--bg);
+}
+
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #55565f;
+}
+
+:root[data-theme="dark"] .date-filter input,
+:root[data-theme="dark"] #manualOrderForm input,
+:root[data-theme="dark"] #manualOrderForm select,
+:root[data-theme="dark"] #reportFrom,
+:root[data-theme="dark"] #reportTo,
+:root[data-theme="dark"] #qrFrom,
+:root[data-theme="dark"] #qrTo,
+:root[data-theme="dark"] #qrSiteUrl {
+    color-scheme: dark;
+}
+
+:root[data-theme="dark"] .order-card:hover,
+:root[data-theme="dark"] .product-card:hover {
+    border-color: #45464f;
+}
+
+:root[data-theme="dark"] .status-filter-btn:hover,
+:root[data-theme="dark"] .report-group-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
 
 /* Premium focus ring for keyboard users */
 :focus-visible {
@@ -457,22 +560,22 @@ body {
 
 
 .stat-icon.new {
-    background: linear-gradient(150deg, #f4f4f4 0%, #e6e6e6 100%);
-    color: #333;
+    background: var(--tint-neutral);
+    color: var(--tint-neutral-color);
 }
 
 .stat-icon.pending {
-    background: linear-gradient(150deg, #fff0f0 0%, #ffe1e1 100%);
+    background: linear-gradient(150deg, var(--tint-red) 0%, var(--tint-red-strong) 100%);
     color: var(--red);
 }
 
 .stat-icon.preparing {
-    background: linear-gradient(150deg, #fff6e7 0%, #ffecc7 100%);
+    background: var(--tint-orange);
     color: var(--orange);
 }
 
 .stat-icon.ready {
-    background: linear-gradient(150deg, #eaf8f1 0%, #d7f2e4 100%);
+    background: var(--tint-green);
     color: var(--green);
 }
 
@@ -511,7 +614,7 @@ body {
 
 
 .search-box {
-    background: white;
+    background: var(--card);
 
     border: 1px solid var(--border);
 
@@ -540,7 +643,7 @@ body {
 
 
 .search-box span {
-    color: #999;
+    color: var(--muted);
 
     font-size: 16px;
 
@@ -571,7 +674,7 @@ body {
 
     border: 1px solid var(--border);
 
-    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23777777' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat left 15px center;
+    background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23777777' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat left 15px center;
 
     border-radius: 11px;
 
@@ -597,13 +700,78 @@ body {
 }
 
 
+/* -------- Status filter (pill toggle, replaces the old plain dropdown) -------- */
+
+.status-filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 5px;
+
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: 100%;
+}
+
+.status-filter-toggle::-webkit-scrollbar {
+    display: none;
+}
+
+.status-filter-btn {
+    flex-shrink: 0;
+
+    border: none;
+    background: transparent;
+    color: var(--muted);
+
+    padding: 9px 14px;
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    transition: background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease), box-shadow .2s var(--ease);
+}
+
+.status-filter-btn i {
+    font-size: 11px;
+    color: inherit;
+}
+
+.status-filter-btn:hover {
+    color: var(--text);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.status-filter-btn:active {
+    transform: scale(.96);
+}
+
+.status-filter-btn.active {
+    color: #111;
+    background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent) 100%);
+    box-shadow: 0 6px 14px rgba(214, 168, 95, 0.3);
+}
+
+
 /* -------- Unstyled inline label/inputs used in QR + Report toolbars -------- */
 
 .field-inline {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: white;
+    background: var(--card);
     border: 1px solid var(--border);
     border-radius: 11px;
     padding: 0 14px;
@@ -660,7 +828,7 @@ body {
 
 
 .order-card {
-    background: white;
+    background: var(--card);
 
     border: 1px solid var(--border);
 
@@ -785,37 +953,37 @@ body {
 
 
 .status-new {
-    background: #fff0f0;
+    background: var(--badge-red-bg);
 
     color: var(--red);
 }
 
 
 .status-preparing {
-    background: #fff5df;
+    background: var(--badge-orange-bg);
 
-    color: #bd7711;
+    color: var(--badge-orange-text);
 }
 
 
 .status-ready {
-    background: #e8f7ef;
+    background: var(--badge-green-bg);
 
-    color: #258456;
+    color: var(--badge-green-text);
 }
 
 
 .status-delivered {
-    background: #eaf1ff;
+    background: var(--badge-blue-bg);
 
-    color: #3168c5;
+    color: var(--badge-blue-text);
 }
 
 
 .status-cancelled {
-    background: #eeeeee;
+    background: var(--badge-grey-bg);
 
-    color: #666;
+    color: var(--badge-grey-text);
 }
 
 
@@ -1002,16 +1170,16 @@ body {
 
 
 .delete-btn {
-    background: #fff0f0;
+    background: var(--tint-red);
 
     color: var(--red);
 
-    border-color: #ffe1e1;
+    border-color: var(--tint-red-strong);
 }
 
 
 .delete-btn:hover {
-    background: #ffe6e6;
+    background: var(--tint-red-hover);
 }
 
 
@@ -1040,7 +1208,7 @@ body {
 
 .empty-state,
 .loading-state {
-    background: white;
+    background: var(--card);
 
     border: 1px solid var(--border);
 
@@ -1162,7 +1330,7 @@ body {
 .modal-content {
     position: relative;
 
-    background: white;
+    background: var(--card);
 
     width: 100%;
 
@@ -1772,7 +1940,8 @@ body {
    NEW: Sidebar sound toggle + logout
 ========================================================= */
 
-.sound-toggle {
+.sound-toggle,
+.theme-toggle {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1785,7 +1954,8 @@ body {
     transition: background .2s var(--ease);
 }
 
-.sound-toggle:hover {
+.sound-toggle:hover,
+.theme-toggle:hover {
     background: rgba(255, 255, 255, 0.05);
 }
 
@@ -1902,6 +2072,9 @@ body {
     border: 1px solid var(--border);
     border-radius: 8px;
     font-family: inherit;
+    background: var(--card);
+    color: var(--text);
+    color-scheme: light;
 }
 
 .clear-date-btn {
@@ -2219,8 +2392,8 @@ body {
 ========================================================= */
 
 .status-shipping {
-    background: #eef1ff;
-    color: #4f4fd1;
+    background: var(--badge-purple-bg);
+    color: var(--badge-purple-text);
 }
 
 
@@ -2283,12 +2456,28 @@ body {
     box-shadow: 0 0 0 3px rgba(214, 168, 95, 0.15);
 }
 
+.mo-search-box {
+    margin-bottom: 10px;
+    background: var(--card);
+}
+
+.mo-search-box input {
+    padding: 11px 4px;
+}
+
 .mo-items-picker {
     max-height: 260px;
     overflow-y: auto;
     border: 1px solid var(--border);
     border-radius: 10px;
     margin-bottom: 12px;
+}
+
+.mo-items-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
 }
 
 .mo-item-row {
@@ -2379,6 +2568,9 @@ body {
     display: flex;
     justify-content: center;
     margin-bottom: 10px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 .qr-print-sheet {

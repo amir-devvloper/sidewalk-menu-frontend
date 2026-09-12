@@ -14,6 +14,23 @@ const STATUSES = [
     "لغو شد"
 ];
 
+// "در حال ارسال" (send with courier) only makes sense for delivery orders.
+// Dine-in / pickup orders skip straight from "آماده شد" to "تحویل شد".
+const STATUSES_ONLY_FOR_DELIVERY = ["در حال ارسال"];
+
+function getStatusesForOrder(order) {
+    const method = order.deliveryMethod || "restaurant";
+
+    if (method === "delivery") return STATUSES;
+
+    return STATUSES.filter(status => {
+        if (!STATUSES_ONLY_FOR_DELIVERY.includes(status)) return true;
+        // Keep the current status selectable even if it doesn't fit the
+        // method, so we never hide the order's real state from staff.
+        return status === order.status;
+    });
+}
+
 let orders = [];
 let products = [];
 let pollTimer = null;
@@ -37,12 +54,14 @@ const loginSubmit = document.getElementById("loginSubmit");
 const appShell = document.getElementById("appShell");
 const logoutBtn = document.getElementById("logoutBtn");
 const soundToggle = document.getElementById("soundToggle");
+const themeToggle = document.getElementById("themeToggle");
 
 const ordersContainer = document.getElementById("ordersContainer");
 const loadingState = document.getElementById("loadingState");
 const emptyState = document.getElementById("emptyState");
 const searchInput = document.getElementById("searchInput");
 const statusFilter = document.getElementById("statusFilter");
+const statusFilterButtons = document.querySelectorAll("#statusFilterToggle .status-filter-btn");
 const dateFrom = document.getElementById("dateFrom");
 const dateTo = document.getElementById("dateTo");
 const clearDateBtn = document.getElementById("clearDateBtn");
@@ -79,6 +98,44 @@ const pf_available = document.getElementById("pf_available");
 const printArea = document.getElementById("printArea");
 const toast = document.getElementById("toast");
 
+
+// ===============================
+// Theme (dark / light mode)
+// ===============================
+
+const THEME_KEY = "sidewalkAdminTheme";
+
+function applyTheme(theme) {
+    const resolved = theme === "dark" ? "dark" : "light";
+
+    document.documentElement.setAttribute("data-theme", resolved);
+    themeToggle.checked = resolved === "dark";
+
+    try {
+        localStorage.setItem(THEME_KEY, resolved);
+    } catch (_) {
+        // localStorage may be unavailable (private mode, etc.) — theme just won't persist
+    }
+
+    if (window.Chart) {
+        Chart.defaults.color = resolved === "dark" ? "#c7c7cf" : "#666666";
+        Chart.defaults.borderColor = resolved === "dark" ? "#34353f" : "#e9e9e9";
+
+        // Redraw any already-rendered charts so they pick up the new colors
+        if (dailyChartInstance || weeklyChartInstance) {
+            renderReports();
+        }
+    }
+}
+
+themeToggle.addEventListener("change", () => {
+    applyTheme(themeToggle.checked ? "dark" : "light");
+});
+
+// Sync the switch + Chart.js defaults with whatever the inline <head> script
+// already applied (it runs before paint to avoid a flash of the wrong theme)
+applyTheme(document.documentElement.getAttribute("data-theme") || "light");
+
 // Manual order entry
 const manualOrderBtn = document.getElementById("manualOrderBtn");
 const manualOrderModal = document.getElementById("manualOrderModal");
@@ -95,8 +152,10 @@ const mo_address = document.getElementById("mo_address");
 const mo_etaBox = document.getElementById("mo_etaBox");
 const mo_pickupEta = document.getElementById("mo_pickupEta");
 const mo_itemsPicker = document.getElementById("mo_itemsPicker");
+const mo_itemSearch = document.getElementById("mo_itemSearch");
 const mo_total = document.getElementById("mo_total");
 let manualOrderQuantities = new Map();
+let manualOrderSearchTerm = "";
 
 // QR codes
 const qrSiteUrl = document.getElementById("qrSiteUrl");
@@ -478,7 +537,7 @@ function createOrderCard(order) {
         `)
         .join("");
 
-    const statusOptionsHTML = STATUSES.map(
+    const statusOptionsHTML = getStatusesForOrder(order).map(
         s => `<option value="${escapeHTML(s)}" ${s === order.status ? "selected" : ""}>${escapeHTML(s)}</option>`
     ).join("");
 
@@ -788,14 +847,29 @@ function updateManualOrderConditionalFields() {
 
 mo_deliveryMethod.addEventListener("change", updateManualOrderConditionalFields);
 
+mo_itemSearch.addEventListener("input", () => {
+    manualOrderSearchTerm = mo_itemSearch.value;
+    renderManualOrderItemsPicker();
+});
+
 function renderManualOrderItemsPicker() {
     if (products.length === 0) {
         mo_itemsPicker.innerHTML = `<p class="sub-info">ابتدا از بخش «محصولات» چند آیتم اضافه کنید.</p>`;
         return;
     }
 
-    mo_itemsPicker.innerHTML = products
+    const term = manualOrderSearchTerm.trim().toLowerCase();
+
+    const visibleProducts = products
         .filter(p => p.availableNow !== false)
+        .filter(p => !term || p.name.toLowerCase().includes(term));
+
+    if (visibleProducts.length === 0) {
+        mo_itemsPicker.innerHTML = `<p class="mo-items-empty">محصولی با این نام پیدا نشد.</p>`;
+        return;
+    }
+
+    mo_itemsPicker.innerHTML = visibleProducts
         .map(product => {
             const qty = manualOrderQuantities.get(product._id) || 0;
             return `
@@ -836,6 +910,8 @@ function updateManualOrderTotal() {
 manualOrderBtn.addEventListener("click", async () => {
     manualOrderForm.reset();
     manualOrderQuantities = new Map();
+    manualOrderSearchTerm = "";
+    mo_itemSearch.value = "";
     updateManualOrderConditionalFields();
 
     if (products.length === 0) {
@@ -1504,6 +1580,16 @@ function showToast(message) {
 
 searchInput.addEventListener("input", renderOrders);
 statusFilter.addEventListener("change", renderOrders);
+
+statusFilterButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        statusFilterButtons.forEach(b => b.classList.remove("active"));
+        void btn.offsetWidth; // restart the pop animation even if clicked again
+        btn.classList.add("active");
+        statusFilter.value = btn.dataset.value;
+        renderOrders();
+    });
+});
 refreshBtn.addEventListener("click", loadOrders);
 
 modalClose.addEventListener("click", () => {
