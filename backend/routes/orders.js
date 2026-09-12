@@ -21,6 +21,76 @@ const CUSTOMER_CANCEL_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const DELIVERY_METHODS = new Set(["restaurant", "delivery", "pickup"]);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const ABAN_API_BASE = "https://abangateway.ir/api/v1";
+const ABAN_API_TOKEN = String(process.env.ABAN_API_TOKEN || "").trim();
+const ABAN_CALLBACK_URL =
+    String(process.env.ABAN_CALLBACK_URL || "https://sidewalk-menu-backend.onrender.com/api/orders/payment/callback").trim();
+
+async function abanRequest(path, options = {}) {
+    if (!ABAN_API_TOKEN) {
+        const error = new Error("ABAN_API_TOKEN تنظیم نشده است.");
+        error.status = 503;
+        throw error;
+    }
+
+    const response = await fetch(`${ABAN_API_BASE}${path}`, {
+        ...options,
+        headers: {
+            Authorization: `Bearer ${ABAN_API_TOKEN}`,
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        }
+    });
+
+    let data = {};
+    try {
+        data = await response.json();
+    } catch (_) {}
+
+    if (!response.ok) {
+        const error = new Error(
+            data?.message ||
+            data?.error?.message ||
+            data?.error ||
+            `Aban Gateway HTTP ${response.status}`
+        );
+        error.status = response.status;
+        error.data = data;
+        throw error;
+    }
+
+    return data;
+}
+
+async function createAbanInvoice({ orderCode, totalToman, customerName, customerPhone }) {
+    const amountRial = Math.round(Number(totalToman) * 10);
+    if (!Number.isSafeInteger(amountRial) || amountRial <= 0) {
+        throw new Error("مبلغ سفارش برای پرداخت نامعتبر است.");
+    }
+
+    return abanRequest("/invoices", {
+        method: "POST",
+        body: JSON.stringify({
+            amount_rial: amountRial,
+            order_id: orderCode,
+            callback_url: ABAN_CALLBACK_URL,
+            description: `پرداخت سفارش SideWalk ${orderCode}`,
+            metadata: {
+                order_code: orderCode,
+                customer_name: customerName,
+                customer_phone: customerPhone
+            }
+        })
+    });
+}
+
+async function verifyAbanInvoice(invoiceId) {
+    return abanRequest(`/invoices/${encodeURIComponent(invoiceId)}/verify`, {
+        method: "POST",
+        body: JSON.stringify({})
+    });
+}
+
 function makeOrderCode() {
     return `SW-${crypto.randomInt(10000000, 100000000)}-${crypto.randomInt(1000, 10000)}`;
 }
@@ -257,14 +327,159 @@ router.post("/", async (req, res) => {
             return res.status(500).json({ success: false, message: "خطا در ثبت سفارش." });
         }
 
-        return res.status(201).json({
-            success: true,
-            message: "سفارش با موفقیت ثبت شد.",
-            order: mapOrder(data)
-        });
+        try {
+            const invoice = await createAbanInvoice({
+                orderCode: data.order_code,
+                totalToman: resolved.total,
+                customerName: customer.customerName,
+                customerPhone: customer.customerPhone
+            });
+
+            const invoiceId = invoice?.invoice_id || invoice?.id;
+            const paymentUrl = invoice?.payment_url;
+
+            if (!invoiceId || !paymentUrl) {
+                throw new Error("آبان لینک پرداخت معتبری برنگرداند.");
+            }
+
+            const { error: paymentUpdateError } = await supabase
+                .from("orders")
+                .update({
+                    payment_status: "pending",
+                    payment_invoice_id: String(invoiceId),
+                    payment_url: String(paymentUrl)
+                })
+                .eq("id", data.id);
+
+            if (paymentUpdateError) throw paymentUpdateError;
+
+            return res.status(201).json({
+                success: true,
+                message: "سفارش ثبت شد و آماده پرداخت است.",
+                order: {
+                    ...mapOrder(data),
+                    paymentStatus: "pending",
+                    paymentInvoiceId: String(invoiceId),
+                    paymentUrl: String(paymentUrl)
+                },
+                payment: {
+                    invoiceId: String(invoiceId),
+                    paymentUrl: String(paymentUrl),
+                    payableToman: invoice?.payable_toman ?? null,
+                    payableRial: invoice?.payable_rial ?? null
+                }
+            });
+        } catch (paymentError) {
+            console.error("Aban invoice error:", paymentError?.message || paymentError);
+            await supabase
+                .from("orders")
+                .update({ payment_status: "failed" })
+                .eq("id", data.id);
+
+            return res.status(502).json({
+                success: false,
+                message: paymentError?.message || "ایجاد لینک پرداخت ناموفق بود."
+            });
+        }
     } catch (error) {
-        console.error("Order create error:", error.message);
+        console.error("Order create error:", error?.message || error);
         return res.status(500).json({ success: false, message: "خطا در ثبت سفارش." });
+    }
+});
+
+// Aban returns the customer to this public callback after payment.
+// The callback never trusts a browser-provided success flag; verification
+// is performed server-to-server with Aban.
+router.get("/payment/callback", async (req, res) => {
+    const invoiceId = String(
+        req.query?.invoice_id || req.query?.invoiceId || ""
+    ).trim();
+    const orderCode = String(
+        req.query?.order_id || req.query?.orderCode || ""
+    ).trim();
+
+    try {
+        let query = supabase.from("orders").select("*").limit(1);
+        if (invoiceId) query = query.eq("payment_invoice_id", invoiceId);
+        else if (orderCode) query = query.eq("order_code", orderCode);
+        else return res.status(400).send("شناسه پرداخت یا سفارش ارسال نشده است.");
+
+        const { data: orders, error } = await query;
+        if (error) throw error;
+        const order = orders?.[0];
+        if (!order) return res.status(404).send("سفارش پیدا نشد.");
+
+        const actualInvoiceId = String(order.payment_invoice_id || invoiceId).trim();
+        if (!actualInvoiceId) return res.status(400).send("شناسه فاکتور سفارش موجود نیست.");
+
+        let verification;
+        try {
+            verification = await verifyAbanInvoice(actualInvoiceId);
+        } catch (verifyError) {
+            if (verifyError?.status !== 409) throw verifyError;
+        }
+
+        const { data: updated, error: updateError } = await supabase
+            .from("orders")
+            .update({
+                payment_status: "paid",
+                paid_at: order.payment_status === "paid" ? order.paid_at : new Date().toISOString()
+            })
+            .eq("id", order.id)
+            .select("*")
+            .single();
+
+        if (updateError) throw updateError;
+
+        const safeCode = String(updated.order_code).replace(/[<>&"']/g, "");
+        const frontend = "https://sidewalk-menu-frontend.pages.dev/";
+        return res.redirect(302, `${frontend}?payment=success&order_code=${encodeURIComponent(safeCode)}`);
+    } catch (error) {
+        console.error("Aban callback error:", error?.message || error);
+        const code = encodeURIComponent(orderCode || "");
+        const frontend = "https://sidewalk-menu-frontend.pages.dev/";
+        return res.redirect(302, `${frontend}?payment=failed&order_code=${code}`);
+    }
+});
+
+// Manual retry/status check for the frontend or support tooling.
+router.get("/payment/verify/:invoiceId", async (req, res) => {
+    const invoiceId = String(req.params.invoiceId || "").trim();
+    if (!invoiceId) return res.status(400).json({ success: false, message: "شناسه فاکتور نامعتبر است." });
+
+    try {
+        const { data: order, error } = await supabase
+            .from("orders")
+            .select("*")
+            .eq("payment_invoice_id", invoiceId)
+            .maybeSingle();
+        if (error) throw error;
+        if (!order) return res.status(404).json({ success: false, message: "سفارش پیدا نشد." });
+
+        if (order.payment_status === "paid") {
+            return res.json({ success: true, verified: true, alreadyPaid: true, order: mapOrder(order) });
+        }
+
+        try {
+            await verifyAbanInvoice(invoiceId);
+        } catch (verifyError) {
+            if (verifyError?.status !== 409) {
+                return res.status(402).json({ success: false, verified: false, message: verifyError?.message || "پرداخت هنوز تأیید نشده است." });
+            }
+        }
+
+        const { data: updated, error: updateError } = await supabase
+            .from("orders")
+            .update({ payment_status: "paid", paid_at: new Date().toISOString() })
+            .eq("id", order.id)
+            .select("*")
+            .single();
+        if (updateError) throw updateError;
+
+        return res.json({ success: true, verified: true, order: mapOrder(updated) });
+    } catch (error) {
+        console.error("Aban verify error:", error?.message || error);
+        return res.status(error?.status || 500).json({ success: false, message: error?.message || "تأیید پرداخت ناموفق بود." });
     }
 });
 

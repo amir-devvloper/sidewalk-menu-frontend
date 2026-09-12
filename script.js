@@ -2884,25 +2884,27 @@ async function submitOrder() {
 
         const paymentUrl =
             data?.payment?.paymentUrl ||
+            data?.payment?.payment_url ||
             data?.order?.paymentUrl ||
             data?.order?.payment_url ||
             null;
 
         if (!paymentUrl) {
-            throw new Error("لینک پرداخت از سرور دریافت نشد.");
+            throw new Error(
+                "سفارش ثبت شد اما لینک پرداخت از سرور دریافت نشد. لطفاً تنظیمات درگاه Aban را بررسی کنید."
+            );
         }
 
         saveLastOrder(orderCode);
         saveLastPhone(phone);
 
-        // The order already exists server-side. Clear the local cart before
-        // leaving the site so a refresh cannot create the same order again.
         cart = [];
         saveCart();
         renderCart();
         destroyDeliveryMap();
 
-        window.location.href = paymentUrl;
+        // Navigate in the same tab so the browser does not block the payment page.
+        window.location.assign(paymentUrl);
     } catch (error) {
         console.error(
             "Order error:",
@@ -3581,41 +3583,33 @@ function initHeroBurger() {
 initHeroBurger();
 
 /* =========================================================
-   ABAN PAYMENT RETURN
+   INITIALIZE
 ========================================================= */
 
-function handlePaymentReturn() {
+loadProductsFromAPI();
+function handlePaymentResultFromAban() {
     const params = new URLSearchParams(window.location.search);
     const payment = params.get("payment");
-    const orderCode = params.get("order");
-
+    const orderCode = params.get("order_code");
     if (!payment) return;
 
     if (payment === "success") {
         showToast(
             orderCode
-                ? `پرداخت سفارش ${orderCode} با موفقیت انجام شد.`
-                : "پرداخت با موفقیت انجام شد."
+                ? `پرداخت سفارش ${orderCode} با موفقیت تأیید شد.`
+                : "پرداخت با موفقیت تأیید شد.",
+            "success"
         );
     } else if (payment === "failed") {
-        showToast(
-            "پرداخت تکمیل یا تأیید نشد. در صورت کسر وجه، وضعیت سفارش را پیگیری کنید."
-        );
+        showToast("پرداخت تأیید نشد. اگر مبلغ از حساب شما کم شده، سفارش را پیگیری کنید.", "warning");
     }
 
-    // Remove payment query parameters after displaying the result.
-    const cleanUrl = `${window.location.pathname}${window.location.hash || ""}`;
+    const cleanUrl = `${window.location.pathname}${params.has("table") ? `?table=${encodeURIComponent(params.get("table"))}` : ""}${window.location.hash}`;
     window.history.replaceState({}, document.title, cleanUrl);
 }
 
-handlePaymentReturn();
-
-/* =========================================================
-   INITIALIZE
-========================================================= */
-
-loadProductsFromAPI();
 window.addEventListener('load', function() {
+    handlePaymentResultFromAban();
   setTimeout(function() {
     document.getElementById('loadingScreen').classList.add('hide');
 
