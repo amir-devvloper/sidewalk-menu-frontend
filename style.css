@@ -16,10 +16,9 @@
     --primary: #8b3dff;
     --primary-dark: #6824d4;
 
-    --purple: #9b4dff;
+    --purple: #b77aff;
     --purple-light: #b77aff;
 
-    --orange: #ff7a00;
     --orange-light: #ff9a3d;
 
     --red: #ff4d3d;
@@ -29,7 +28,7 @@
     --muted: #99919f;
     --muted-dark: #68616f;
 
-    --neon: #b88e47;
+    --neon: #b77aff;
 
     /* Shared surface colors */
     --light: #100d14;
@@ -1417,12 +1416,6 @@ body.light .categories {
     line-height: 1;
 }
 
-#trackOrderBtn:hover {
-    background: var(--neon);
-    border-color: transparent;
-    color: #fff;
-}
-
 /* =========================================================
    ORDER TRACKING PAGE
 ========================================================= */
@@ -2461,12 +2454,8 @@ body.light .categories {
 
     border-radius: 14px;
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--purple),
-            var(--orange)
-        );
+    background: #b77aff;
+
 
     color: #fff;
 
@@ -2477,7 +2466,7 @@ body.light .categories {
 
 .checkout-btn:hover {
     transform: translateY(-2px);
-
+    background: #b77aff;
     box-shadow:
         0 10px 25px rgba(139, 61, 255, 0.25);
 }
@@ -3566,12 +3555,8 @@ body.light .payment-info-item strong {
     bottom: 0;
     right: 0;
     width: 3px;
-    background:
-        linear-gradient(
-            180deg,
-            var(--purple),
-            var(--orange)
-        );
+    background: #b77aff;
+
     border-radius: 0 14px 14px 0;
 }
 
@@ -4460,7 +4445,6 @@ body.light::-webkit-scrollbar-thumb {
 }
 
 /* Header actions use one interaction language. */
-#trackOrderBtn:hover,
 .favorites-nav-button:hover {
     background: rgba(139, 61, 255, 0.12);
     border-color: rgba(139, 61, 255, 0.35);
@@ -4468,9 +4452,8 @@ body.light::-webkit-scrollbar-thumb {
     transform: translateY(-2px);
 }
 
-#trackOrderBtn:hover i,
 .favorites-nav-button:hover i {
-    color: var(--purple-light);
+    color: var(--purple);
 }
 
 /* Favorites */
