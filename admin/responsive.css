@@ -224,6 +224,15 @@ textarea {
         min-width: 0;
     }
 
+    .date-filter-bar {
+        flex-wrap: wrap;
+    }
+
+    .date-filter-label {
+        border-left: none;
+        padding-left: 0;
+    }
+
     .date-filter {
         flex: 1 1 100%;
         min-width: 0;
@@ -409,6 +418,15 @@ textarea {
     .clear-date-btn {
         width: 43px;
         min-width: 43px;
+    }
+
+    .date-filter-bar {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .date-filter-label {
+        width: 100%;
     }
 
     .order-card {
