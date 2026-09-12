@@ -288,18 +288,19 @@ body.light .header {
 }
 
 .icon-btn:hover {
-    color: #fff;
+    color: var(--purple-light);
 
-    background:
-        linear-gradient(
-            135deg,
-            var(--purple),
-            var(--orange)
-        );
+    background: rgba(183, 122, 255, 0.14);
 
-    border-color: transparent;
+    border-color: rgba(183, 122, 255, 0.45);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 
     transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 24px rgba(183, 122, 255, 0.22);
 }
 
 .favorites-nav-button {
