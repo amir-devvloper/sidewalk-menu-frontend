@@ -45,13 +45,13 @@ function getStatusesForOrder(order) {
 //   pending   -> "در حال انتظار"   (لینک پرداخت آبان ارسال شده، منتظر پرداخت مشتری)
 //   paid      -> "پرداخت شده"
 //   expired   -> "لینک پرداخت منقضی شد"
-//   cancelled -> "پرداخت لغو شد"
+//   cancelled -> "لغو شد"
 //   unpaid    -> پیش‌فرض (سفارش‌های نقدی/حضوری) — بج نشون داده نمی‌شه
 const PAYMENT_STATUS_LABELS = {
     pending: "در حال انتظار",
     paid: "پرداخت شده",
     expired: "لینک پرداخت منقضی شد",
-    cancelled: "پرداخت لغو شد"
+    cancelled: "لغو شد"
 };
 
 const PAYMENT_STATUS_CLASSES = {
