@@ -581,6 +581,12 @@ router.post("/:orderCode/cancel", async (req, res) => {
 // Aban sends signed payment events to this server-to-server webhook.
 // We verify both the HMAC signature and the invoice via Aban before marking an order paid.
 router.post("/payment/webhook", async (req, res) => {
+    // --- TEMPORARY DEBUG LOGGING: remove once the cancel-webhook issue is diagnosed ---
+    console.log("=== Aban webhook received ===");
+    console.log("Headers:", JSON.stringify(req.headers));
+    console.log("Raw body:", req.rawBody ? req.rawBody.toString("utf8") : "(no rawBody captured)");
+    console.log("==============================");
+    // --- END TEMPORARY DEBUG LOGGING ---
     try {
         if (!ABAN_WEBHOOK_SECRET) {
             console.error("ABAN_WEBHOOK_SECRET is missing; refusing unsigned webhook processing.");
