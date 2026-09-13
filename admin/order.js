@@ -572,6 +572,7 @@ function createOrderCard(order) {
                 <div>
                     <span class="item-name">${escapeHTML(item.name)}</span>
                     <span class="item-quantity">× ${item.quantity}</span>
+                    ${item.note ? `<br><span class="item-note">📝 ${escapeHTML(item.note)}</span>` : ""}
                 </div>
                 <span class="item-price">${formatPrice(item.price * item.quantity)}</span>
             </div>
@@ -638,6 +639,18 @@ function createOrderCard(order) {
     `;
 }
 
+function getLocationMapLinkHTML(order) {
+    const lat = Number(order.latitude);
+    const lng = Number(order.longitude);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return "";
+    }
+
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    return `<br><a class="sub-info location-link" href="${url}" target="_blank" rel="noopener">📍 مشاهده روی نقشه (${lat.toFixed(5)}, ${lng.toFixed(5)})</a>`;
+}
+
 function getDeliveryMethodHTML(order) {
     const method = order.deliveryMethod || "restaurant";
 
@@ -645,6 +658,7 @@ function getDeliveryMethodHTML(order) {
         return `
             <span class="delivery-tag"><i class="fa-solid fa-motorcycle"></i> ارسال با پیک</span>
             <br><span class="sub-info">${order.address ? escapeHTML(order.address) : "آدرس ثبت نشده"}</span>
+            ${getLocationMapLinkHTML(order)}
         `;
     }
 
@@ -718,7 +732,7 @@ function openOrderDetails(orderCode) {
     const itemsRows = order.items
         .map(item => `
             <tr>
-                <td>${escapeHTML(item.name)}</td>
+                <td>${escapeHTML(item.name)}${item.note ? `<br><small class="item-note">📝 ${escapeHTML(item.note)}</small>` : ""}</td>
                 <td>${item.quantity}</td>
                 <td>${formatPrice(item.price)}</td>
                 <td>${formatPrice(item.price * item.quantity)}</td>
@@ -799,7 +813,7 @@ function printInvoice(orderCode) {
     const itemsRows = order.items
         .map(item => `
             <tr>
-                <td>${escapeHTML(item.name)}</td>
+                <td>${escapeHTML(item.name)}${item.note ? `<br><small>📝 ${escapeHTML(item.note)}</small>` : ""}</td>
                 <td>${item.quantity}</td>
                 <td>${formatPrice(item.price)}</td>
                 <td>${formatPrice(item.price * item.quantity)}</td>

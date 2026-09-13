@@ -1090,6 +1090,16 @@ body {
     word-break: break-word;
 }
 
+.location-link {
+    color: var(--primary, #8b3dff);
+
+    text-decoration: underline;
+}
+
+.location-link:hover {
+    opacity: 0.85;
+}
+
 
 /* Items */
 
@@ -1131,6 +1141,19 @@ body {
 
 .item-price {
     font-weight: 700;
+}
+
+
+.item-note {
+    display: inline-block;
+
+    margin-top: 3px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+    font-weight: 400;
+    font-style: italic;
 }
 
 

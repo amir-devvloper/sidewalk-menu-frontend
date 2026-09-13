@@ -11,6 +11,10 @@ let searchTerm = "";
 const API_BASE_URL =
     window.SIDEWALK_API_URL || "https://sidewalk-menu-backend.onrender.com/api";
 
+// Max length for a per-item customization note (kept in sync with the
+// backend's MAX_ITEM_NOTE in routes/orders.js).
+const MAX_ITEM_NOTE_LENGTH = 300;
+
 /* =========================================================
    TABLE QR CODE (?table=N in the URL)
 ========================================================= */
@@ -510,6 +514,26 @@ function saveCart() {
     localStorage.setItem("sideWalkCart", JSON.stringify(cart));
 }
 
+// Minimal escaping for values placed inside an HTML attribute/text node
+// (the per-item note is free text typed by the customer).
+function escapeHtmlAttr(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function updateCartItemNote(id, value) {
+    const item = cart.find(cartItem => cartItem.id === id);
+    if (!item) return;
+
+    item.note = String(value || "").slice(0, MAX_ITEM_NOTE_LENGTH);
+    saveCart();
+    // Intentionally not calling renderCart() here: re-rendering the whole
+    // cart on every keystroke would rebuild the textarea and steal focus.
+}
+
 function saveFavorites() {
     localStorage.setItem(
         "sideWalkFavorites",
@@ -584,7 +608,8 @@ function addToCart(item, qty = 1) {
     } else {
         cart.push({
             id: item.id,
-            quantity: qty
+            quantity: qty,
+            note: ""
         });
     }
 
@@ -686,6 +711,14 @@ function renderCart() {
                     >
                         حذف
                     </button>
+
+                    <textarea
+                        class="cart-item-note"
+                        data-id="${product.id}"
+                        maxlength="${MAX_ITEM_NOTE_LENGTH}"
+                        placeholder="توضیح برای این محصول (مثلاً «سیروپ کمتر»، «بدون پیاز»)"
+                        rows="1"
+                    >${escapeHtmlAttr(cartItem.note || "")}</textarea>
                 </div>
             `;
 
@@ -705,6 +738,13 @@ function renderCart() {
                 .addEventListener("click", () => {
                     removeFromCart(product.id);
                 });
+
+            const noteField = element.querySelector(".cart-item-note");
+            if (noteField) {
+                noteField.addEventListener("input", () => {
+                    updateCartItemNote(product.id, noteField.value);
+                });
+            }
 
             cartItems.appendChild(element);
         });
@@ -1770,12 +1810,36 @@ function loadDeliveryMap() {
             "locationBtn"
         );
 
-    if (!locationBtn) return;
+    if (locationBtn) {
+        locationBtn.addEventListener(
+            "click",
+            getUserLocation
+        );
+    }
 
-    locationBtn.addEventListener(
-        "click",
-        getUserLocation
-    );
+    const manualAddressBtn =
+        document.getElementById("manualAddressBtn");
+    const manualAddressInput =
+        document.getElementById("manualAddressInput");
+
+    if (manualAddressBtn) {
+        manualAddressBtn.addEventListener(
+            "click",
+            handleManualAddressSubmit
+        );
+    }
+
+    if (manualAddressInput) {
+        manualAddressInput.addEventListener(
+            "keydown",
+            event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleManualAddressSubmit();
+                }
+            }
+        );
+    }
 }
 
 /* =========================================================
@@ -1840,7 +1904,8 @@ function getUserLocation() {
 
             selectedLocation = {
                 lat,
-                lng
+                lng,
+                source: "gps"
             };
 
             selectedAddress =
@@ -2175,6 +2240,112 @@ async function updateLocationAddress(
 }
 
 /* =========================================================
+   FORWARD GEOCODING (MANUAL ADDRESS INPUT)
+========================================================= */
+
+// Turns a customer-typed address into coordinates, restricted to the
+// Kerman service area. Returns null (never throws) when nothing usable
+// was found, so the caller can leave the previously selected location
+// untouched instead of silently overwriting it with a bad guess.
+async function forwardGeocode(addressText) {
+    const url =
+        "https://nominatim.openstreetmap.org/search" +
+        `?format=jsonv2&q=${encodeURIComponent(`${addressText}, کرمان, ایران`)}` +
+        "&limit=5&accept-language=fa" +
+        // Bias + hard-bound results to the Kerman area (left,top,right,bottom).
+        "&viewbox=56.90,30.42,57.27,30.15&bounded=1";
+
+    try {
+        const response = await fetch(url, {
+            headers: { Accept: "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Forward geocoding failed: ${response.status}`);
+        }
+
+        const results = await response.json();
+
+        if (!Array.isArray(results) || results.length === 0) {
+            return null;
+        }
+
+        const match = results.find(result =>
+            isInsideKerman(Number(result.lat), Number(result.lon))
+        );
+
+        if (!match) return null;
+
+        return {
+            lat: Number(match.lat),
+            lng: Number(match.lon),
+            displayName: match.display_name || addressText
+        };
+    } catch (error) {
+        console.warn("Forward geocoding error:", error);
+        return null;
+    }
+}
+
+async function handleManualAddressSubmit() {
+    const input = document.getElementById("manualAddressInput");
+    const button = document.getElementById("manualAddressBtn");
+
+    if (!input) return;
+
+    const typedAddress = input.value.trim();
+
+    if (!typedAddress) {
+        showToast("لطفاً آدرس را وارد کنید.");
+        return;
+    }
+
+    if (button) {
+        button.disabled = true;
+        button.textContent = "در حال جستجوی آدرس...";
+    }
+
+    const result = await forwardGeocode(typedAddress);
+
+    if (button) {
+        button.disabled = false;
+        button.textContent = "جستجوی آدرس روی نقشه";
+    }
+
+    if (!result) {
+        // Important: do NOT touch selectedLocation/selectedAddress here.
+        // An unresolved address must never silently replace whatever
+        // location was already selected.
+        showToast(
+            "آدرس پیدا نشد یا خارج از محدوده کرمان است. لطفاً دقیق‌تر بنویسید یا موقعیت را روی نقشه انتخاب کنید."
+        );
+        return;
+    }
+
+    selectedLocation = {
+        lat: result.lat,
+        lng: result.lng,
+        source: "manual"
+    };
+
+    await showDeliveryMap(result.lat, result.lng, 0);
+
+    // showDeliveryMap() reverse-geocodes the pin and would otherwise
+    // overwrite this with its own (GPS-style) label — the address the
+    // customer actually typed takes priority here.
+    selectedAddress = typedAddress;
+
+    const addressElement = document.getElementById("selectedAddress");
+    if (addressElement) {
+        addressElement.textContent = typedAddress;
+    }
+
+    showToast(
+        "آدرس روی نقشه پیدا شد. در صورت نیاز می‌توانید موقعیت را روی نقشه اصلاح کنید."
+    );
+}
+
+/* =========================================================
    LOCATION CONFIRM BUTTON
 ========================================================= */
 
@@ -2281,6 +2452,31 @@ function confirmLocation() {
    CHANGE LOCATION
 ========================================================= */
 
+// Shared markup for the manual-address input + "search" button, used both
+// when a delivery map is shown for the first time and when the customer
+// re-opens the location selector to change it.
+function manualAddressInputHTML() {
+    return `
+        <div class="manual-address-row">
+            <input
+                id="manualAddressInput"
+                type="text"
+                placeholder="آدرس را تایپ کنید (مثلاً خیابان، کوچه، پلاک)"
+                maxlength="300"
+            >
+
+            <button
+                id="manualAddressBtn"
+                type="button"
+            >
+                جستجوی آدرس روی نقشه
+            </button>
+        </div>
+
+        <div class="manual-address-or">یا</div>
+    `;
+}
+
 function showLocationSelector() {
     const deliveryInfo =
         document.getElementById(
@@ -2292,6 +2488,8 @@ function showLocationSelector() {
     destroyDeliveryMap();
 
     deliveryInfo.innerHTML = `
+        ${manualAddressInputHTML()}
+
         <button
             id="locationBtn"
             type="button"
@@ -2598,6 +2796,8 @@ function openCheckout() {
                     selectedPickupEta = "";
 
                     deliveryInfo.innerHTML = `
+                        ${manualAddressInputHTML()}
+
                         <button
                             id="locationBtn"
                             type="button"
@@ -2798,7 +2998,11 @@ async function submitOrder() {
                     quantity:
                         Number(
                             cartItem.quantity
-                        )
+                        ),
+                    note:
+                        String(cartItem.note || "")
+                            .trim()
+                            .slice(0, MAX_ITEM_NOTE_LENGTH)
                 };
             })
             .filter(Boolean);
