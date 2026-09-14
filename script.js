@@ -2772,12 +2772,6 @@ function openCheckout() {
                     توضیحات سفارش (اختیاری)
                 </label>
 
-                <textarea
-                    id="customerNote"
-                    placeholder="مثلاً بدون پیاز، زنگ نزنید در بزنید و..."
-                    maxlength="500"
-                    rows="3"
-                ></textarea>
 
                 <div class="delivery-method">
 
