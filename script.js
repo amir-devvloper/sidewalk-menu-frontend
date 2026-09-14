@@ -52,6 +52,13 @@ let selectedLocation = null;
 let selectedAddress = "";
 let selectedPickupEta = "";
 
+// Discount code state for the currently open checkout. checkoutSubtotal is
+// fixed at the moment checkout opens (the cart can't be edited while the
+// checkout modal is open); appliedDiscount holds the last successful
+// server-verified preview, or null if no code is applied.
+let checkoutSubtotal = 0;
+let appliedDiscount = null;
+
 let deliveryMap = null;
 let deliveryMarker = null;
 let locationAccuracyCircle = null;
@@ -2613,6 +2620,9 @@ function openCheckout() {
     selectedLocation = null;
     selectedAddress = "";
     selectedPickupEta = "";
+
+    checkoutSubtotal = total;
+    appliedDiscount = null;
 
     destroyDeliveryMap();
 

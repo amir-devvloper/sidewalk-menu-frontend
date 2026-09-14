@@ -169,6 +169,22 @@ const CUSTOMER_CANCELLABLE_STATUSES = new Set(["جدید"]);
 const CUSTOMER_CANCEL_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const DELIVERY_METHODS = new Set(["restaurant", "delivery", "pickup"]);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+// Free-text customization note the customer can attach to a cart line
+// (e.g. "سیروپ کمتر", "بدون پیاز"). Kept short and always re-validated
+// here server-side — the frontend limit is only for UX.
+const MAX_ITEM_NOTE = 300;
+
+function sanitizeItemNote(value) {
+    if (typeof value !== "string") return "";
+    // Strip control characters (except space) and collapse to a single line
+    // of trimmed text so a note can't be used to inject odd formatting into
+    // the admin panel, CSV export, or printed invoices.
+    return value
+        .replace(/[\r\n\t]+/g, " ")
+        .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "")
+        .trim()
+        .slice(0, MAX_ITEM_NOTE);
+}
 
 function makeOrderCode() {
     return `SW-${crypto.randomInt(10000000, 100000000)}-${crypto.randomInt(1000, 10000)}`;
@@ -220,7 +236,14 @@ function mapOrder(order, { publicView = false } = {}) {
         customerPhone: order.customer_phone,
         deliveryMethod: order.delivery_method,
         address: order.address,
-        pickupEta: order.pickup_eta
+        latitude: order.latitude,
+        longitude: order.longitude,
+        locationSource: order.location_source,
+        pickupEta: order.pickup_eta,
+        subtotal: order.subtotal,
+        discountCode: order.discount_code,
+        discountPercent: order.discount_percent,
+        discountAmount: order.discount_amount || 0
     };
 }
 
@@ -231,8 +254,18 @@ function validateOrderBody(body = {}) {
     const deliveryMethod = cleanString(body.deliveryMethod, 20);
     const address = cleanString(body.address, 1000);
     const pickupEta = cleanString(body.pickupEta, 50);
+    // Discount codes are always compared upper-cased; letters/digits/-/_
+    // only, same charset the admin panel enforces when creating one.
+    const discountCode = cleanString(body.discountCode, 30).toUpperCase();
+    if (discountCode && !/^[A-Z0-9_-]{3,30}$/.test(discountCode)) {
+        return { error: "کد تخفیف نامعتبر است." };
+    }
     const location = body.location && typeof body.location === "object"
-        ? { lat: Number(body.location.lat), lng: Number(body.location.lng) }
+        ? {
+            lat: Number(body.location.lat),
+            lng: Number(body.location.lng),
+            source: ["gps", "manual", "map"].includes(body.location.source) ? body.location.source : ""
+        }
         : null;
     const items = Array.isArray(body.items) ? body.items : [];
 
@@ -276,6 +309,7 @@ function validateOrderBody(body = {}) {
     }
 
     const quantityByProduct = new Map();
+    const notesByProduct = new Map();
     for (const item of items) {
         const productId = String(item?.productId || "").trim();
         const quantity = Number(item?.quantity);
@@ -283,6 +317,12 @@ function validateOrderBody(body = {}) {
             return { error: "اطلاعات یکی از محصولات نامعتبر است." };
         }
         quantityByProduct.set(productId, (quantityByProduct.get(productId) || 0) + quantity);
+
+        const note = sanitizeItemNote(item?.note);
+        if (note) {
+            const existingNote = notesByProduct.get(productId);
+            notesByProduct.set(productId, existingNote ? `${existingNote} | ${note}` : note);
+        }
     }
 
     const totalQuantity = [...quantityByProduct.values()].reduce((sum, quantity) => sum + quantity, 0);
@@ -297,8 +337,11 @@ function validateOrderBody(body = {}) {
             tableNumber: deliveryMethod === "restaurant" ? tableNumber : "",
             deliveryMethod,
             address: deliveryMethod === "delivery" ? address : "",
+            location: deliveryMethod === "delivery" ? location : null,
             pickupEta: deliveryMethod === "pickup" ? pickupEta : "",
-            quantityByProduct
+            discountCode,
+            quantityByProduct,
+            notesByProduct
         }
     };
 }
@@ -306,7 +349,63 @@ function validateOrderBody(body = {}) {
 // Looks up products for a quantityByProduct map, checks availability, and
 // returns priced order items + total. Shared by the public checkout and
 // the admin manual-order endpoint so prices always come from the database.
-async function resolveOrderItems(quantityByProduct) {
+// Looks up a discount code and, if every rule passes, computes the actual
+// discount amount from the DB's stored percentage — never from anything the
+// client sent. Returns { error } or { value: { code, discountPercent,
+// discountAmount, finalTotal } }.
+async function validateAndApplyDiscount(rawCode, subtotal) {
+    const code = String(rawCode || "").trim().toUpperCase();
+    if (!code) return { error: "کد تخفیف وارد نشده است." };
+
+    const { data: discount, error } = await supabase
+        .from("discount_codes")
+        .select("*")
+        .eq("code", code)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Discount lookup error:", error.message);
+        return { error: "خطا در بررسی کد تخفیف." };
+    }
+    if (!discount) {
+        return { error: "کد تخفیف نامعتبر است." };
+    }
+    if (!discount.is_active) {
+        return { error: "این کد تخفیف غیرفعال است." };
+    }
+
+    const now = Date.now();
+    if (now < new Date(discount.starts_at).getTime()) {
+        return { error: "این کد تخفیف هنوز فعال نشده است." };
+    }
+    if (now > new Date(discount.expires_at).getTime()) {
+        return { error: "این کد تخفیف منقضی شده است." };
+    }
+
+    const minOrderAmount = Number(discount.min_order_amount) || 0;
+    if (subtotal < minOrderAmount) {
+        return { error: `حداقل مبلغ سفارش برای این کد ${minOrderAmount.toLocaleString("fa-IR")} تومان است.` };
+    }
+
+    const discountPercent = Number(discount.discount_percent);
+    if (!Number.isFinite(discountPercent) || discountPercent <= 0 || discountPercent > 100) {
+        return { error: "درصد تخفیف این کد نامعتبر است." };
+    }
+
+    const discountAmount = Math.round((subtotal * discountPercent) / 100);
+    const finalTotal = Math.max(0, subtotal - discountAmount);
+
+    return {
+        value: {
+            code: discount.code,
+            discountPercent,
+            discountAmount,
+            finalTotal
+        }
+    };
+}
+
+async function resolveOrderItems(quantityByProduct, notesByProduct = new Map()) {
     const productIds = [...quantityByProduct.keys()];
 
     const { data: products, error: productError } = await supabase
@@ -338,11 +437,13 @@ async function resolveOrderItems(quantityByProduct) {
     const items = productIds.map(productId => {
         const product = productMap.get(productId);
         const quantity = quantityByProduct.get(productId);
+        const note = notesByProduct.get(productId) || "";
         return {
             productId: product.id,
             name: product.name,
             price: Number(product.price),
-            quantity
+            quantity,
+            ...(note ? { note } : {})
         };
     });
 
@@ -354,7 +455,7 @@ async function resolveOrderItems(quantityByProduct) {
     return { items, total };
 }
 
-async function insertOrder({ customerName, tableNumber, customerPhone, deliveryMethod, address, pickupEta, items, total }) {
+async function insertOrder({ customerName, tableNumber, customerPhone, deliveryMethod, address, location, pickupEta, items, subtotal, discountCode, discountPercent, discountAmount, total }) {
     let data = null;
     let insertError = null;
     for (let attempt = 0; attempt < 3 && !data; attempt += 1) {
@@ -368,8 +469,15 @@ async function insertOrder({ customerName, tableNumber, customerPhone, deliveryM
                 customer_phone: customerPhone,
                 delivery_method: deliveryMethod,
                 address,
+                latitude: location?.lat ?? null,
+                longitude: location?.lng ?? null,
+                location_source: location?.source || null,
                 pickup_eta: pickupEta,
                 items,
+                subtotal: subtotal ?? total,
+                discount_code: discountCode || null,
+                discount_percent: discountCode ? discountPercent : null,
+                discount_amount: discountAmount || 0,
                 total
             }])
             .select()
@@ -398,16 +506,36 @@ router.post("/", async (req, res) => {
             });
         }
 
-        const { quantityByProduct, ...customer } = validation.value;
-        const resolved = await resolveOrderItems(quantityByProduct);
+        const { quantityByProduct, notesByProduct, discountCode, ...customer } = validation.value;
+        const resolved = await resolveOrderItems(quantityByProduct, notesByProduct);
         if (resolved.error) {
             return res.status(resolved.status).json({ success: false, message: resolved.error });
+        }
+
+        const subtotal = resolved.total;
+        let finalTotal = subtotal;
+        let appliedDiscount = null;
+
+        if (discountCode) {
+            const discountResult = await validateAndApplyDiscount(discountCode, subtotal);
+            if (discountResult.error) {
+                // The code was valid when the customer clicked "apply" during
+                // checkout but no longer is (e.g. it just expired) — fail the
+                // whole submission rather than silently charging full price.
+                return res.status(400).json({ success: false, message: discountResult.error });
+            }
+            appliedDiscount = discountResult.value;
+            finalTotal = appliedDiscount.finalTotal;
         }
 
         const { data, insertError } = await insertOrder({
             ...customer,
             items: resolved.items,
-            total: resolved.total
+            subtotal,
+            discountCode: appliedDiscount?.code || null,
+            discountPercent: appliedDiscount?.discountPercent ?? null,
+            discountAmount: appliedDiscount?.discountAmount || 0,
+            total: finalTotal
         });
 
         if (insertError || !data) {
@@ -420,7 +548,7 @@ router.post("/", async (req, res) => {
         try {
             const invoiceResponse = await createAbanInvoice({
                 orderCode,
-                totalToman: resolved.total
+                totalToman: finalTotal
             });
             const invoice = unwrapAbanInvoice(invoiceResponse);
 
@@ -489,6 +617,29 @@ router.post("/", async (req, res) => {
     } catch (error) {
         console.error("Order create error:", error.message);
         return res.status(500).json({ success: false, message: "خطا در ثبت سفارش." });
+    }
+});
+
+// Lets the checkout page show the discount amount before the customer
+// submits the order. Purely informational: the subtotal sent here is NOT
+// trusted for money — order creation above always recomputes the real
+// subtotal from the DB's own product prices and re-validates the code.
+router.post("/discount/validate", async (req, res) => {
+    try {
+        const subtotal = Number(req.body?.subtotal);
+        if (!Number.isFinite(subtotal) || subtotal < 0 || subtotal > 1000000000) {
+            return res.status(400).json({ success: false, message: "مبلغ سفارش نامعتبر است." });
+        }
+
+        const result = await validateAndApplyDiscount(req.body?.code, subtotal);
+        if (result.error) {
+            return res.status(400).json({ success: false, message: result.error });
+        }
+
+        return res.json({ success: true, discount: result.value });
+    } catch (error) {
+        console.error("Discount validate error:", error.message);
+        return res.status(500).json({ success: false, message: "خطا در بررسی کد تخفیف." });
     }
 });
 
