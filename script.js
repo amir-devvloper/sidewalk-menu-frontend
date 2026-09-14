@@ -3405,15 +3405,7 @@ async function submitOrder() {
                         <i class="fa-solid fa-credit-card"></i>
                     </button>
 
-                    <button
-                        class="checkout-btn"
-                        id="goTrackBtn"
-                        type="button"
-                        style="margin-top:10px;"
-                    >
-                        پیگیری سفارش
-                        <i class="fa-solid fa-location-arrow"></i>
-                    </button>
+
 
                 </div>
             </div>
@@ -3426,18 +3418,6 @@ async function submitOrder() {
             goPaymentBtn.addEventListener("click", () => {
                 window.location.href = paymentUrl;
             });
-        }
-
-        const goTrackBtn =
-            document.getElementById(
-                "goTrackBtn"
-            );
-
-        if (goTrackBtn) {
-            goTrackBtn.addEventListener(
-                "click",
-                () => openTrackOrder(orderCode)
-            );
         }
 
         openModalDialog(null, "#goTrackBtn");

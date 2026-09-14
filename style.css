@@ -5511,3 +5511,17 @@ body.light .app-toast {
     }
 
 }
+
+/* Fix: hero menu button contrast in light mode */
+[data-theme="light"] .hero-btn,
+.light-mode .hero-btn {
+    color: #ffffff;
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 10px 30px rgba(139,61,255,.28);
+}
+
+[data-theme="light"] .hero-btn:hover,
+.light-mode .hero-btn:hover {
+    background: var(--primary-dark);
+}
