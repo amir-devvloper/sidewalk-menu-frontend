@@ -160,7 +160,9 @@
 
 :root[data-theme="dark"] .status-filter-btn:hover,
 :root[data-theme="dark"] .report-group-btn:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--btn-hover);
+    color: var(--text);
+    border-color: var(--border);
 }
 
 
@@ -2875,3 +2877,58 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* =========================================================
+   Discount button — compact outline style
+========================================================= */
+
+.discount-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#applyDiscountBtn {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 82px;
+    height: 42px;
+    padding: 0 15px;
+
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+
+    background: transparent;
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background .2s var(--ease),
+        border-color .2s var(--ease),
+        color .2s var(--ease),
+        transform .15s var(--ease),
+        box-shadow .2s var(--ease);
+}
+
+#applyDiscountBtn:hover {
+    background: rgba(214, 168, 95, 0.10);
+    border-color: var(--accent-light);
+    color: var(--text);
+    box-shadow: 0 5px 14px rgba(214, 168, 95, 0.12);
+}
+
+#applyDiscountBtn:active {
+    transform: scale(.96);
+}
+
+#applyDiscountBtn:disabled {
+    opacity: .55;
+    cursor: wait;
+    transform: none;
+}
+

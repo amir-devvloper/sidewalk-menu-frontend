@@ -719,13 +719,6 @@ function renderCart() {
                         حذف
                     </button>
 
-                    <textarea
-                        class="cart-item-note"
-                        data-id="${product.id}"
-                        maxlength="${MAX_ITEM_NOTE_LENGTH}"
-                        placeholder="توضیح برای این محصول (مثلاً «سیروپ کمتر»، «بدون پیاز»)"
-                        rows="1"
-                    >${escapeHtmlAttr(cartItem.note || "")}</textarea>
                 </div>
             `;
 
@@ -745,13 +738,6 @@ function renderCart() {
                 .addEventListener("click", () => {
                     removeFromCart(product.id);
                 });
-
-            const noteField = element.querySelector(".cart-item-note");
-            if (noteField) {
-                noteField.addEventListener("input", () => {
-                    updateCartItemNote(product.id, noteField.value);
-                });
-            }
 
             cartItems.appendChild(element);
         });
