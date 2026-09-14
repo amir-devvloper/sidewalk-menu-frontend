@@ -5457,20 +5457,22 @@ body.light .app-toast {
         min-height: 230px;
     }
 }
-#applydiscountBtn {
-    display: inline-flex;
+#applyDiscountBtn {
+    width: 90px !important;
+    height: 44px !important;
+
+    display: inline-flex !important;
     align-items: center;
+    justify-content: center;
+    gap: 8px;
 
-    gap: 10px;
-
-    padding: 14px 25px;
+    padding: 0 !important;
 
     border-radius: 14px;
-    border: 1px solid rgba(183, 122, 255, 0.35);
+    border: 1px solid rgba(183, 122, 255, 0.35) !important;
 
-    background: rgba(139, 61, 255, 0.10);
-
-    color: #fff;
+    background: rgba(139, 61, 255, 0.10) !important;
+    color: #fff !important;
 
     font-size: 14px;
     font-weight: 800;
@@ -5478,8 +5480,14 @@ body.light .app-toast {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 
-    box-shadow:
-        0 15px 35px rgba(139, 61, 255, 0.18);
+    box-shadow: 0 15px 35px rgba(139, 61, 255, 0.18);
 
     transition: var(--transition);
+}
+
+#applyDiscountBtn:hover {
+    background: rgba(183, 122, 255, 0.18) !important;
+    border-color: rgba(183, 122, 255, 0.60) !important;
+    color: var(--purple-light) !important;
+    transform: translateY(-2px);
 }
