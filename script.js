@@ -2768,6 +2768,17 @@ function openCheckout() {
                     required
                 >
 
+                <label for="customerNote">
+                    توضیحات سفارش (اختیاری)
+                </label>
+
+                <textarea
+                    id="customerNote"
+                    placeholder="مثلاً بدون پیاز، زنگ نزنید در بزنید و..."
+                    maxlength="500"
+                    rows="3"
+                ></textarea>
+
                 <div class="delivery-method">
 
                     <label for="deliveryMethod">
@@ -3091,6 +3102,16 @@ async function submitOrder() {
             ? tableInput.value.trim()
             : "";
 
+    const noteInput =
+        document.getElementById(
+            "customerNote"
+        );
+
+    const note =
+        noteInput
+            ? noteInput.value.trim().slice(0, 500)
+            : "";
+
     if (!name) {
         showToast(
             "لطفاً نام را وارد کنید."
@@ -3209,6 +3230,9 @@ async function submitOrder() {
 
             customerPhone:
                 phone,
+
+            customerNote:
+                note,
 
             deliveryMethod:
                 selectedDeliveryMethod,

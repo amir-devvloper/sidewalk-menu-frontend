@@ -2349,14 +2349,16 @@ body {
     gap: 8px !important;
 }
 
-#productForm {
+#productForm,
+#discountForm {
     display: flex;
     flex-direction: column;
     gap: 12px;
     text-align: right;
 }
 
-#productForm label {
+#productForm label,
+#discountForm label {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -2366,7 +2368,10 @@ body {
 
 #productForm input,
 #productForm textarea,
-#productForm select {
+#productForm select,
+#discountForm input,
+#discountForm textarea,
+#discountForm select {
     padding: 10px 12px;
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -2374,7 +2379,8 @@ body {
     font-size: 14px;
 }
 
-#productForm select {
+#productForm select,
+#discountForm select {
     appearance: none;
     -webkit-appearance: none;
     background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23777777' d='M1 1l5 5 5-5' stroke='%23777777' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat left 14px center;
@@ -2385,10 +2391,19 @@ body {
 
 #productForm select:focus,
 #productForm input:focus,
-#productForm textarea:focus {
+#productForm textarea:focus,
+#discountForm select:focus,
+#discountForm input:focus,
+#discountForm textarea:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(214, 168, 95, 0.15);
+}
+
+#discountForm h2 {
+    font-size: 17px;
+    margin: 0 0 6px;
+    color: var(--text);
 }
 
 .form-actions {
@@ -2413,6 +2428,16 @@ body {
 }
 
 #productCancelBtn {
+    background: var(--bg);
+    border: 1px solid var(--border) !important;
+}
+
+#discountSaveBtn {
+    background: var(--primary);
+    color: #fff;
+}
+
+#discountCancelBtn {
     background: var(--bg);
     border: 1px solid var(--border) !important;
 }

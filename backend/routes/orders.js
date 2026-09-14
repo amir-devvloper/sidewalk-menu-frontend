@@ -173,6 +173,9 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 // (e.g. "سیروپ کمتر", "بدون پیاز"). Kept short and always re-validated
 // here server-side — the frontend limit is only for UX.
 const MAX_ITEM_NOTE = 300;
+// Free-text note the customer can attach to the whole order (e.g. "بدون
+// پیاز", "زنگ نزنید در بزنید"), as opposed to a per-item note above.
+const MAX_ORDER_NOTE = 500;
 
 function sanitizeItemNote(value) {
     if (typeof value !== "string") return "";
@@ -184,6 +187,15 @@ function sanitizeItemNote(value) {
         .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "")
         .trim()
         .slice(0, MAX_ITEM_NOTE);
+}
+
+function sanitizeOrderNote(value) {
+    if (typeof value !== "string") return "";
+    return value
+        .replace(/[\r\n\t]+/g, " ")
+        .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "")
+        .trim()
+        .slice(0, MAX_ORDER_NOTE);
 }
 
 function makeOrderCode() {
@@ -234,6 +246,7 @@ function mapOrder(order, { publicView = false } = {}) {
         customerName: order.customer_name,
         tableNumber: order.table_number,
         customerPhone: order.customer_phone,
+        customerNote: order.customer_note || "",
         deliveryMethod: order.delivery_method,
         address: order.address,
         latitude: order.latitude,
@@ -251,6 +264,7 @@ function validateOrderBody(body = {}) {
     const customerName = cleanString(body.customerName, 100);
     const customerPhone = normalizePhone(body.customerPhone);
     const tableNumber = cleanString(body.tableNumber, 20);
+    const customerNote = sanitizeOrderNote(body.customerNote);
     const deliveryMethod = cleanString(body.deliveryMethod, 20);
     const address = cleanString(body.address, 1000);
     const pickupEta = cleanString(body.pickupEta, 50);
@@ -334,6 +348,7 @@ function validateOrderBody(body = {}) {
         value: {
             customerName,
             customerPhone,
+            customerNote,
             tableNumber: deliveryMethod === "restaurant" ? tableNumber : "",
             deliveryMethod,
             address: deliveryMethod === "delivery" ? address : "",
@@ -455,7 +470,7 @@ async function resolveOrderItems(quantityByProduct, notesByProduct = new Map()) 
     return { items, total };
 }
 
-async function insertOrder({ customerName, tableNumber, customerPhone, deliveryMethod, address, location, pickupEta, items, subtotal, discountCode, discountPercent, discountAmount, total }) {
+async function insertOrder({ customerName, tableNumber, customerPhone, customerNote, deliveryMethod, address, location, pickupEta, items, subtotal, discountCode, discountPercent, discountAmount, total }) {
     let data = null;
     let insertError = null;
     for (let attempt = 0; attempt < 3 && !data; attempt += 1) {
@@ -467,6 +482,7 @@ async function insertOrder({ customerName, tableNumber, customerPhone, deliveryM
                 customer_name: customerName,
                 table_number: tableNumber,
                 customer_phone: customerPhone,
+                customer_note: customerNote || null,
                 delivery_method: deliveryMethod,
                 address,
                 latitude: location?.lat ?? null,

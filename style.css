@@ -3197,7 +3197,8 @@ body.light .categories {
    CHECKOUT INPUTS
 ========================================= */
 
-.checkout-form input {
+.checkout-form input,
+.checkout-form textarea {
     width: 100%;
     box-sizing: border-box;
     padding: 14px 16px;
@@ -3221,14 +3222,22 @@ body.light .categories {
         background 0.25s ease;
 }
 
-.checkout-form input:focus {
+.checkout-form textarea {
+    resize: vertical;
+    min-height: 64px;
+    line-height: 1.7;
+}
+
+.checkout-form input:focus,
+.checkout-form textarea:focus {
     border-color: var(--primary);
 
     box-shadow:
         0 0 0 3px rgba(139, 61, 255, 0.12);
 }
 
-.checkout-form input::placeholder {
+.checkout-form input::placeholder,
+.checkout-form textarea::placeholder {
     color: var(--muted);
     opacity: 0.7;
 }
@@ -3738,6 +3747,7 @@ body.light .payment-info-item strong {
 }
 
 .checkout-form input,
+.checkout-form textarea,
 .checkout-input {
     background: var(--card);
     color: var(--text);
@@ -3745,6 +3755,7 @@ body.light .payment-info-item strong {
 }
 
 .checkout-form input:focus,
+.checkout-form textarea:focus,
 .checkout-input:focus {
     border-color: rgba(139, 61, 255, 0.60);
     box-shadow:
@@ -3752,6 +3763,7 @@ body.light .payment-info-item strong {
 }
 
 .checkout-form input::placeholder,
+.checkout-form textarea::placeholder,
 .checkout-input::placeholder {
     color: var(--muted-dark);
 }
