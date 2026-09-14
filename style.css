@@ -3583,46 +3583,14 @@ body.light .payment-info-item strong {
 
 .discount-input-row {
     display: flex;
-    align-items: center;
     gap: 8px;
-    width: 100%;
 }
 
 .discount-input-row input {
     flex: 1;
     min-width: 0;
-    height: 44px;
-    box-sizing: border-box;
-
-    margin: 0 !important;
-    padding: 0 14px;
-
-    border: 1px solid var(--border);
-    border-radius: 12px;
-
-    background: var(--card);
-    color: var(--text);
-
-    font-family: inherit;
-    font-size: 13px;
-
-    outline: none;
 
     text-transform: uppercase;
-
-    transition:
-        border-color 0.25s ease,
-        box-shadow 0.25s ease,
-        background 0.25s ease;
-}
-
-.discount-input-row input:focus {
-    border-color: rgba(139, 61, 255, 0.60);
-    box-shadow: 0 0 0 3px rgba(139, 61, 255, 0.10);
-}
-
-.discount-input-row input::placeholder {
-    color: var(--muted-dark);
 }
 
 #applyDiscountBtn {
@@ -5489,22 +5457,20 @@ body.light .app-toast {
         min-height: 230px;
     }
 }
-#applyDiscountBtn {
-    width: 90px !important;
-    height: 55px !important;
-
-    display: inline-flex !important;
+#applydiscountBtn {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
 
-    padding: 0 !important;
+    gap: 10px;
+
+    padding: 14px 25px;
 
     border-radius: 14px;
-    border: 1px solid rgba(183, 122, 255, 0.35) !important;
+    border: 1px solid rgba(183, 122, 255, 0.35);
 
-    background: rgba(139, 61, 255, 0.10) !important;
-    color: #fff !important;
+    background: rgba(139, 61, 255, 0.10);
+
+    color: #fff;
 
     font-size: 14px;
     font-weight: 800;
@@ -5512,14 +5478,8 @@ body.light .app-toast {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 
-    box-shadow: 0 15px 35px rgba(139, 61, 255, 0.18);
+    box-shadow:
+        0 15px 35px rgba(139, 61, 255, 0.18);
 
     transition: var(--transition);
-}
-
-#applyDiscountBtn:hover {
-    background: rgba(183, 122, 255, 0.18) !important;
-    border-color: rgba(183, 122, 255, 0.60) !important;
-    color: var(--purple-light) !important;
-    transform: translateY(-2px);
 }
