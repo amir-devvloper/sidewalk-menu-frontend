@@ -3583,14 +3583,46 @@ body.light .payment-info-item strong {
 
 .discount-input-row {
     display: flex;
+    align-items: center;
     gap: 8px;
+    width: 100%;
 }
 
 .discount-input-row input {
     flex: 1;
     min-width: 0;
+    height: 44px;
+    box-sizing: border-box;
+
+    margin: 0 !important;
+    padding: 0 14px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: var(--card);
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    outline: none;
 
     text-transform: uppercase;
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+.discount-input-row input:focus {
+    border-color: rgba(139, 61, 255, 0.60);
+    box-shadow: 0 0 0 3px rgba(139, 61, 255, 0.10);
+}
+
+.discount-input-row input::placeholder {
+    color: var(--muted-dark);
 }
 
 #applyDiscountBtn {
@@ -5459,7 +5491,7 @@ body.light .app-toast {
 }
 #applyDiscountBtn {
     width: 90px !important;
-    height: 44px !important;
+    height: 55px !important;
 
     display: inline-flex !important;
     align-items: center;
