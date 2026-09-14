@@ -3581,14 +3581,28 @@ body.light .payment-info-item strong {
     margin-bottom: 8px;
 }
 
+
+/* =========================================================
+   DISCOUNT INPUT ROW — ALIGNMENT ONLY
+   Keeps the existing #applyDiscountBtn styling unchanged.
+========================================================= */
+
 .discount-input-row {
     display: flex;
+    align-items: stretch;
     gap: 8px;
+    width: 100%;
 }
 
 .discount-input-row input {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
+    height: 44px !important;
+    min-height: 44px !important;
+    box-sizing: border-box;
+
+    margin: 0 !important;
+    padding: 0 14px !important;
 
     text-transform: uppercase;
 }
@@ -5457,29 +5471,21 @@ body.light .app-toast {
         min-height: 230px;
     }
 }
-#applydiscountBtn {
-    display: inline-flex;
-    align-items: center;
-
-    gap: 10px;
-
-    padding: 14px 25px;
-
-    border-radius: 14px;
-    border: 1px solid rgba(183, 122, 255, 0.35);
-
+#applyDiscountBtn {
     background: rgba(139, 61, 255, 0.10);
-
-    color: #fff;
-
-    font-size: 14px;
-    font-weight: 800;
-
+    border: 1px solid rgba(183, 122, 255, 0.35);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+}
 
-    box-shadow:
-        0 15px 35px rgba(139, 61, 255, 0.18);
+#applyDiscountBtn:hover {
+    background: rgba(183, 122, 255, 0.18);
+    border-color: rgba(183, 122, 255, 0.60);
+    color: var(--purple-light);
+}
 
-    transition: var(--transition);
+/* Match the discount button height to the field; visual button styling stays unchanged. */
+.discount-input-row #applyDiscountBtn {
+    min-height: 44px;
 }
