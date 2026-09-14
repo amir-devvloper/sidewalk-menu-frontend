@@ -718,14 +718,6 @@ function renderCart() {
                     >
                         حذف
                     </button>
-
-                    <textarea
-                        class="cart-item-note"
-                        data-id="${product.id}"
-                        maxlength="${MAX_ITEM_NOTE_LENGTH}"
-                        placeholder="توضیح برای این محصول (مثلاً «سیروپ کمتر»، «بدون پیاز»)"
-                        rows="1"
-                    >${escapeHtmlAttr(cartItem.note || "")}</textarea>
                 </div>
             `;
 
@@ -2772,6 +2764,12 @@ function openCheckout() {
                     توضیحات سفارش (اختیاری)
                 </label>
 
+                <textarea
+                    id="customerNote"
+                    placeholder="مثلاً بدون پیاز، زنگ نزنید در بزنید و..."
+                    maxlength="500"
+                    rows="3"
+                ></textarea>
 
                 <div class="delivery-method">
 
