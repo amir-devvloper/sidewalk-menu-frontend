@@ -1157,6 +1157,33 @@ body {
 }
 
 
+.order-note-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    margin-bottom: 14px;
+    padding: 10px 12px;
+
+    background: rgba(255, 176, 32, 0.12);
+    border: 1px solid rgba(255, 176, 32, 0.35);
+    border-radius: 10px;
+
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.order-note-box i {
+    color: #d98c00;
+    margin-top: 2px;
+}
+
+.order-note-box strong {
+    font-weight: 700;
+}
+
+
 /* Bottom */
 
 .order-bottom {

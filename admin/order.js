@@ -639,6 +639,13 @@ function createOrderCard(order) {
 
             <div class="order-items">${itemsHTML}</div>
 
+            ${order.customerNote ? `
+                <div class="order-note-box">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <span><strong>توضیحات مشتری:</strong> ${escapeHTML(order.customerNote)}</span>
+                </div>
+            ` : ""}
+
             <div class="order-bottom">
                 <div class="total">${formatPrice(order.total)} <small>تومان</small></div>
 
@@ -776,6 +783,12 @@ function openOrderDetails(orderCode) {
             <p><strong>وضعیت:</strong> <span class="status-badge ${getStatusClass(order.status)}">${escapeHTML(order.status)}</span></p>
             ${getPaymentStatusBadgeHTML(order) ? `<p><strong>وضعیت پرداخت:</strong> ${getPaymentStatusBadgeHTML(order)}</p>` : ""}
             <p><strong>تاریخ:</strong> ${formatDate(order.createdAt)}</p>
+            ${order.customerNote ? `
+                <div class="order-note-box">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <span><strong>توضیحات مشتری:</strong> ${escapeHTML(order.customerNote)}</span>
+                </div>
+            ` : ""}
 
             <table class="invoice-table">
                 <thead>
@@ -854,6 +867,7 @@ function printInvoice(orderCode) {
             <hr>
             <p>مشتری: ${escapeHTML(order.customerName)}</p>
             <p>${getDeliveryMethodHTML(order).replace(/<br>/g, " - ")}</p>
+            ${order.customerNote ? `<p><strong>توضیحات مشتری: ${escapeHTML(order.customerNote)}</strong></p>` : ""}
             <table>
                 <thead>
                     <tr><th>نام</th><th>تعداد</th><th>واحد</th><th>جمع</th></tr>
