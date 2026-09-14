@@ -639,9 +639,24 @@ if (insertError || !data) {
                 retryAfter: paymentError.retryAfter ?? null
             });
         }
-    } catch (error) {
-        console.error("Order create error:", error.message);
-        return res.status(500).json({ success: false, message: "خطا در ثبت سفارش." });
+        } catch (error) {
+        console.error("Order create error:", {
+            message: error?.message,
+            code: error?.code,
+            status: error?.status,
+            details: error?.details,
+            hint: error?.hint,
+            stack: error?.stack
+        });
+
+        return res.status(
+            error?.status >= 400 && error?.status < 600
+                ? error.status
+                : 500
+        ).json({
+            success: false,
+            message: error?.message || "خطا در ثبت سفارش."
+        });
     }
 });
 
