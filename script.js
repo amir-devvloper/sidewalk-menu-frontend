@@ -3424,6 +3424,7 @@ async function submitOrder() {
 
         saveLastOrder(orderCode);
         saveLastPhone(phone);
+        savePendingOrder(orderCode, phone);
 
         cart = [];
         saveCart();
@@ -3589,6 +3590,127 @@ function saveLastPhone(phone) {
 
 function getLastPhone() {
     return localStorage.getItem("sideWalkLastPhone") || "";
+}
+
+/* =========================================================
+   PENDING ORDER RECOVERY
+   If the customer goes to the payment gateway and comes back
+   (closed the tab, hit back, connection dropped, changed their
+   mind mid-way, etc.), we don't force a brand new order — we
+   remember it for a few hours and offer to continue the same one.
+========================================================= */
+
+const ORDER_RESUME_WINDOW_MS = 3 * 60 * 60 * 1000; // 3 hours
+
+function savePendingOrder(orderCode, phone) {
+    if (!orderCode || !phone) return;
+    localStorage.setItem(
+        "sideWalkPendingOrder",
+        JSON.stringify({ orderCode, phone, createdAt: Date.now() })
+    );
+}
+
+function getPendingOrder() {
+    try {
+        const raw = localStorage.getItem("sideWalkPendingOrder");
+        if (!raw) return null;
+
+        const data = JSON.parse(raw);
+        if (!data?.orderCode || !data?.phone || !Number.isFinite(data?.createdAt)) {
+            return null;
+        }
+
+        if (Date.now() - data.createdAt > ORDER_RESUME_WINDOW_MS) {
+            clearPendingOrder();
+            return null;
+        }
+
+        return data;
+    } catch (_) {
+        return null;
+    }
+}
+
+function clearPendingOrder() {
+    localStorage.removeItem("sideWalkPendingOrder");
+}
+
+async function resumePendingOrderRequest(orderCode, phone) {
+    const response = await fetch(
+        `${API_BASE_URL}/orders/${encodeURIComponent(orderCode)}/payment/resume`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ customerPhone: phone })
+        }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.success) {
+        const error = new Error(data.message || "ادامه‌ی پرداخت انجام نشد.");
+        error.code = data.code || "";
+        throw error;
+    }
+
+    return data;
+}
+
+function showPendingOrderBanner() {
+    const pending = getPendingOrder();
+    if (!pending) return;
+
+    const existing = document.getElementById("pendingOrderBanner");
+    if (existing) existing.remove();
+
+    const banner = document.createElement("div");
+    banner.id = "pendingOrderBanner";
+    banner.className = "pending-order-banner";
+    banner.innerHTML = `
+        <span class="pending-order-banner-text">
+            یک سفارش ناتمام داری (${escapeHTML(pending.orderCode)}). ادامه بدی؟
+        </span>
+        <div class="pending-order-banner-actions">
+            <button type="button" class="pending-order-continue-btn">ادامه پرداخت</button>
+            <button type="button" class="pending-order-dismiss-btn">بی‌خیال</button>
+        </div>
+    `;
+    document.body.prepend(banner);
+
+    const continueBtn = banner.querySelector(".pending-order-continue-btn");
+    const dismissBtn = banner.querySelector(".pending-order-dismiss-btn");
+
+    continueBtn.addEventListener("click", async () => {
+        continueBtn.disabled = true;
+        continueBtn.innerHTML = 'در حال اتصال... <i class="fa-solid fa-spinner fa-spin"></i>';
+
+        try {
+            const result = await resumePendingOrderRequest(pending.orderCode, pending.phone);
+
+            if (result.alreadyPaid) {
+                clearPendingOrder();
+                banner.remove();
+                showToast("این سفارش قبلاً پرداخت شده است. ✅");
+                return;
+            }
+
+            const paymentUrl = result?.payment?.paymentUrl;
+            if (!paymentUrl) {
+                throw new Error("لینک پرداخت دریافت نشد.");
+            }
+
+            window.location.href = paymentUrl;
+        } catch (error) {
+            clearPendingOrder();
+            banner.remove();
+            showToast(error.message || "این سفارش دیگر قابل ادامه نیست.");
+        }
+    });
+
+    dismissBtn.addEventListener("click", () => {
+        clearPendingOrder();
+        banner.remove();
+    });
 }
 
 async function cancelOrderRequest(orderCode, phone) {
@@ -4232,6 +4354,7 @@ initScrollReveal();
 ========================================================= */
 
 loadProductsFromAPI();
+showPendingOrderBanner();
 window.addEventListener('load', function() {
   setTimeout(function() {
     document.getElementById('loadingScreen').classList.add('hide');
