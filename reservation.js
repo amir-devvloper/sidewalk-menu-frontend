@@ -137,7 +137,6 @@
     const closeBtn = document.getElementById("reservationModalClose");
 
     const stepForm = document.getElementById("reservationStepForm");
-    const stepCalendar = document.getElementById("reservationStepCalendar");
 
     const form = document.getElementById("reservationForm");
     const nameInput = document.getElementById("rsv_name");
@@ -154,11 +153,11 @@
     const submitBtn = document.getElementById("reservationSubmitBtn");
     const submitSpinner = document.getElementById("reservationSubmitSpinner");
 
+    const calendarPopover = document.getElementById("reservationCalendarPopover");
     const monthLabel = document.getElementById("jalaliMonthLabel");
     const daysGrid = document.getElementById("jalaliDaysGrid");
     const prevMonthBtn = document.getElementById("jalaliPrevMonth");
     const nextMonthBtn = document.getElementById("jalaliNextMonth");
-    const backToFormBtn = document.getElementById("jalaliBackToForm");
 
     if (!modal || !form) return; // markup not present on this page
 
@@ -189,19 +188,42 @@
         if (e.key === "Escape" && modal.classList.contains("active")) closeModal();
     });
 
+    function closeCalendar() {
+        calendarPopover?.classList.add("hidden");
+        dateTrigger?.setAttribute("aria-expanded", "false");
+    }
+
     function showFormStep() {
-        stepForm.classList.remove("hidden");
-        stepCalendar.classList.add("hidden");
+        closeCalendar();
     }
 
-    function showCalendarStep() {
-        stepForm.classList.add("hidden");
-        stepCalendar.classList.remove("hidden");
-        renderCalendar();
+    function toggleCalendar() {
+        if (!calendarPopover) return;
+        const opening = calendarPopover.classList.contains("hidden");
+        if (opening) {
+            renderCalendar();
+            calendarPopover.classList.remove("hidden");
+            dateTrigger?.setAttribute("aria-expanded", "true");
+        } else {
+            closeCalendar();
+        }
     }
 
-    dateTrigger?.addEventListener("click", showCalendarStep);
-    backToFormBtn?.addEventListener("click", showFormStep);
+    dateTrigger?.addEventListener("click", toggleCalendar);
+    dateTrigger?.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleCalendar();
+        }
+    });
+
+    document.addEventListener("click", event => {
+        if (!calendarPopover?.classList.contains("hidden")
+            && !event.target.closest(".reservation-date-field")) {
+            closeCalendar();
+        }
+    });
+
 
     // ---------------------------------------------------------------
     // Guests stepper
@@ -393,3 +415,9 @@
         }
     });
 })();
+
+document.getElementById("footerReservationBtn")
+?.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("openReservationBtn")?.click();
+});

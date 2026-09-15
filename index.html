@@ -54,6 +54,17 @@
 
 <link rel="stylesheet" href="reservation.css">
 
+
+<style>
+.reservation-date-trigger {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.reservation-date-arrow { opacity:.6; font-size:.85em; }
+.reservation-date-trigger:focus { outline: none; }
+</style>
 </head>
 
 
@@ -238,12 +249,40 @@
                         </div>
                     </label>
 
-                    <div class="reservation-field">
+                    <div class="reservation-field reservation-date-field">
                         <span>تاریخ رزرو (شمسی)</span>
-                        <button type="button" class="reservation-date-trigger" id="rsv_dateTrigger">
+                        <div
+                            class="reservation-date-trigger"
+                            id="rsv_dateTrigger"
+                            role="button"
+                            tabindex="0"
+                            aria-haspopup="dialog"
+                            aria-expanded="false"
+                        >
                             <i class="fa-solid fa-calendar-days"></i>
-                            <span id="rsv_dateLabel">انتخاب تاریخ</span>
-                        </button>
+                            <span id="rsv_dateLabel">انتخاب تاریخ رزرو</span>
+                            <i class="fa-solid fa-chevron-down reservation-date-arrow" aria-hidden="true"></i>
+                        </div>
+
+                        <div class="reservation-calendar-popover hidden" id="reservationCalendarPopover">
+                            <div class="jalali-calendar">
+                                <div class="jalali-calendar__header">
+                                    <button type="button" id="jalaliPrevMonth" aria-label="ماه قبل">
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </button>
+                                    <strong id="jalaliMonthLabel"></strong>
+                                    <button type="button" id="jalaliNextMonth" aria-label="ماه بعد">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                    </button>
+                                </div>
+
+                                <div class="jalali-calendar__weekdays">
+                                    <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+                                </div>
+
+                                <div class="jalali-calendar__days" id="jalaliDaysGrid"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="reservation-field">
@@ -268,24 +307,6 @@
                         <div class="reservation-spinner hidden" id="reservationSubmitSpinner"></div>
                     </button>
                 </form>
-            </div>
-
-            <!-- Persian click-only calendar (no typing) -->
-            <div class="reservation-modal__body hidden" id="reservationStepCalendar">
-                <div class="jalali-calendar">
-                    <div class="jalali-calendar__header">
-                        <button type="button" id="jalaliPrevMonth" aria-label="ماه قبل"><i class="fa-solid fa-chevron-right"></i></button>
-                        <strong id="jalaliMonthLabel"></strong>
-                        <button type="button" id="jalaliNextMonth" aria-label="ماه بعد"><i class="fa-solid fa-chevron-left"></i></button>
-                    </div>
-                    <div class="jalali-calendar__weekdays">
-                        <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
-                    </div>
-                    <div class="jalali-calendar__days" id="jalaliDaysGrid"></div>
-                    <button type="button" class="reservation-back-btn" id="jalaliBackToForm">
-                        <i class="fa-solid fa-arrow-right"></i> بازگشت
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -663,6 +684,10 @@
                     <i class="fa-solid fa-phone"></i>
                     034-33656788
                 </div>
+                    <a href="" class="footer-reservation-link" id="footerReservationBtn">
+                        <i class="fa-solid fa-chair"></i>
+                             رزرو میز
+                     </a>
 
             </div>
 

@@ -406,3 +406,165 @@
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+/* =====================================================
+   Single inline Jalali date picker override
+   Keeps the full reservation theme above intact.
+   ===================================================== */
+.reservation-date-field {
+    position: relative;
+}
+
+.reservation-date-trigger {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-sm, 12px);
+    color: var(--text, #eee);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition, 0.2s ease);
+    box-sizing: border-box;
+}
+
+.reservation-date-trigger:hover {
+    border-color: rgba(183, 122, 255, 0.6);
+    background: rgba(139, 61, 255, 0.07);
+}
+
+.reservation-date-trigger:focus-visible {
+    outline: 2px solid rgba(183, 122, 255, 0.55);
+    outline-offset: 2px;
+}
+
+.reservation-date-trigger i:first-child {
+    color: var(--purple-light, #b77aff);
+    font-size: 15px;
+}
+
+.reservation-date-arrow {
+    margin-inline-start: auto;
+    color: var(--muted, #99919f);
+    transition: transform 0.2s ease;
+}
+
+.reservation-date-trigger[aria-expanded="true"] .reservation-date-arrow {
+    transform: rotate(180deg);
+}
+
+.reservation-calendar-popover {
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 8px);
+    inset-inline: 0;
+    padding: 14px;
+    background: var(--card, #16121c);
+    border: 1px solid var(--border, rgba(255,255,255,0.09));
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.38), 0 0 0 1px rgba(139,61,255,0.05);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    animation: reservationCalendarIn 0.16s ease-out;
+}
+
+.reservation-calendar-popover.hidden {
+    display: none;
+}
+
+.reservation-calendar-popover .jalali-calendar {
+    width: 100%;
+}
+
+.reservation-calendar-popover .reservation-back-btn {
+    display: none;
+}
+
+.reservation-calendar-popover .jalali-calendar__header {
+    margin-bottom: 12px;
+}
+
+.reservation-calendar-popover .jalali-calendar__header button {
+    flex: 0 0 34px;
+}
+
+.reservation-calendar-popover .jalali-calendar__days {
+    gap: 5px;
+}
+
+.reservation-calendar-popover .jalali-day {
+    min-width: 0;
+    border: 1px solid transparent;
+}
+
+.reservation-calendar-popover .jalali-day:hover:not(.jalali-day--empty):not(.jalali-day--disabled) {
+    border-color: rgba(183, 122, 255, 0.45);
+    transform: translateY(-1px);
+}
+
+@keyframes reservationCalendarIn {
+    from { opacity: 0; transform: translateY(-5px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 480px) {
+    .reservation-calendar-popover {
+        position: fixed;
+        top: auto;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        inset-inline: 10px;
+        width: auto;
+        max-height: min(72vh, 520px);
+        overflow-y: auto;
+    }
+}
+
+/* FINAL RESERVATION OVERLAY FIX */
+
+#reservationModal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    z-index: 999999 !important;
+    background: rgba(10, 8, 15, 0.85) !important;
+}
+
+#reservationModal .reservation-modal,
+#reservationModal .modal-content,
+#reservationModal > div {
+    max-height: 90dvh !important;
+}
+
+body.reservation-open {
+    overflow: hidden !important;
+}
+/* Fix reservation modal scroll */
+
+html:has(.reservation-modal.active),
+body:has(.reservation-modal.active) {
+    overflow: hidden !important;
+}
+
+.reservation-modal {
+    overflow: hidden !important;
+}
+
+.reservation-modal__dialog {
+    max-height: 92dvh !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+}
+.reservation-modal__overlay {
+    background: #000 !important;
+}
