@@ -1,3 +1,15 @@
+// =====================================================
+// REAL VIEWPORT HEIGHT FIX (mobile browsers / Xiaomi-MIUI)
+// -----------------------------------------------------
+// "100vh" on many mobile browsers is calculated against the
+// full screen height, ignoring the address bar / bottom nav
+// bar that is actually on screen. That makes fixed-height
+// panels (cart drawer, modals, etc.) taller than what's
+// really visible, so their bottom part (e.g. the checkout
+// button) ends up off-screen and unreachable.
+// This measures the ACTUAL visible height with JS and
+// exposes it as --app-vh, used as a CSS fallback.
+// =====================================================
 (function setRealViewportHeight() {
     function update() {
         const vh = (window.visualViewport
@@ -15,6 +27,54 @@
         window.visualViewport.addEventListener("resize", update);
     }
 })();
+
+// =====================================================
+// SCROLL REVEAL ANIMATION (fade in up)
+// -----------------------------------------------------
+// Any element with the "reveal-up" class starts hidden/
+// shifted down; when it scrolls into view it fades in and
+// slides up. Call initScrollReveal() (or initScrollReveal(container))
+// after new "reveal-up" elements are added to the page.
+// =====================================================
+let scrollRevealObserver = null;
+
+function getScrollRevealObserver() {
+    if (scrollRevealObserver) return scrollRevealObserver;
+
+    if (!("IntersectionObserver" in window)) return null;
+
+    scrollRevealObserver = new IntersectionObserver(
+        (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        },
+        {
+            threshold: 0.12,
+            rootMargin: "0px 0px -40px 0px"
+        }
+    );
+
+    return scrollRevealObserver;
+}
+
+function initScrollReveal(root = document) {
+    const items = root.querySelectorAll(".reveal-up:not(.is-visible)");
+    if (!items.length) return;
+
+    const observer = getScrollRevealObserver();
+
+    if (!observer) {
+        // Older browsers without IntersectionObserver: just show them.
+        items.forEach(el => el.classList.add("is-visible"));
+        return;
+    }
+
+    items.forEach(el => observer.observe(el));
+}
 
 let cart =
     JSON.parse(localStorage.getItem("sideWalkCart")) || [];
@@ -342,7 +402,7 @@ function buildMenuCardHTML(product) {
 
     return `
         <article
-            class="menu-card${available ? "" : " sold-out"}"
+            class="menu-card reveal-up${available ? "" : " sold-out"}"
             data-id="${escapeAttr(product._id)}"
             data-category="${escapeAttr(product.category)}"
             data-name="${escapeAttr(product.name)}"
@@ -382,7 +442,7 @@ function buildMenuCardHTML(product) {
                     <div class="card-actions">
                         <div class="qty-stepper" data-id="${escapeAttr(product._id)}">
                             <button type="button" class="qty-btn qty-minus" aria-label="کم کردن">−</button>
-                            <span class="qty-value">1</span>
+                            <span class="qty-value">0</span>
                             <button type="button" class="qty-btn qty-plus" aria-label="زیاد کردن">+</button>
                         </div>
 
@@ -486,6 +546,7 @@ async function loadProductsFromAPI() {
         renderMenu();
         renderCart();
         renderFavorites();
+        initScrollReveal();
     }
 }
 
@@ -933,6 +994,7 @@ function openProduct(item) {
     if (modalAdd && available) {
         modalAdd.addEventListener("click", () => {
             addToCart(item, modalQty);
+            flushPendingCardQuantities({ excludeId: item.id });
             closeProduct();
         });
     }
@@ -986,7 +1048,7 @@ function attachQtyStepper(card) {
     if (!stepper) return;
 
     if (!cardQuantities.has(id)) {
-        cardQuantities.set(id, 1);
+        cardQuantities.set(id, 0);
     }
 
     const valueEl = stepper.querySelector(".qty-value");
@@ -994,7 +1056,7 @@ function attachQtyStepper(card) {
 
     stepper.querySelector(".qty-minus").addEventListener("click", event => {
         event.stopPropagation();
-        const current = Math.max(1, cardQuantities.get(id) - 1);
+        const current = Math.max(0, cardQuantities.get(id) - 1);
         cardQuantities.set(id, current);
         valueEl.textContent = current;
     });
@@ -1004,6 +1066,52 @@ function attachQtyStepper(card) {
         const current = Math.min(20, cardQuantities.get(id) + 1);
         cardQuantities.set(id, current);
         valueEl.textContent = current;
+    });
+}
+
+/* =========================================================
+   COMMIT ALL PENDING QUANTITIES TO CART
+   -----------------------------------------------------
+   Clicking ANY "افزودن به سبد خرید" button commits every
+   product card whose +/- stepper is above 0 — not just the
+   card that was clicked. This lets someone bump the quantity
+   on several products first, then add them all at once with
+   a single click.
+   - forceId: the card that was actually clicked; if its
+     stepper is still at 0, it still counts as "1" since the
+     click itself is an explicit add.
+   - excludeId: used by the product modal's own add button,
+     which already adds its item with its own quantity — this
+     just resets that card's stepper without adding it twice.
+========================================================= */
+
+function flushPendingCardQuantities({ forceId = null, excludeId = null } = {}) {
+    getAllCards().forEach(card => {
+        const cardId = card.dataset.id;
+        if (!cardId) return;
+
+        const resetDisplay = () => {
+            cardQuantities.set(cardId, 0);
+            const valueEl = card.querySelector(".qty-value");
+            if (valueEl) valueEl.textContent = "0";
+        };
+
+        if (cardId === excludeId) {
+            resetDisplay();
+            return;
+        }
+
+        let qty = cardQuantities.get(cardId) || 0;
+
+        if (cardId === forceId && qty <= 0) {
+            qty = 1;
+        }
+
+        if (qty > 0) {
+            const product = getProductById(cardId);
+            if (product) addToCart(product, qty);
+            resetDisplay();
+        }
     });
 }
 
@@ -1040,18 +1148,7 @@ function initializeProducts() {
                 "click",
                 event => {
                     event.stopPropagation();
-
-                    const product =
-                        getProductById(id);
-
-                    if (product) {
-                        const qty = cardQuantities.get(id) || 1;
-                        addToCart(product, qty);
-
-                        cardQuantities.set(id, 1);
-                        const valueEl = card.querySelector(".qty-value");
-                        if (valueEl) valueEl.textContent = "1";
-                    }
+                    flushPendingCardQuantities({ forceId: id });
                 }
             );
         }
@@ -1541,7 +1638,7 @@ function renderFavorites() {
             document.createElement("div");
 
         favoriteCard.className =
-            "favorite-card";
+            "favorite-card reveal-up";
 
         favoriteCard.innerHTML = `
             <button
@@ -1624,6 +1721,7 @@ function renderFavorites() {
                     event.stopPropagation();
                     if (product.available === false) return;
                     addToCart(product);
+                    flushPendingCardQuantities({ excludeId: product.id });
                 }
             );
 
@@ -1663,6 +1761,8 @@ function renderFavorites() {
 
         grid.appendChild(favoriteCard);
     });
+
+    initScrollReveal(grid);
 }
 
 createFavoritesSection();
@@ -4116,6 +4216,7 @@ function initHeroBurger() {
 }
 
 initHeroBurger();
+initScrollReveal();
 
 /* =========================================================
    INITIALIZE
