@@ -1377,8 +1377,8 @@ function createDiscountCard(discount) {
     const statusLabel = DISCOUNT_STATUS_LABELS[discount.status] || discount.status;
     const statusClass = DISCOUNT_STATUS_CLASSES[discount.status] || "";
 
-    const startsAtLabel = new Date(discount.startsAt).toLocaleString("fa-IR");
-    const expiresAtLabel = new Date(discount.expiresAt).toLocaleString("fa-IR");
+    const startsAtLabel = formatJalaliDateTime(new Date(discount.startsAt));
+    const expiresAtLabel = formatJalaliDateTime(new Date(discount.expiresAt));
 
     return `
         <article class="product-card discount-card" data-discount="${escapeHTML(discount.id)}">
@@ -1609,7 +1609,7 @@ function renderDailyChart(activeOrders, startOfToday) {
             })
             .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
-        days.push(day.toLocaleDateString("fa-IR", { month: "2-digit", day: "2-digit" }));
+        days.push(formatJalaliShortDate(day));
         totals.push(dayTotal);
     }
 
@@ -1651,8 +1651,8 @@ function renderWeeklyChart(activeOrders, startOfToday) {
             .reduce((sum, o) => sum + Number(o.total || 0), 0);
 
         labels.push(
-            `${weekStart.toLocaleDateString("fa-IR", { month: "2-digit", day: "2-digit" })} تا ` +
-            `${weekEnd.toLocaleDateString("fa-IR", { month: "2-digit", day: "2-digit" })}`
+            `${formatJalaliShortDate(weekStart)} تا ` +
+            `${formatJalaliShortDate(weekEnd)}`
         );
         totals.push(weekTotal);
     }
@@ -1896,12 +1896,36 @@ function formatPrice(price) {
     return Number(price || 0).toLocaleString("fa-IR");
 }
 
-function formatDate(date) {
-    if (!date) return "";
-    return new Date(date).toLocaleString("fa-IR", {
-        year: "numeric", month: "2-digit", day: "2-digit",
+// Persian (Jalali) calendar formatting. We explicitly force the "persian"
+// calendar via the -u-ca-persian locale extension instead of relying on
+// "fa-IR"'s default calendar, since some browsers/webviews silently fall
+// back to the Gregorian calendar for it.
+const JALALI_LOCALE = "fa-IR-u-ca-persian";
+
+// "۱۴۰۵/۰۶/۲۴" or, with time, "۱۴۰۵/۰۶/۲۴ - ۱۴:۳۲"
+function formatJalaliDateTime(date, { withTime = true } = {}) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+
+    const dateLabel = date.toLocaleDateString(JALALI_LOCALE, {
+        year: "numeric", month: "2-digit", day: "2-digit"
+    });
+    if (!withTime) return dateLabel;
+
+    const timeLabel = date.toLocaleTimeString("fa-IR", {
         hour: "2-digit", minute: "2-digit"
     });
+    return `${dateLabel} - ${timeLabel}`;
+}
+
+// "۰۶/۲۴" — used for short chart-axis labels.
+function formatJalaliShortDate(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString(JALALI_LOCALE, { month: "2-digit", day: "2-digit" });
+}
+
+function formatDate(date) {
+    if (!date) return "";
+    return formatJalaliDateTime(new Date(date));
 }
 
 function escapeHTML(value) {
