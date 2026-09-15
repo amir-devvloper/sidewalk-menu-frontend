@@ -540,8 +540,25 @@ function playAlertSound() {
 function renderOrders() {
     const search = searchInput.value.trim().toLowerCase();
     const status = statusFilter.value;
-    const from = dateFrom.value ? new Date(dateFrom.value + "T00:00:00") : null;
-    const to = dateTo.value ? new Date(dateTo.value + "T23:59:59") : null;
+
+    let from = null;
+    let to = null;
+
+    if (dateFrom.value.trim()) {
+        from = parseJalaliDateInput(dateFrom.value, false);
+        if (!from) {
+            showToast("تاریخ «از» نامعتبر است. مثال: ۱۴۰۵/۰۶/۲۴");
+            return;
+        }
+    }
+
+    if (dateTo.value.trim()) {
+        to = parseJalaliDateInput(dateTo.value, true);
+        if (!to) {
+            showToast("تاریخ «تا» نامعتبر است. مثال: ۱۴۰۵/۰۶/۳۱");
+            return;
+        }
+    }
 
     const filtered = orders.filter(order => {
         const matchesSearch =
@@ -1318,20 +1335,203 @@ const DISCOUNT_STATUS_CLASSES = {
     inactive: "status-payment-cancelled"
 };
 
-// <input type="datetime-local"> needs "YYYY-MM-DDTHH:mm" in LOCAL time.
-function toLocalDateTimeInputValue(isoString) {
+// ==========================================
+// JALALI DATE INPUT HELPERS
+// ==========================================
+
+function div(a, b) {
+    return Math.floor(a / b);
+}
+
+function gregorianToJalali(gy, gm, gd) {
+    const gDaysInMonth = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+
+    const gy2 = gm > 2 ? gy + 1 : gy;
+
+    let days =
+        355666 +
+        (365 * gy) +
+        div(gy2 + 3, 4) -
+        div(gy2 + 99, 100) +
+        div(gy2 + 399, 400) +
+        gd +
+        gDaysInMonth[gm - 1];
+
+    let jy = -1595 + (33 * div(days, 12053));
+
+    days %= 12053;
+    jy += 4 * div(days, 1461);
+    days %= 1461;
+
+    if (days > 365) {
+        jy += div(days - 1, 365);
+        days = (days - 1) % 365;
+    }
+
+    const jm = days < 186
+        ? 1 + div(days, 31)
+        : 7 + div(days - 186, 30);
+
+    const jd = 1 + (days < 186
+        ? days % 31
+        : (days - 186) % 30);
+
+    return [jy, jm, jd];
+}
+
+function jalaliToGregorian(jy, jm, jd) {
+    const jy2 = jy + 1595;
+
+    let days =
+        -355668 +
+        (365 * jy2) +
+        (div(jy2, 33) * 8) +
+        div((jy2 % 33) + 3, 4) +
+        jd +
+        (jm < 7
+            ? (jm - 1) * 31
+            : (jm - 7) * 30 + 186);
+
+    let gy = 400 * div(days, 146097);
+    days %= 146097;
+
+    if (days > 36524) {
+        gy += 100 * div(--days, 36524);
+        days %= 36524;
+        if (days >= 365) days++;
+    }
+
+    gy += 4 * div(days, 1461);
+    days %= 1461;
+
+    if (days > 365) {
+        gy += div(days - 1, 365);
+        days = (days - 1) % 365;
+    }
+
+    let gd = days + 1;
+
+    const gDaysInMonth = [
+        0,
+        31,
+        ((gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0) ? 29 : 28,
+        31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    ];
+
+    let gm;
+    for (gm = 0; gm < 13 && gd > gDaysInMonth[gm]; gm++) {
+        gd -= gDaysInMonth[gm];
+    }
+
+    return [gy, gm, gd];
+}
+
+function toLatinDigits(value) {
+    return String(value ?? "").replace(/[۰-۹]/g, digit => "۰۱۲۳۴۵۶۷۸۹".indexOf(digit));
+}
+
+function toPersianDigits(value) {
+    return String(value ?? "").replace(/\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[digit]);
+}
+
+function pad2(value) {
+    return String(value).padStart(2, "0");
+}
+
+function formatJalaliInputDate(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+
+    const [jy, jm, jd] = gregorianToJalali(
+        date.getFullYear(),
+        date.getMonth() + 1,
+        date.getDate()
+    );
+
+    return toPersianDigits(`${jy}/${pad2(jm)}/${pad2(jd)}`);
+}
+
+function formatJalaliInputDateTime(isoString) {
     const date = new Date(isoString);
     if (Number.isNaN(date.getTime())) return "";
 
-    const pad = n => String(n).padStart(2, "0");
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    const datePart = formatJalaliInputDate(date);
+    const timePart = `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+
+    return `${datePart} - ${toPersianDigits(timePart)}`;
 }
 
-// The browser parses "YYYY-MM-DDTHH:mm" from a datetime-local input as
-// local time when passed to `new Date(...)`, so this round-trips correctly.
-function fromLocalDateTimeInputValue(value) {
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+function parseJalaliDateInput(value, endOfDay = false) {
+    if (!value?.trim()) return null;
+
+    const normalized = toLatinDigits(value).trim().replace(/[-.]/g, "/");
+    const match = normalized.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+    if (!match) return null;
+
+    const jy = Number(match[1]);
+    const jm = Number(match[2]);
+    const jd = Number(match[3]);
+
+    if (jm < 1 || jm > 12 || jd < 1 || jd > 31) return null;
+
+    const [gy, gm, gd] = jalaliToGregorian(jy, jm, jd);
+
+    const date = new Date(
+        gy,
+        gm - 1,
+        gd,
+        endOfDay ? 23 : 0,
+        endOfDay ? 59 : 0,
+        endOfDay ? 59 : 0,
+        0
+    );
+
+    const [checkJy, checkJm, checkJd] = gregorianToJalali(
+        date.getFullYear(),
+        date.getMonth() + 1,
+        date.getDate()
+    );
+
+    if (checkJy !== jy || checkJm !== jm || checkJd !== jd) return null;
+
+    return date;
+}
+
+function parseJalaliDateTimeInput(value) {
+    if (!value?.trim()) return null;
+
+    const normalized = toLatinDigits(value)
+        .trim()
+        .replace("T", " ")
+        .replace(/\s+/g, " ");
+
+    const match = normalized.match(
+        /^(\d{4})\/(\d{1,2})\/(\d{1,2})\s*-?\s*(\d{1,2}):(\d{2})$/
+    );
+
+    if (!match) return null;
+
+    const jy = Number(match[1]);
+    const jm = Number(match[2]);
+    const jd = Number(match[3]);
+    const hour = Number(match[4]);
+    const minute = Number(match[5]);
+
+    if (jm < 1 || jm > 12 || jd < 1 || jd > 31 || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+        return null;
+    }
+
+    const [gy, gm, gd] = jalaliToGregorian(jy, jm, jd);
+    const date = new Date(gy, gm - 1, gd, hour, minute, 0, 0);
+
+    const [checkJy, checkJm, checkJd] = gregorianToJalali(
+        date.getFullYear(),
+        date.getMonth() + 1,
+        date.getDate()
+    );
+
+    if (checkJy !== jy || checkJm !== jm || checkJd !== jd) return null;
+
+    return date.toISOString();
 }
 
 async function loadDiscounts() {
@@ -1449,8 +1649,8 @@ addDiscountBtn.addEventListener("click", () => {
     // Sensible defaults: starts now, expires in 24h — the admin can change both.
     const now = new Date();
     const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    df_startsAt.value = toLocalDateTimeInputValue(now.toISOString());
-    df_expiresAt.value = toLocalDateTimeInputValue(in24h.toISOString());
+    df_startsAt.value = formatJalaliInputDateTime(now.toISOString());
+    df_expiresAt.value = formatJalaliInputDateTime(in24h.toISOString());
 
     discountModal.classList.remove("hidden");
 });
@@ -1465,8 +1665,8 @@ function editDiscount(id) {
     df_code.value = discount.code || "";
     df_discountPercent.value = discount.discountPercent || 0;
     df_minOrderAmount.value = discount.minOrderAmount || 0;
-    df_startsAt.value = toLocalDateTimeInputValue(discount.startsAt);
-    df_expiresAt.value = toLocalDateTimeInputValue(discount.expiresAt);
+    df_startsAt.value = formatJalaliInputDateTime(discount.startsAt);
+    df_expiresAt.value = formatJalaliInputDateTime(discount.expiresAt);
     df_isActive.checked = !!discount.isActive;
 
     discountModal.classList.remove("hidden");
@@ -1483,8 +1683,8 @@ discountModalClose.addEventListener("click", () => {
 discountForm.addEventListener("submit", async event => {
     event.preventDefault();
 
-    const startsAt = fromLocalDateTimeInputValue(df_startsAt.value);
-    const expiresAt = fromLocalDateTimeInputValue(df_expiresAt.value);
+    const startsAt = parseJalaliDateTimeInput(df_startsAt.value);
+    const expiresAt = parseJalaliDateTimeInput(df_expiresAt.value);
 
     if (!startsAt || !expiresAt) {
         showToast("تاریخ/ساعت شروع یا پایان نامعتبر است.");
@@ -1769,14 +1969,16 @@ loadSavedQrSiteUrl();
 function defaultReportRange() {
     const to = new Date();
     const from = new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
+
     return {
-        from: from.toISOString().slice(0, 10),
-        to: to.toISOString().slice(0, 10)
+        from: formatJalaliInputDate(from),
+        to: formatJalaliInputDate(to)
     };
 }
 
 function initReportDateInputs() {
     const range = defaultReportRange();
+
     if (!reportFrom.value) reportFrom.value = range.from;
     if (!reportTo.value) reportTo.value = range.to;
 }
@@ -1784,8 +1986,19 @@ function initReportDateInputs() {
 function buildReportQuery() {
     const params = new URLSearchParams();
     params.set("group", reportGroup.value || "day");
-    if (reportFrom.value) params.set("from", new Date(`${reportFrom.value}T00:00:00`).toISOString());
-    if (reportTo.value) params.set("to", new Date(`${reportTo.value}T23:59:59`).toISOString());
+
+    if (reportFrom.value.trim()) {
+        const fromDate = parseJalaliDateInput(reportFrom.value, false);
+        if (!fromDate) throw new Error("تاریخ شروع گزارش نامعتبر است.");
+        params.set("from", fromDate.toISOString());
+    }
+
+    if (reportTo.value.trim()) {
+        const toDate = parseJalaliDateInput(reportTo.value, true);
+        if (!toDate) throw new Error("تاریخ پایان گزارش نامعتبر است.");
+        params.set("to", toDate.toISOString());
+    }
+
     return params.toString();
 }
 
