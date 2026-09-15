@@ -1290,61 +1290,70 @@ function setupSmartCategoryScroll() {
         return;
     }
 
+    const categoriesBar =
+        document.getElementById("categories");
+
     const sections =
-        document.querySelectorAll(
-            ".menu-category-section"
+        Array.from(
+            document.querySelectorAll(
+                ".menu-category-section"
+            )
         );
 
-    if (!sections.length) return;
+    if (!categoriesBar || !sections.length) return;
 
-    smartCategoryObserver =
-        new IntersectionObserver(
-            entries => {
-                let bestSection = null;
-                let bestRatio = 0;
+    // Pixel-based scroll-spy: instead of a fixed % band of the
+    // viewport (which breaks for the first section on short mobile
+    // screens), we track the real bottom edge of the sticky
+    // categories bar and pick the last section whose top has
+    // scrolled up past that line. This is exact on every device.
+    let ticking = false;
 
-                entries.forEach(entry => {
-                    if (
-                        entry.isIntersecting &&
-                        entry.intersectionRatio > bestRatio
-                    ) {
-                        bestRatio =
-                            entry.intersectionRatio;
+    function updateActiveSection() {
+        ticking = false;
 
-                        bestSection =
-                            entry.target;
-                    }
-                });
+        const referenceLine =
+            categoriesBar.getBoundingClientRect().bottom + 4;
 
-                if (!bestSection) return;
+        let active = null;
 
-                const category =
-                    bestSection.dataset.category;
-
-                if (category) {
-                    setActiveCategory(category);
-                    scrollActiveCategoryIntoView();
-                }
-            },
-            {
-                root: null,
-                rootMargin:
-                    "-30% 0px -55% 0px",
-                threshold: [
-                    0.1,
-                    0.2,
-                    0.3,
-                    0.4,
-                    0.5,
-                    0.6,
-                    0.7
-                ]
+        for (const section of sections) {
+            if (section.getBoundingClientRect().top <= referenceLine) {
+                active = section;
+            } else {
+                break;
             }
-        );
+        }
 
-    sections.forEach(section => {
-        smartCategoryObserver.observe(section);
-    });
+        if (!active) return;
+
+        const category = active.dataset.category;
+
+        if (category && category !== currentCategory) {
+            setActiveCategory(category);
+            scrollActiveCategoryIntoView();
+        }
+    }
+
+    function onScrollOrResize() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(updateActiveSection);
+    }
+
+    // Run once immediately so the right category is already
+    // highlighted even before the user scrolls.
+    updateActiveSection();
+
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
+
+    smartCategoryObserver = {
+        disconnect() {
+            window.removeEventListener("scroll", onScrollOrResize);
+            window.removeEventListener("resize", onScrollOrResize);
+        }
+    };
 }
 
 /* =========================================================
