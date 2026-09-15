@@ -1926,7 +1926,11 @@ body {
 .input-group:focus-within {
     border-color: var(--accent);
     background: var(--card);
-    box-shadow: 0 0 0 3px rgba(214, 168, 95, 0.15);
+    box-shadow: none;
+}
+.input-group input:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .input-group > i:first-child {
@@ -3027,8 +3031,8 @@ textarea {
 #qrSiteUrl:focus,
 #loginUsername:focus,
 #loginPassword:focus {
-  border-color: var(--accent);
-  box-shadow: var(--sw-focus);
+  border-color: inherit;
+  box-shadow: none;
   outline: none;
 }
 
@@ -3456,4 +3460,12 @@ button,
     margin: 5px 0 0;
     color: var(--muted);
     font-size: 12px;
+}
+.login-card .input-group input:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.login-card .input-group:focus-within {
+    box-shadow: none !important;
 }
