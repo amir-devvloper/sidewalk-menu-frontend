@@ -230,8 +230,8 @@
                 <section class="date-filter-bar">
                     <span class="date-filter-label"><i class="fa-solid fa-calendar-days"></i> بازه تاریخ</span>
                     <div class="date-filter">
-                        <label>از <input type="date" id="dateFrom"></label>
-                        <label>تا <input type="date" id="dateTo"></label>
+                        <label>از <input type="text" id="dateFrom" class="jalali-date-input" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۶/۰۱"></label>
+                        <label>تا <input type="text" id="dateTo" class="jalali-date-input" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۶/۳۱"></label>
                         <button id="clearDateBtn" class="clear-date-btn" title="پاک کردن فیلتر تاریخ"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </section>
@@ -371,8 +371,8 @@
                             <option value="month">بر اساس ماه</option>
                         </select>
 
-                        <label class="field-inline">از <input type="date" id="reportFrom"></label>
-                        <label class="field-inline">تا <input type="date" id="reportTo"></label>
+                        <label class="field-inline">از <input type="text" id="reportFrom" class="jalali-date-input" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۶/۰۱"></label>
+                        <label class="field-inline">تا <input type="text" id="reportTo" class="jalali-date-input" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۶/۳۱"></label>
 
                         <button class="action-btn primary-btn" id="runReportBtn"><i class="fa-solid fa-filter"></i> اعمال</button>
                         <button class="action-btn" id="exportCsvBtn"><i class="fa-solid fa-file-export"></i> خروجی CSV</button>
@@ -517,11 +517,11 @@
                 </label>
 
                 <label>تاریخ و ساعت شروع
-                    <input type="datetime-local" id="df_startsAt" required>
+                    <input type="text" id="df_startsAt" class="jalali-date-input" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۶/۲۴ - ۱۴:۳۰" required>
                 </label>
 
                 <label>تاریخ و ساعت پایان
-                    <input type="datetime-local" id="df_expiresAt" required>
+                    <input type="text" id="df_expiresAt" class="jalali-date-input" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۶/۲۵ - ۱۴:۳۰" required>
                 </label>
 
                 <label class="checkbox-label">
