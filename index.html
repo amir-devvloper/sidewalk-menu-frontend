@@ -52,6 +52,8 @@
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
 
+<link rel="stylesheet" href="reservation.css">
+
 </head>
 
 
@@ -192,9 +194,101 @@
                 </svg>
             </a>
 
+            <button type="button" class="hero-btn reservation-btn" id="openReservationBtn">
+                رزرو میز
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="5" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/>
+                    <path d="M8 3V7M16 3V7M3 10H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+
         </div>
 
     </section>
+
+    <!-- ===================== Table Reservation Modal ===================== -->
+    <div class="reservation-modal" id="reservationModal" aria-hidden="true">
+        <div class="reservation-modal__overlay" id="reservationModalOverlay"></div>
+        <div class="reservation-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="reservationModalTitle">
+            <button type="button" class="reservation-modal__close" id="reservationModalClose" aria-label="بستن">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="reservation-modal__body" id="reservationStepForm">
+                <h2 id="reservationModalTitle">رزرو میز</h2>
+                <p class="reservation-modal__subtitle">میزت رو رزرو کن، بقیه‌اش با ما.</p>
+
+                <form id="reservationForm" novalidate>
+                    <label class="reservation-field">
+                        <span>نام و نام خانوادگی</span>
+                        <input type="text" id="rsv_name" autocomplete="name" maxlength="100" required>
+                    </label>
+
+                    <label class="reservation-field">
+                        <span>شماره موبایل</span>
+                        <input type="tel" id="rsv_phone" inputmode="numeric" autocomplete="tel" placeholder="09xxxxxxxxx" maxlength="11" required>
+                    </label>
+
+                    <label class="reservation-field">
+                        <span>تعداد نفرات</span>
+                        <div class="guest-stepper">
+                            <button type="button" class="guest-stepper__btn" id="rsv_guestsMinus" aria-label="کم کردن">−</button>
+                            <input type="text" id="rsv_guests" value="2" inputmode="numeric" readonly>
+                            <button type="button" class="guest-stepper__btn" id="rsv_guestsPlus" aria-label="افزودن">+</button>
+                        </div>
+                    </label>
+
+                    <div class="reservation-field">
+                        <span>تاریخ رزرو (شمسی)</span>
+                        <button type="button" class="reservation-date-trigger" id="rsv_dateTrigger">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <span id="rsv_dateLabel">انتخاب تاریخ</span>
+                        </button>
+                    </div>
+
+                    <div class="reservation-field">
+                        <span>ساعت</span>
+                        <div class="time-slots" id="rsv_timeSlots"></div>
+                    </div>
+
+                    <label class="reservation-field">
+                        <span>توضیحات (اختیاری)</span>
+                        <textarea id="rsv_note" maxlength="500" rows="2" placeholder="مثلاً میز کنار پنجره..."></textarea>
+                    </label>
+
+                    <div class="reservation-amount">
+                        <span>مبلغ قابل پرداخت</span>
+                        <strong id="rsv_amount">—</strong>
+                    </div>
+
+                    <p class="reservation-error hidden" id="reservationError"></p>
+
+                    <button type="submit" class="reservation-submit-btn" id="reservationSubmitBtn">
+                        <span>ثبت و پرداخت</span>
+                        <div class="reservation-spinner hidden" id="reservationSubmitSpinner"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Persian click-only calendar (no typing) -->
+            <div class="reservation-modal__body hidden" id="reservationStepCalendar">
+                <div class="jalali-calendar">
+                    <div class="jalali-calendar__header">
+                        <button type="button" id="jalaliPrevMonth" aria-label="ماه قبل"><i class="fa-solid fa-chevron-right"></i></button>
+                        <strong id="jalaliMonthLabel"></strong>
+                        <button type="button" id="jalaliNextMonth" aria-label="ماه بعد"><i class="fa-solid fa-chevron-left"></i></button>
+                    </div>
+                    <div class="jalali-calendar__weekdays">
+                        <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+                    </div>
+                    <div class="jalali-calendar__days" id="jalaliDaysGrid"></div>
+                    <button type="button" class="reservation-back-btn" id="jalaliBackToForm">
+                        <i class="fa-solid fa-arrow-right"></i> بازگشت
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <!-- =====================================================
@@ -625,6 +719,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script src="script.js"></script>
+<script src="reservation.js" defer></script>
 
 </body>
 

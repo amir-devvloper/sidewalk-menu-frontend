@@ -1,0 +1,408 @@
+/* =====================================================
+   Table Reservation — button, modal, Jalali calendar
+   Reuses the CSS variables defined in style.css (:root)
+   so it always matches the current theme (dark/light).
+   ===================================================== */
+
+.hero-btn.reservation-btn {
+    background: linear-gradient(135deg, #8b3dff, #6824d4);
+    border-color: rgba(183, 122, 255, 0.55);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.hero-btn.reservation-btn:hover {
+    background: linear-gradient(135deg, #9b4dff, #7a2fe2);
+    color: #fff;
+}
+
+/* ---------- Modal shell ---------- */
+.reservation-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(10px, 2.4vw, 24px);
+}
+
+.reservation-modal.active {
+    display: flex;
+}
+
+.reservation-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 4, 8, 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.reservation-modal__dialog {
+    position: relative;
+    width: min(440px, 100%);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    background: var(--card, #16121c);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius, 18px);
+    padding: 28px 22px 22px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    transform: translateY(10px) scale(0.985);
+    opacity: 0;
+    transition: transform 0.24s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.2s ease;
+}
+
+.reservation-modal.active .reservation-modal__dialog {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.reservation-modal__close {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text, #eee);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition, 0.2s ease);
+}
+
+.reservation-modal__close:hover {
+    background: rgba(255, 77, 61, 0.15);
+    color: #ff6b5b;
+}
+
+.reservation-modal__body h2 {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text, #eee);
+}
+
+.reservation-modal__subtitle {
+    margin: 0 0 20px;
+    color: var(--muted, #99919f);
+    font-size: 13px;
+}
+
+/* ---------- Form fields ---------- */
+.reservation-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.reservation-field > span {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted, #99919f);
+}
+
+.reservation-field input[type="text"],
+.reservation-field input[type="tel"],
+.reservation-field textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-sm, 12px);
+    padding: 12px 14px;
+    color: var(--text, #eee);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: var(--transition, 0.2s ease);
+    resize: none;
+}
+
+.reservation-field input:focus,
+.reservation-field textarea:focus {
+    border-color: rgba(183, 122, 255, 0.6);
+    background: rgba(139, 61, 255, 0.07);
+}
+
+/* Guests stepper */
+.guest-stepper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.guest-stepper__btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text, #eee);
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--transition, 0.2s ease);
+}
+
+.guest-stepper__btn:hover {
+    border-color: rgba(183, 122, 255, 0.6);
+    color: var(--purple-light, #b77aff);
+}
+
+.guest-stepper input {
+    flex: 1;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: 10px;
+    height: 40px;
+    color: var(--text, #eee);
+    font-weight: 800;
+}
+
+/* Date trigger button — click-only, opens the calendar step */
+.reservation-date-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-sm, 12px);
+    color: var(--text, #eee);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition, 0.2s ease);
+}
+
+.reservation-date-trigger:hover {
+    border-color: rgba(183, 122, 255, 0.6);
+}
+
+.reservation-date-trigger i {
+    color: var(--purple-light, #b77aff);
+}
+
+/* Time slots — click-only buttons, no typing */
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-height: 160px;
+    overflow-y: auto;
+    padding-left: 2px;
+}
+
+.time-slot {
+    padding: 9px 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text, #eee);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition, 0.2s ease);
+}
+
+.time-slot:hover {
+    border-color: rgba(183, 122, 255, 0.5);
+}
+
+.time-slot.active {
+    background: linear-gradient(135deg, #8b3dff, #6824d4);
+    border-color: transparent;
+    color: #fff;
+}
+
+/* Amount summary */
+.reservation-amount {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm, 12px);
+    background: rgba(139, 61, 255, 0.08);
+    border: 1px dashed rgba(183, 122, 255, 0.35);
+    margin: 8px 0 16px;
+    color: var(--text, #eee);
+    font-size: 14px;
+}
+
+.reservation-amount strong {
+    color: var(--purple-light, #b77aff);
+    font-size: 16px;
+}
+
+.reservation-error {
+    color: #ff6b5b;
+    font-size: 13px;
+    margin: -6px 0 12px;
+}
+
+.reservation-error.hidden {
+    display: none;
+}
+
+.reservation-submit-btn {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: var(--radius-sm, 12px);
+    background: linear-gradient(135deg, #8b3dff, #6824d4);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: var(--transition, 0.2s ease);
+}
+
+.reservation-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(139, 61, 255, 0.30);
+}
+
+.reservation-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.reservation-spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    animation: reservationSpin 0.7s linear infinite;
+}
+
+.reservation-spinner.hidden {
+    display: none;
+}
+
+@keyframes reservationSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* ---------- Jalali calendar step ---------- */
+.jalali-calendar__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.jalali-calendar__header button {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text, #eee);
+    cursor: pointer;
+}
+
+.jalali-calendar__header strong {
+    font-size: 15px;
+    color: var(--text, #eee);
+}
+
+.jalali-calendar__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    color: var(--muted, #99919f);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.jalali-calendar__days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.jalali-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text, #eee);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+    transition: var(--transition, 0.2s ease);
+}
+
+.jalali-day:hover {
+    border-color: rgba(183, 122, 255, 0.6);
+    background: rgba(139, 61, 255, 0.12);
+}
+
+.jalali-day.jalali-day--empty {
+    cursor: default;
+    background: transparent;
+}
+
+.jalali-day.jalali-day--weekend {
+    color: var(--orange-light, #ff9a3d);
+}
+
+.jalali-day.jalali-day--event::after {
+    content: "";
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--purple-light, #b77aff);
+    margin-top: 2px;
+}
+
+.jalali-day.jalali-day--disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.jalali-day.jalali-day--selected {
+    background: linear-gradient(135deg, #8b3dff, #6824d4);
+    color: #fff;
+}
+
+.reservation-back-btn {
+    width: 100%;
+    margin-top: 16px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text, #eee);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+@media (max-width: 480px) {
+    .time-slots {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
