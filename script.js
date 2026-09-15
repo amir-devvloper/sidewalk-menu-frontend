@@ -1,3 +1,21 @@
+(function setRealViewportHeight() {
+    function update() {
+        const vh = (window.visualViewport
+            ? window.visualViewport.height
+            : window.innerHeight) * 0.01;
+        document.documentElement.style.setProperty("--app-vh", vh + "px");
+    }
+
+    update();
+
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", update);
+    }
+})();
+
 let cart =
     JSON.parse(localStorage.getItem("sideWalkCart")) || [];
 

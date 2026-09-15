@@ -1933,9 +1933,14 @@ body.light .categories {
         min(430px, 92vw);
 
     height: 100vh;
+    height: 100svh;
+    height: 100dvh;
+    height: calc(var(--app-vh, 1vh) * 100);
 
     display: flex;
     flex-direction: column;
+
+    overflow-y: auto;
 
     background: var(--bg-soft);
 
