@@ -2932,3 +2932,461 @@ body {
     transform: none;
 }
 
+/* =========================================================
+   SIDEWALK ADMIN — JALALI / POLISHED OVERRIDES
+   Load AFTER order(7).css
+========================================================= */
+
+:root {
+  --sw-radius-sm: 10px;
+  --sw-radius-md: 14px;
+  --sw-radius-lg: 20px;
+  --sw-shadow: 0 12px 35px rgba(20, 20, 20, .07);
+  --sw-shadow-hover: 0 18px 45px rgba(20, 20, 20, .11);
+  --sw-focus: 0 0 0 4px rgba(214, 168, 95, .15);
+}
+
+/* ---------- Global polish ---------- */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+::selection {
+  background: rgba(214, 168, 95, .25);
+}
+
+/* ---------- Topbar / sections ---------- */
+.topbar {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(128, 128, 128, .12);
+}
+
+.toolbar,
+.date-filter-bar,
+.advanced-report-card,
+.chart-card,
+.qr-grid,
+.products-container,
+.discounts-container,
+.orders-section {
+  border-radius: var(--sw-radius-lg);
+}
+
+.stat-card,
+.chart-card,
+.advanced-report-card,
+.order-card,
+.product-card,
+.discount-card,
+.empty-state,
+.loading-state {
+  box-shadow: var(--sw-shadow);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.order-card:hover,
+.product-card:hover,
+.discount-card:hover,
+.stat-card:hover,
+.chart-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sw-shadow-hover);
+}
+
+/* ---------- Search ---------- */
+.search-box {
+  position: relative;
+}
+
+.search-box input,
+#productSearchInput,
+#mo_itemSearch,
+#qrSiteUrl,
+#loginUsername,
+#loginPassword {
+  border-radius: 12px;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.search-box input:focus,
+#productSearchInput:focus,
+#mo_itemSearch:focus,
+#qrSiteUrl:focus,
+#loginUsername:focus,
+#loginPassword:focus {
+  border-color: var(--accent);
+  box-shadow: var(--sw-focus);
+  outline: none;
+}
+
+/* ---------- Status / report segmented controls ---------- */
+.status-filter-btn,
+.report-group-btn {
+  position: relative;
+  border-radius: 11px;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.status-filter-btn:hover,
+.report-group-btn:hover {
+  transform: translateY(-1px);
+}
+
+.status-filter-btn.active,
+.report-group-btn.active {
+  box-shadow: 0 8px 20px rgba(214, 168, 95, .12);
+}
+
+/* ---------- Jalali date area ---------- */
+.date-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(248,248,248,.72));
+}
+
+.date-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.date-filter-label i {
+  color: var(--accent-dark);
+}
+
+.date-filter,
+.field-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter > label,
+.field-inline {
+  color: var(--text);
+  font-weight: 650;
+}
+
+.jalali-date-input {
+  min-width: 170px;
+  height: 44px;
+  padding: 0 13px;
+  direction: ltr;
+  text-align: center;
+  letter-spacing: .2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface, #fff);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .18s ease, background .2s ease;
+}
+
+.jalali-date-input::placeholder {
+  color: #9a9a9a;
+  font-weight: 600;
+}
+
+.jalali-date-input:hover {
+  border-color: rgba(214, 168, 95, .55);
+}
+
+.jalali-date-input:focus {
+  border-color: var(--accent);
+  box-shadow: var(--sw-focus);
+  transform: translateY(-1px);
+}
+
+.jalali-date-input:invalid {
+  box-shadow: none;
+}
+
+.clear-date-btn {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface, #fff);
+  color: var(--text);
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.clear-date-btn:hover {
+  color: #fff;
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+/* ---------- Advanced reports ---------- */
+.advanced-report-card {
+  overflow: hidden;
+}
+
+.report-columns {
+  gap: 18px;
+}
+
+.report-columns .field-inline {
+  min-width: 0;
+}
+
+.report-columns .jalali-date-input {
+  width: 175px;
+}
+
+.action-btn {
+  min-height: 42px;
+  border-radius: 11px;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.primary-btn {
+  box-shadow: 0 8px 20px rgba(214, 168, 95, .14);
+}
+
+/* ---------- Forms / modal inputs ---------- */
+.modal-content {
+  border-radius: 22px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.20);
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea,
+.field-wide input,
+.field-wide select,
+.field-wide textarea,
+.field-narrow input,
+.field-narrow select,
+.field-narrow textarea {
+  border-radius: 12px;
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus,
+.field-wide input:focus,
+.field-wide select:focus,
+.field-wide textarea:focus,
+.field-narrow input:focus,
+.field-narrow select:focus,
+.field-narrow textarea:focus {
+  border-color: var(--accent);
+  box-shadow: var(--sw-focus);
+  outline: none;
+}
+
+#discountForm .jalali-date-input {
+  width: 100%;
+  min-width: 0;
+  direction: ltr;
+}
+
+#df_startsAt,
+#df_expiresAt {
+  font-weight: 750;
+}
+
+.form-actions {
+  margin-top: 18px;
+  gap: 10px;
+}
+
+/* ---------- Cards ---------- */
+.stat-card {
+  border-radius: 16px;
+}
+
+.stat-icon {
+  border-radius: 13px;
+}
+
+/* ---------- Tables ---------- */
+.report-table {
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.report-table table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.report-table th:first-child {
+  border-top-right-radius: 12px;
+}
+
+.report-table th:last-child {
+  border-top-left-radius: 12px;
+}
+
+.report-table tbody tr {
+  transition: background .16s ease;
+}
+
+.report-table tbody tr:hover {
+  background: rgba(214, 168, 95, .055);
+}
+
+/* ---------- Buttons ---------- */
+button,
+.action-btn,
+.refresh-btn,
+.ghost,
+.logout-btn,
+.nav-item {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.refresh-btn,
+.ghost,
+.logout-btn,
+.manual-order-btn {
+  border-radius: 12px;
+}
+
+.refresh-btn:hover,
+.ghost:hover,
+.manual-order-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* ---------- Toast ---------- */
+#toast {
+  border-radius: 14px;
+  box-shadow: 0 15px 45px rgba(0,0,0,.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ---------- Dark mode ---------- */
+:root[data-theme="dark"] .date-filter-bar {
+  background: linear-gradient(180deg, rgba(35,36,44,.86), rgba(25,26,32,.86));
+}
+
+:root[data-theme="dark"] .jalali-date-input,
+:root[data-theme="dark"] .clear-date-btn {
+  background: #1d1e25;
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .jalali-date-input::placeholder {
+  color: #777985;
+}
+
+:root[data-theme="dark"] .jalali-date-input:focus {
+  background: #202127;
+}
+
+:root[data-theme="dark"] .report-table tbody tr:hover {
+  background: rgba(214, 168, 95, .08);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .date-filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .date-filter {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .date-filter > label {
+    flex: 1 1 220px;
+  }
+
+  .date-filter .jalali-date-input {
+    width: 100%;
+  }
+
+  .report-columns .field-inline {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .report-columns .jalali-date-input {
+    width: min(100%, 220px);
+  }
+}
+
+@media (max-width: 620px) {
+  .date-filter-label {
+    font-size: 13px;
+  }
+
+  .date-filter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-filter > label {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .date-filter .jalali-date-input {
+    min-width: 0;
+  }
+
+  .clear-date-btn {
+    width: 100%;
+  }
+
+  .report-columns .field-inline {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+    align-items: stretch;
+  }
+
+  .report-columns .jalali-date-input {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
