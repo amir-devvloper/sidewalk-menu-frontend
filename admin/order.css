@@ -3390,3 +3390,70 @@ button,
     animation-duration: .01ms !important;
   }
 }
+
+/* =========================
+   Reservation admin
+========================= */
+.reservation-admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: right;
+}
+
+.reservation-admin-form > label:not(.checkbox-label) {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.reservation-admin-form input,
+.reservation-admin-form select,
+.reservation-admin-form textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--text);
+    font: inherit;
+}
+
+.reservation-admin-form input:focus,
+.reservation-admin-form select:focus,
+.reservation-admin-form textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(214, 168, 95, 0.15);
+}
+
+.reservation-admin-form h2,
+.reservation-events-section h2 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.reservation-settings-content {
+    max-width: 760px;
+}
+
+.reservation-events-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.reservation-events-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.reservation-events-head p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+}

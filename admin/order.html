@@ -136,6 +136,9 @@
                 <a href="#" class="nav-item" data-view="qrcodes">
                     <span class="nav-icon"><i class="fa-solid fa-qrcode"></i></span><span>QR میزها</span>
                 </a>
+                <a href="#" class="nav-item" data-view="reservations">
+                    <span class="nav-icon"><i class="fa-solid fa-chair"></i></span><span>رزرو میز</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -444,6 +447,49 @@
 
             </section>
 
+
+            <!-- ================= RESERVATIONS VIEW ================= -->
+            <section class="view hidden" id="view-reservations">
+                <header class="topbar">
+                    <div>
+                        <h1>رزرو میز</h1>
+                        <p>مدیریت رزروهای مشتریان، وضعیت‌ها و تنظیمات قیمت رزرو</p>
+                    </div>
+                    <div class="topbar-actions">
+                        <button class="refresh-btn" id="reservationSettingsBtn">
+                            <i class="fa-solid fa-sliders"></i> تنظیمات و ایونت‌ها
+                        </button>
+                        <button class="refresh-btn ghost" id="reservationsRefreshBtn">
+                            <i class="fa-solid fa-arrows-rotate"></i> بروزرسانی
+                        </button>
+                    </div>
+                </header>
+
+                <section class="toolbar">
+                    <div class="status-filter-toggle" id="reservationStatusFilter" role="group" aria-label="فیلتر وضعیت رزرو">
+                        <button type="button" class="status-filter-btn active" data-value="all"><i class="fa-solid fa-layer-group"></i> همه</button>
+                        <button type="button" class="status-filter-btn" data-value="در انتظار پرداخت"><i class="fa-solid fa-clock"></i> در انتظار پرداخت</button>
+                        <button type="button" class="status-filter-btn" data-value="تایید شده"><i class="fa-solid fa-circle-check"></i> تایید شده</button>
+                        <button type="button" class="status-filter-btn" data-value="لغو شده"><i class="fa-solid fa-ban"></i> لغو شده</button>
+                    </div>
+                </section>
+
+                <section class="orders-section">
+                    <div id="reservationsContainer" class="orders-container"></div>
+
+                    <div id="reservationsEmptyState" class="empty-state hidden">
+                        <div class="empty-icon"><i class="fa-solid fa-chair"></i></div>
+                        <h2>رزروی پیدا نشد</h2>
+                        <p>هنوز رزروی با این وضعیت ثبت نشده است.</p>
+                    </div>
+
+                    <div id="reservationsLoadingState" class="loading-state hidden">
+                        <div class="spinner"></div>
+                        <span>در حال دریافت رزروها...</span>
+                    </div>
+                </section>
+            </section>
+
         </main>
 
     </div>
@@ -540,6 +586,109 @@
         </div>
     </div>
 
+
+    <!-- Reservation Settings & Events Modal -->
+    <div id="reservationSettingsModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content reservation-settings-content">
+            <button class="modal-close" id="reservationSettingsModalClose"><i class="fa-solid fa-xmark"></i></button>
+
+            <form id="reservationSettingsForm" class="reservation-admin-form">
+                <h2>تنظیمات رزرو میز</h2>
+
+                <label>مبلغ پایه رزرو (تومان)
+                    <input type="number" id="rs_basePrice" min="0" step="1000" required>
+                </label>
+
+                <label class="checkbox-label">
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="rs_specialDayEnabled">
+                        <span class="toggle-slider"></span>
+                    </span>
+                    افزایش قیمت روزهای خاص فعال باشد
+                </label>
+
+                <label>درصد افزایش روزهای خاص
+                    <input type="number" id="rs_specialDayPercent" min="0" max="500" step="1" required>
+                </label>
+
+                <label class="checkbox-label">
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="rs_eventEnabled">
+                        <span class="toggle-slider"></span>
+                    </span>
+                    قیمت‌گذاری ایونت‌ها فعال باشد
+                </label>
+
+                <div class="form-actions">
+                    <button type="submit" id="reservationSettingsSaveBtn"><i class="fa-solid fa-check"></i> ذخیره تنظیمات</button>
+                </div>
+            </form>
+
+            <section class="reservation-events-section">
+                <div class="reservation-events-head">
+                    <div>
+                        <h2>ایونت‌ها</h2>
+                        <p>افزایش قیمت برای تاریخ‌ها و ساعت‌های خاص</p>
+                    </div>
+                    <button type="button" class="action-btn primary-btn" id="addReservationEventBtn">
+                        <i class="fa-solid fa-plus"></i> ایونت جدید
+                    </button>
+                </div>
+
+                <div id="reservationEventsContainer" class="orders-container"></div>
+                <div id="reservationEventsLoadingState" class="loading-state hidden">
+                    <div class="spinner"></div>
+                    <span>در حال دریافت ایونت‌ها...</span>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Reservation Event Add/Edit Modal -->
+    <div id="reservationEventModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="reservationEventModalClose"><i class="fa-solid fa-xmark"></i></button>
+            <form id="reservationEventForm" class="reservation-admin-form">
+                <h2 id="reservationEventFormTitle">ایونت جدید</h2>
+
+                <label>عنوان ایونت
+                    <input type="text" id="re_title" maxlength="100" placeholder="مثلاً شب یلدا" required>
+                </label>
+
+                <label>تاریخ ایونت
+                    <input type="text" id="re_eventDate" class="jalali-date-input" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۶/۲۴" required>
+                </label>
+
+                <label>ساعت شروع (اختیاری)
+                    <input type="time" id="re_startTime">
+                </label>
+
+                <label>ساعت پایان (اختیاری)
+                    <input type="time" id="re_endTime">
+                </label>
+
+                <label>درصد افزایش قیمت
+                    <input type="number" id="re_pricePercent" min="0" max="500" step="1" value="0" required>
+                </label>
+
+                <label class="checkbox-label">
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="re_active" checked>
+                        <span class="toggle-slider"></span>
+                    </span>
+                    فعال
+                </label>
+
+                <div class="form-actions">
+                    <button type="submit" id="reservationEventSaveBtn"><i class="fa-solid fa-check"></i> ذخیره</button>
+                    <button type="button" id="reservationEventCancelBtn"><i class="fa-solid fa-xmark"></i> انصراف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Manual Order Modal (staff entry from the panel) -->
     <div id="manualOrderModal" class="modal hidden">
         <div class="modal-overlay"></div>
@@ -600,6 +749,7 @@
     </script>
 
     <script src="order.js"></script>
+    <script src="reservations.js"></script>
 
 </body>
 
